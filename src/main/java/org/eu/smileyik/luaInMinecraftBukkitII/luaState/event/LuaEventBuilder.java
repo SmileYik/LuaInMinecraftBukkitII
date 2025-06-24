@@ -34,37 +34,38 @@ public class LuaEventBuilder {
         this.luaEnv = luaEnv;
     }
 
-    public void subscribe(@NotNull String eventClassName,
-                          @NotNull ILuaCallable closure) throws ClassNotFoundException {
+    public LuaEventBuilder subscribe(@NotNull String eventClassName,
+                                     @NotNull ILuaCallable closure) throws ClassNotFoundException {
         Class<?> eventClass = findEventClass(eventClassName);
-        this.subscribe(eventClass, closure, null, null);
+        return this.subscribe(eventClass, closure, null, null);
     }
 
-    public void subscribe(@NotNull String eventClassName,
+    public LuaEventBuilder subscribe(@NotNull String eventClassName,
                           @NotNull ILuaCallable closure,
                           @NotNull EventPriority eventPriority) throws ClassNotFoundException {
         Class<?> eventClass = findEventClass(eventClassName);
-        this.subscribe(eventClass, closure, eventPriority, null);
+        return this.subscribe(eventClass, closure, eventPriority, null);
     }
 
-    public void subscribe(@NotNull String eventClassName,
+    public LuaEventBuilder subscribe(@NotNull String eventClassName,
                           @NotNull ILuaCallable closure,
                           @NotNull EventPriority eventPriority,
                           boolean ignoreCancelled) throws ClassNotFoundException {
         Class<?> eventClass = findEventClass(eventClassName);
-        this.subscribe(eventClass, closure, eventPriority, ignoreCancelled);
+        return this.subscribe(eventClass, closure, eventPriority, ignoreCancelled);
     }
 
-    public void subscribe(@NotNull String eventClassName,
+    public LuaEventBuilder subscribe(@NotNull String eventClassName,
                           @NotNull ILuaCallable closure,
                           boolean ignoreCancelled) throws ClassNotFoundException {
         Class<?> eventClass = findEventClass(eventClassName);
-        this.subscribe(eventClass, closure, null, ignoreCancelled);
+        return this.subscribe(eventClass, closure, null, ignoreCancelled);
     }
 
-    public void subscribe(Class<?> eventClass, ILuaCallable closure,
+    public LuaEventBuilder subscribe(Class<?> eventClass, ILuaCallable closure,
                           EventPriority eventPriority, Boolean ignoreCancelled) {
         this.eventConfigs.add(new EventConfig(eventClass, closure, eventPriority, ignoreCancelled));
+        return this;
     }
 
     @NotNull
@@ -107,7 +108,7 @@ public class LuaEventBuilder {
             }
             AnnotationDescription eventHandler = builder.build();
 
-            String methodName = String.format("on%s%d", eventConfig.eventClass.getName(), count++);
+            String methodName = String.format("on%s%d", eventConfig.eventClass.getSimpleName(), count++);
             callableMap.put(methodName, eventConfig.closure);
             byteBuddy = byteBuddy.defineMethod(methodName, Void.class, Visibility.PUBLIC)
                     .withParameters(eventConfig.eventClass)

@@ -1,36 +1,30 @@
 package org.eu.smileyik.luaInMinecraftBukkitII;
 
-import lombok.Getter;
-import net.bytebuddy.ByteBuddy;
-import net.bytebuddy.description.annotation.AnnotationDescription;
-import net.bytebuddy.description.modifier.Visibility;
-import net.bytebuddy.implementation.MethodDelegation;
-import net.bytebuddy.implementation.SuperMethodCall;
-import net.bytebuddy.implementation.bind.annotation.*;
-import net.bytebuddy.matcher.ElementMatchers;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerPreLoginEvent;
+import com.google.gson.Gson;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.eu.smileyik.luaInMinecraftBukkitII.config.Config;
+import org.eu.smileyik.luaInMinecraftBukkitII.luaState.LuaStateEnv;
+import org.eu.smileyik.simpledebug.DebugLogger;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.EventListener;
-import java.util.concurrent.Callable;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public final class LuaInMinecraftBukkit extends JavaPlugin {
+    public static final String NATIVES_FOLDER = "natives";
+    public static final String LUA_STATE_FOLDER = "luastate";
 
     private static final String[] FOLDERS = new String[] {
-            "luastate",
-            "natives",
+            LUA_STATE_FOLDER,
+            NATIVES_FOLDER,
             "scripts"
     };
 
     private static LuaInMinecraftBukkit plugin;
+    private final Map<String, LuaStateEnv> envs = new HashMap<>();
 
     public LuaInMinecraftBukkit() {
         plugin = this;
@@ -47,53 +41,41 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
         if (!new File(getDataFolder(), "config.json").exists()) {
             saveResource("config.json", false);
         }
-
-        AnnotationDescription annotationDescription = AnnotationDescription.Builder
-                .ofType(EventHandler.class)
-                .define("priority", EventPriority.HIGHEST)
-                .define("ignoreCancelled", false)
-                .build();
-
-        Class<?> onEvent = new ByteBuddy()
-                .subclass(Object.class)
-                .implement(Listener.class)
-                .defineMethod("onEvent", Void.class, Visibility.PUBLIC)
-                    .withParameters(PlayerJoinEvent.class)
-                    .intercept(MethodDelegation.to(new A()))
-                    .annotateMethod(annotationDescription)
-                .make()
-                .load(getClassLoader())
-                .getLoaded();
         try {
-            Object o = onEvent.getDeclaredConstructor().newInstance();
-            getServer().getPluginManager().registerEvents((Listener) o, this);
-        } catch (InstantiationException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        } catch (InvocationTargetException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
+            DebugLogger.init(getLogger(), new File(getDataFolder(), "debug.log"), 0xFFFF);
+            List<String> strings = Files.readAllLines(new File(getDataFolder(), "config.json").toPath());
+            String json = String.join("\n", strings);
+            json = JsonUtil.stripComments(json);
+            Config config1 = new Gson().fromJson(json, Config.class);
+            config1.getLuaState().forEach((id, config) -> {
+                LuaStateEnv env = new LuaStateEnv(id, config);
+                env.initialization();
+                envs.put(id, env);
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
     }
 
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+        envs.forEach((id, env) -> {
+            env.close();
+        });
+        envs.clear();
+        try {
+            DebugLogger.closeLogger();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static LuaInMinecraftBukkit instance() {
         return plugin;
     }
 
-    public static final class A {
-        @RuntimeType
-        public Object intercept(@Argument(0) Object event,
-                                @Origin Method method) {
-            System.out.println("Intercepted " + method.getName() + " : " + event);
-            return null;
-        }
+    public File getLuaStateFolder() {
+        return new File(getDataFolder(), LUA_STATE_FOLDER);
     }
 }
