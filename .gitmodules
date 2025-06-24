@@ -1,0 +1,3 @@
+[submodule "luajava"]
+	path = luajava
+	url = https://github.com/SmileYik/luajava.git
