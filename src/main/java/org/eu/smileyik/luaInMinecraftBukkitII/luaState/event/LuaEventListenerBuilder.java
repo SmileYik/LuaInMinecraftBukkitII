@@ -12,14 +12,17 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.eu.smileyik.luaInMinecraftBukkitII.LuaInMinecraftBukkit;
-import org.eu.smileyik.luaInMinecraftBukkitII.luaState.LuaStateEnv;
+import org.eu.smileyik.luaInMinecraftBukkitII.luaState.ILuaEnv;
 import org.eu.smileyik.luajava.type.ILuaCallable;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
-public class LuaEventBuilder {
+public class LuaEventListenerBuilder {
     private static final String[] EVENT_CLASS_PREFIX = {
             "org.bukkit.event.",
             "org.bukkit.event.player.",
@@ -28,42 +31,42 @@ public class LuaEventBuilder {
             "org.bukkit.event.inventory.",
     };
     private final List<EventConfig> eventConfigs = new LinkedList<>();
-    private final LuaStateEnv luaEnv;
+    private final ILuaEnv luaEnv;
 
-    public LuaEventBuilder(LuaStateEnv luaEnv) {
+    public LuaEventListenerBuilder(ILuaEnv luaEnv) {
         this.luaEnv = luaEnv;
     }
 
-    public LuaEventBuilder subscribe(@NotNull String eventClassName,
-                                     @NotNull ILuaCallable closure) throws ClassNotFoundException {
+    public LuaEventListenerBuilder subscribe(@NotNull String eventClassName,
+                                             @NotNull ILuaCallable closure) throws ClassNotFoundException {
         Class<?> eventClass = findEventClass(eventClassName);
         return this.subscribe(eventClass, closure, null, null);
     }
 
-    public LuaEventBuilder subscribe(@NotNull String eventClassName,
-                          @NotNull ILuaCallable closure,
-                          @NotNull EventPriority eventPriority) throws ClassNotFoundException {
+    public LuaEventListenerBuilder subscribe(@NotNull String eventClassName,
+                                             @NotNull ILuaCallable closure,
+                                             @NotNull EventPriority eventPriority) throws ClassNotFoundException {
         Class<?> eventClass = findEventClass(eventClassName);
         return this.subscribe(eventClass, closure, eventPriority, null);
     }
 
-    public LuaEventBuilder subscribe(@NotNull String eventClassName,
-                          @NotNull ILuaCallable closure,
-                          @NotNull EventPriority eventPriority,
-                          boolean ignoreCancelled) throws ClassNotFoundException {
+    public LuaEventListenerBuilder subscribe(@NotNull String eventClassName,
+                                             @NotNull ILuaCallable closure,
+                                             @NotNull EventPriority eventPriority,
+                                             boolean ignoreCancelled) throws ClassNotFoundException {
         Class<?> eventClass = findEventClass(eventClassName);
         return this.subscribe(eventClass, closure, eventPriority, ignoreCancelled);
     }
 
-    public LuaEventBuilder subscribe(@NotNull String eventClassName,
-                          @NotNull ILuaCallable closure,
-                          boolean ignoreCancelled) throws ClassNotFoundException {
+    public LuaEventListenerBuilder subscribe(@NotNull String eventClassName,
+                                             @NotNull ILuaCallable closure,
+                                             boolean ignoreCancelled) throws ClassNotFoundException {
         Class<?> eventClass = findEventClass(eventClassName);
         return this.subscribe(eventClass, closure, null, ignoreCancelled);
     }
 
-    public LuaEventBuilder subscribe(Class<?> eventClass, ILuaCallable closure,
-                          EventPriority eventPriority, Boolean ignoreCancelled) {
+    public LuaEventListenerBuilder subscribe(Class<?> eventClass, ILuaCallable closure,
+                                             EventPriority eventPriority, Boolean ignoreCancelled) {
         this.eventConfigs.add(new EventConfig(eventClass, closure, eventPriority, ignoreCancelled));
         return this;
     }

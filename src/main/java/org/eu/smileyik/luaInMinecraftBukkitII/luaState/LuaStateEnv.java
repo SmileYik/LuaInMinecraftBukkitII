@@ -1,27 +1,23 @@
 package org.eu.smileyik.luaInMinecraftBukkitII.luaState;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.eu.smileyik.luaInMinecraftBukkitII.LuaInMinecraftBukkit;
 import org.eu.smileyik.luaInMinecraftBukkitII.config.LuaStateConfig;
-import org.eu.smileyik.luaInMinecraftBukkitII.luaState.command.LuaCommandClassBuilder;
-import org.eu.smileyik.luaInMinecraftBukkitII.luaState.command.LuaCommandRegister;
-import org.eu.smileyik.luaInMinecraftBukkitII.luaState.event.LuaEventBuilder;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.event.LuaEventListener;
 import org.eu.smileyik.luajava.exception.Result;
+import org.eu.smileyik.luajava.type.ILuaCallable;
 import org.eu.smileyik.luajava.type.LuaTable;
 import org.eu.smileyik.simplecommand.CommandService;
 import org.eu.smileyik.simpledebug.DebugLogger;
-import org.keplerproject.luajava.LuaException;
 import org.keplerproject.luajava.LuaStateFacade;
 import org.keplerproject.luajava.LuaStateFactory;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class LuaStateEnv implements AutoCloseable {
 
@@ -45,16 +41,21 @@ public class LuaStateEnv implements AutoCloseable {
     @Getter
     private final File rootDir;
 
+    @Getter(AccessLevel.PROTECTED)
     private final Map<String, Listener> listeners = new HashMap<>();
+    @Getter(AccessLevel.PROTECTED)
     private final Map<String, CommandService> commandServices = new HashMap<>();
+    @Getter(AccessLevel.PROTECTED)
+    private final List<ILuaCallable> cleaners = new LinkedList<>();
+    private final ILuaEnv luaEnv = new SimpleLuaEnv(this);
 
     public LuaStateEnv(String id, LuaStateConfig config) {
         this.id = id;
         this.config = config;
         this.lua = LuaStateFactory.newLuaState(!this.config.isIgnoreAccessLimit());
         this.rootDir = new File(LuaInMinecraftBukkit.instance().getLuaStateFolder(), this.config.getRootDir());
-        if (!rootDir.exists()) {
-            rootDir.mkdirs();
+        if (!rootDir.exists() && !rootDir.mkdirs()) {
+            DebugLogger.debug("Cannot create new directory: %s", rootDir);
         }
     }
 
@@ -86,11 +87,12 @@ public class LuaStateEnv implements AutoCloseable {
         lua.toJavaObject(-1)
                 .mapResultValue(obj -> {
                     LuaTable table = ((LuaTable) obj).asTable();
-                    Result<Void, ? extends LuaException> result = table.put("env", this)
+                    return table.put("env", luaEnv)
                             .mapResultValue(it -> table.put("plugin", LuaInMinecraftBukkit.instance()))
                             .mapResultValue(it -> table.put("bukkit", Bukkit.class))
-                            .mapResultValue(it -> table.put("server", LuaInMinecraftBukkit.instance().getServer()));
-                    return result.isError() ? result.justCast() : Result.success(table);
+                            .mapResultValue(it -> table.put("server", LuaInMinecraftBukkit.instance().getServer()))
+                            .mapResultValue(it -> table.put("log", LuaInMinecraftBukkit.instance().getLogger()))
+                            .mapResultValue(it -> Result.success(table));
                 })
                 .mapResultValue(table -> lua.setGlobal("luaBukkit", table))
                 .ifFailureThen(err -> {
@@ -100,78 +102,36 @@ public class LuaStateEnv implements AutoCloseable {
                 });
 
         for (String file : config.getInitialization()) {
-            File scripFile = new File(rootDir, file);
-            String absolutePath = scripFile.getAbsolutePath();
-            if (scripFile.exists()) {
-                lua.evalFile(absolutePath)
-                        .ifFailureThen(err -> {
-                            LuaInMinecraftBukkit.instance()
-                                    .getLogger()
-                                    .warning(String.format(
-                                            "Failed to eval lua file '%s', because: %s", file, err.getMessage()));
-                            DebugLogger.debug(DebugLogger.WARN,
-                                    "Failed to eval lua file '%s', because: %s", file, err.getMessage());
-                            DebugLogger.debug(DebugLogger.ERROR, err);
-                        });
-            } else {
-                LuaInMinecraftBukkit.instance()
-                        .getLogger()
-                        .warning(String.format("Cannot find file: %s", file));
-            }
+            evalFile(file);
         }
     }
 
-    public void registerEventListener(String name, Listener listener) {
-        Listener oldOne = listeners.put(name, listener);
-        LuaInMinecraftBukkit.instance()
-                .getServer()
-                .getPluginManager()
-                .registerEvents(listener, LuaInMinecraftBukkit.instance());
-        if (oldOne != null) {
-            HandlerList.unregisterAll(oldOne);
+    public void evalFile(String file) {
+        File scripFile = new File(rootDir, file);
+        String absolutePath = scripFile.toString();
+        if (scripFile.exists()) {
+            lua.evalFile(absolutePath)
+                    .ifFailureThen(err -> {
+                        LuaInMinecraftBukkit.instance()
+                                .getLogger()
+                                .warning(String.format(
+                                        "Failed to eval lua file '%s', because: %s", file, err.getMessage()));
+                        DebugLogger.debug(DebugLogger.ERROR, err);
+                    });
+        } else {
+            LuaInMinecraftBukkit.instance()
+                    .getLogger()
+                    .warning(String.format("Cannot find file: %s", file));
         }
-    }
-
-    public LuaEventBuilder eventBuilder() {
-        return new LuaEventBuilder(this);
-    }
-
-    public LuaCommandClassBuilder newCommandClassBuilder() {
-        return new LuaCommandClassBuilder();
-    }
-
-    public Result<Boolean, Exception> registerCommand(String rootCommand, Class<?> ... classes) {
-        try {
-            CommandService commandService = LuaCommandRegister.register(rootCommand, classes);
-            if (commandService == null) {
-                return Result.success(false);
-            }
-            commandServices.put(rootCommand, commandService);
-            commandService.registerToBukkit(LuaInMinecraftBukkit.instance());
-            return Result.success(true);
-        } catch (Exception e) {
-            return Result.failure(e);
-        }
-    }
-
-    public String path(String path) {
-        return file(path).toString();
-    }
-
-    public String path(String ... paths) {
-        return file(paths).toString();
-    }
-
-    public File file(String path) {
-        return new File(this.rootDir, path);
-    }
-
-    public File file(String ... paths) {
-        return new File(rootDir, String.join(File.pathSeparator, paths));
     }
 
     @Override
     public void close() {
+        for (ILuaCallable cleaner : cleaners) {
+            cleaner.call();
+        }
+        cleaners.clear();
+
         listeners.forEach((name, listener) -> {
             HandlerList.unregisterAll(listener);
             if (listener instanceof LuaEventListener) {
