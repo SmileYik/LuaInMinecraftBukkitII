@@ -1,4 +1,4 @@
-package org.eu.smileyik.luaInMinecraftBukkitII.api.luaState;
+package org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState;
 
 import org.bukkit.scheduler.BukkitTask;
 import org.eu.smileyik.luaInMinecraftBukkitII.LuaInMinecraftBukkit;

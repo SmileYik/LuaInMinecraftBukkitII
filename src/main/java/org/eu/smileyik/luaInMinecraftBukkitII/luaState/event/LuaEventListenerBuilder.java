@@ -1,4 +1,4 @@
-package org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.event;
+package org.eu.smileyik.luaInMinecraftBukkitII.luaState.event;
 
 import lombok.Data;
 import net.bytebuddy.ByteBuddy;
@@ -12,9 +12,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.eu.smileyik.luaInMinecraftBukkitII.LuaInMinecraftBukkit;
-import org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.ILuaEnv;
-import org.eu.smileyik.luaInMinecraftBukkitII.luaState.event.LuaEventHandler;
-import org.eu.smileyik.luaInMinecraftBukkitII.luaState.event.LuaEventListener;
+import org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState.ILuaEnv;
+import org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState.event.ILuaEventListenerBuilder;
+import org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState.event.LuaEventListenerProperty;
+import org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState.event.LuaUnregisteredListener;
 import org.eu.smileyik.luaInMinecraftBukkitII.reflect.LuaTable2Object;
 import org.eu.smileyik.luajava.type.ILuaCallable;
 import org.eu.smileyik.luajava.type.LuaTable;
@@ -26,7 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class LuaEventListenerBuilder {
+public class LuaEventListenerBuilder implements ILuaEventListenerBuilder {
     private static final String[] EVENT_CLASS_PREFIX = {
             "org.bukkit.event.",
             "org.bukkit.event.player.",
@@ -41,109 +42,57 @@ public class LuaEventListenerBuilder {
         this.luaEnv = luaEnv;
     }
 
-    /**
-     * 订阅一个事件
-     * @param eventClassName 事件全类名, 常见类名可以忽略包路径
-     * @param closure        事件闭包, 固定一个形参, 为监听的事件实例.
-     * @return 此构造器
-     * @throws ClassNotFoundException 如果该事件类型不存在则抛出.
-     */
-    public LuaEventListenerBuilder subscribe(@NotNull String eventClassName,
-                                             @NotNull ILuaCallable closure) throws ClassNotFoundException {
+    @Override
+    public ILuaEventListenerBuilder subscribe(@NotNull String eventClassName,
+                                              @NotNull ILuaCallable closure) throws ClassNotFoundException {
         Class<?> eventClass = findEventClass(eventClassName);
         return this.doSubscribe(eventClass, closure, null, null);
     }
 
-    /**
-     * 订阅一个事件
-     * @param eventClassName 事件全类名, 常见类名可以忽略包路径
-     * @param eventPriority  事件优先级
-     * @param closure        事件闭包, 固定一个形参, 为监听的事件实例.
-     * @return 此构造器
-     * @throws ClassNotFoundException 如果该事件类型不存在则抛出.
-     */
-    public LuaEventListenerBuilder subscribe(@NotNull String eventClassName,
-                                             @NotNull EventPriority eventPriority,
-                                             @NotNull ILuaCallable closure) throws ClassNotFoundException {
+    @Override
+    public ILuaEventListenerBuilder subscribe(@NotNull String eventClassName,
+                                              @NotNull EventPriority eventPriority,
+                                              @NotNull ILuaCallable closure) throws ClassNotFoundException {
         Class<?> eventClass = findEventClass(eventClassName);
         return this.doSubscribe(eventClass, closure, eventPriority, null);
     }
 
-    /**
-     * 订阅一个事件
-     * @param eventClassName 事件全类名, 常见类名可以忽略包路径
-     * @param eventPriority  事件优先级, 包含<code>LOWEST</code> <code>LOW</code> <code>NORMAL</code>
-     *                       <code>HIGH</code> <code>HIGHEST</code> <code>MONITOR</code>
-     * @param closure        事件闭包, 固定一个形参, 为监听的事件实例.
-     * @return 此构造器
-     * @throws ClassNotFoundException 如果该事件类型不存在则抛出.
-     */
-    public LuaEventListenerBuilder subscribe(@NotNull String eventClassName,
-                                             @NotNull String eventPriority,
-                                             @NotNull ILuaCallable closure) throws ClassNotFoundException {
+    @Override
+    public ILuaEventListenerBuilder subscribe(@NotNull String eventClassName,
+                                              @NotNull String eventPriority,
+                                              @NotNull ILuaCallable closure) throws ClassNotFoundException {
         EventPriority priority = EventPriority.valueOf(eventPriority.toUpperCase());
         return subscribe(eventClassName, priority, closure);
     }
 
-    /**
-     * 订阅一个事件
-     * @param eventClassName  事件全类名, 常见类名可以忽略包路径
-     * @param eventPriority   事件优先级
-     * @param ignoreCancelled 是否忽略已取消的事件.
-     * @param closure         事件闭包, 固定一个形参, 为监听的事件实例.
-     * @return 此构造器
-     * @throws ClassNotFoundException 如果该事件类型不存在则抛出.
-     */
-    public LuaEventListenerBuilder subscribe(@NotNull String eventClassName,
-                                             @NotNull EventPriority eventPriority,
-                                             boolean ignoreCancelled,
-                                             @NotNull ILuaCallable closure) throws ClassNotFoundException {
+    @Override
+    public ILuaEventListenerBuilder subscribe(@NotNull String eventClassName,
+                                              @NotNull EventPriority eventPriority,
+                                              boolean ignoreCancelled,
+                                              @NotNull ILuaCallable closure) throws ClassNotFoundException {
         Class<?> eventClass = findEventClass(eventClassName);
         return this.doSubscribe(eventClass, closure, eventPriority, ignoreCancelled);
     }
 
-    /**
-     * 订阅一个事件
-     * @param eventClassName  事件全类名, 常见类名可以忽略包路径
-     * @param eventPriority   事件优先级, 包含<code>LOWEST</code> <code>LOW</code> <code>NORMAL</code>
-     *                        <code>HIGH</code> <code>HIGHEST</code> <code>MONITOR</code>
-     * @param ignoreCancelled 是否忽略已取消的事件.
-     * @param closure        事件闭包, 固定一个形参, 为监听的事件实例.
-     * @return 此构造器
-     * @throws ClassNotFoundException 如果该事件类型不存在则抛出.
-     */
-    public LuaEventListenerBuilder subscribe(@NotNull String eventClassName,
-                                             @NotNull String eventPriority,
-                                             boolean ignoreCancelled,
-                                             @NotNull ILuaCallable closure) throws ClassNotFoundException {
+    @Override
+    public ILuaEventListenerBuilder subscribe(@NotNull String eventClassName,
+                                              @NotNull String eventPriority,
+                                              boolean ignoreCancelled,
+                                              @NotNull ILuaCallable closure) throws ClassNotFoundException {
         EventPriority priority = EventPriority.valueOf(eventPriority.toUpperCase());
         return this.subscribe(eventClassName, priority, ignoreCancelled, closure);
     }
 
-    /**
-     * 订阅一个事件
-     * @param eventClassName  事件全类名, 常见类名可以忽略包路径
-     * @param ignoreCancelled 是否忽略已取消的事件.
-     * @param closure        事件闭包, 固定一个形参, 为监听的事件实例.
-     * @return 此构造器
-     * @throws ClassNotFoundException 如果该事件类型不存在则抛出.
-     */
-    public LuaEventListenerBuilder subscribe(@NotNull String eventClassName,
-                                             boolean ignoreCancelled,
-                                             @NotNull ILuaCallable closure) throws ClassNotFoundException {
+    @Override
+    public ILuaEventListenerBuilder subscribe(@NotNull String eventClassName,
+                                              boolean ignoreCancelled,
+                                              @NotNull ILuaCallable closure) throws ClassNotFoundException {
         Class<?> eventClass = findEventClass(eventClassName);
         return this.doSubscribe(eventClass, closure, null, ignoreCancelled);
     }
 
-    /**
-     * 订阅一个事件, 传入LuaTable类型, 并且必须包含<code>event</code>和<code>handler</code>字段.
-     * <code>event</code>字段为文本类型, 是要订阅的事件的全类名.
-     * <code>handler</code>字段为Lua闭包, 并且包含一个形参.
-     * @param table LuaTable
-     * @return 此构造器
-     * @throws Exception 如果LuaTable不符合要求则抛出
-     */
-    public LuaEventListenerBuilder subscribe(@NotNull LuaTable table) throws Exception {
+    @Override
+    public ILuaEventListenerBuilder subscribe(@NotNull LuaTable table) throws Exception {
         LuaEventListenerProperty property = LuaTable2Object.covert(table, LuaEventListenerProperty.class)
                 .getOrThrow();
         if (property.getEvent() == null) {
@@ -165,34 +114,21 @@ public class LuaEventListenerBuilder {
         return this.doSubscribe(eventClass, callable, priority, ignoreCancelled);
     }
 
-    /**
-     * 与<code>subscribe(LuaTable)</code>类似, 但是是接受一个LuaTable数组(数组风格LuaTable),
-     * 以批量订阅事件.
-     * @param tables table组成的数组, 形似与<code>local tables = {{}, {}, {}}</code>
-     * @return 此构造器
-     * @throws Exception 如果LuaTable不符合要求则抛出
-     */
-    public LuaEventListenerBuilder subscribes(@NotNull LuaTable ... tables) throws Exception {
+    @Override
+    public ILuaEventListenerBuilder subscribes(@NotNull LuaTable... tables) throws Exception {
         for (LuaTable t : tables) {
             subscribe(t);
         }
         return this;
     }
 
-    private LuaEventListenerBuilder doSubscribe(Class<?> eventClass, ILuaCallable closure,
-                                             EventPriority eventPriority, Boolean ignoreCancelled) {
+    private ILuaEventListenerBuilder doSubscribe(Class<?> eventClass, ILuaCallable closure,
+                                                 EventPriority eventPriority, Boolean ignoreCancelled) {
         this.eventConfigs.add(new EventConfig(eventClass, closure, eventPriority, ignoreCancelled));
         return this;
     }
 
-    /**
-     * 构造未监听的事件实例.
-     * @return 未监听的事件实例
-     * @throws NoSuchMethodException
-     * @throws InvocationTargetException
-     * @throws InstantiationException
-     * @throws IllegalAccessException
-     */
+    @Override
     public LuaUnregisteredListener build()
             throws NoSuchMethodException,
             InvocationTargetException,
@@ -256,7 +192,7 @@ public class LuaEventListenerBuilder {
     }
 
     @Data
-    private static class EventConfig {
+    public static class EventConfig {
         private final Class<?> eventClass;
         private final ILuaCallable closure;
         private final EventPriority eventPriority;

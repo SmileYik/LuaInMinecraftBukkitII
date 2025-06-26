@@ -3,11 +3,13 @@ package org.eu.smileyik.luaInMinecraftBukkitII.luaState;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.eu.smileyik.luaInMinecraftBukkitII.LuaInMinecraftBukkit;
-import org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.ILuaEnv;
-import org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.command.LuaCommandClassBuilder;
-import org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.event.LuaEventListenerBuilder;
+import org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState.ILuaEnv;
+import org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState.command.ILuaCommandClassBuilder;
+import org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState.event.ILuaEventListenerBuilder;
+import org.eu.smileyik.luaInMinecraftBukkitII.luaState.command.LuaCommandClassBuilder;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.command.LuaCommandRegister;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.event.LuaEventListener;
+import org.eu.smileyik.luaInMinecraftBukkitII.luaState.event.LuaEventListenerBuilder;
 import org.eu.smileyik.luajava.exception.Result;
 import org.eu.smileyik.luajava.type.ILuaCallable;
 import org.eu.smileyik.simplecommand.CommandService;
@@ -45,12 +47,12 @@ public class SimpleLuaEnv implements ILuaEnv {
     }
 
     @Override
-    public LuaEventListenerBuilder listenerBuilder() {
+    public ILuaEventListenerBuilder listenerBuilder() {
         return new LuaEventListenerBuilder(this);
     }
 
     @Override
-    public LuaCommandClassBuilder commandClassBuilder() {
+    public ILuaCommandClassBuilder commandClassBuilder() {
         return new LuaCommandClassBuilder();
     }
 

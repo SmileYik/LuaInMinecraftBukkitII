@@ -1,7 +1,7 @@
-package org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.event;
+package org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState.event;
 
 import org.bukkit.event.Listener;
-import org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.ILuaEnv;
+import org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState.ILuaEnv;
 
 /**
  * 未监听的事件类型.

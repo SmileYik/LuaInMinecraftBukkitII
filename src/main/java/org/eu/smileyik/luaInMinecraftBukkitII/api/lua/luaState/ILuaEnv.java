@@ -1,8 +1,8 @@
-package org.eu.smileyik.luaInMinecraftBukkitII.api.luaState;
+package org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState;
 
 import org.bukkit.event.Listener;
-import org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.command.LuaCommandClassBuilder;
-import org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.event.LuaEventListenerBuilder;
+import org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState.command.ILuaCommandClassBuilder;
+import org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState.event.ILuaEventListenerBuilder;
 import org.eu.smileyik.luajava.exception.Result;
 import org.eu.smileyik.luajava.type.ILuaCallable;
 
@@ -59,13 +59,13 @@ public interface ILuaEnv {
      * </code></pre>
      * @return 事件监听构造器.
      */
-    LuaEventListenerBuilder listenerBuilder();
+    ILuaEventListenerBuilder listenerBuilder();
 
     /**
      * 获取指令类构造器.
      * @return 指令类构造器.
      */
-    LuaCommandClassBuilder commandClassBuilder();
+    ILuaCommandClassBuilder commandClassBuilder();
 
     /**
      * 注册指令
