@@ -3,6 +3,7 @@ package org.eu.smileyik.luaInMinecraftBukkitII.luaState.event;
 import lombok.Data;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.description.annotation.AnnotationDescription;
+import net.bytebuddy.description.enumeration.EnumerationDescription;
 import net.bytebuddy.description.modifier.Visibility;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.implementation.MethodCall;
@@ -13,9 +14,12 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.eu.smileyik.luaInMinecraftBukkitII.LuaInMinecraftBukkit;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.ILuaEnv;
+import org.eu.smileyik.luaInMinecraftBukkitII.reflect.LuaTable2Object;
 import org.eu.smileyik.luajava.type.ILuaCallable;
+import org.eu.smileyik.luajava.type.LuaTable;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -40,32 +44,76 @@ public class LuaEventListenerBuilder {
     public LuaEventListenerBuilder subscribe(@NotNull String eventClassName,
                                              @NotNull ILuaCallable closure) throws ClassNotFoundException {
         Class<?> eventClass = findEventClass(eventClassName);
-        return this.subscribe(eventClass, closure, null, null);
+        return this.doSubscribe(eventClass, closure, null, null);
     }
 
     public LuaEventListenerBuilder subscribe(@NotNull String eventClassName,
-                                             @NotNull ILuaCallable closure,
-                                             @NotNull EventPriority eventPriority) throws ClassNotFoundException {
-        Class<?> eventClass = findEventClass(eventClassName);
-        return this.subscribe(eventClass, closure, eventPriority, null);
-    }
-
-    public LuaEventListenerBuilder subscribe(@NotNull String eventClassName,
-                                             @NotNull ILuaCallable closure,
                                              @NotNull EventPriority eventPriority,
-                                             boolean ignoreCancelled) throws ClassNotFoundException {
+                                             @NotNull ILuaCallable closure) throws ClassNotFoundException {
         Class<?> eventClass = findEventClass(eventClassName);
-        return this.subscribe(eventClass, closure, eventPriority, ignoreCancelled);
+        return this.doSubscribe(eventClass, closure, eventPriority, null);
     }
 
     public LuaEventListenerBuilder subscribe(@NotNull String eventClassName,
-                                             @NotNull ILuaCallable closure,
-                                             boolean ignoreCancelled) throws ClassNotFoundException {
-        Class<?> eventClass = findEventClass(eventClassName);
-        return this.subscribe(eventClass, closure, null, ignoreCancelled);
+                                             @NotNull String eventPriority,
+                                             @NotNull ILuaCallable closure) throws ClassNotFoundException {
+        EventPriority priority = EventPriority.valueOf(eventPriority.toUpperCase());
+        return subscribe(eventClassName, priority, closure);
     }
 
-    public LuaEventListenerBuilder subscribe(Class<?> eventClass, ILuaCallable closure,
+    public LuaEventListenerBuilder subscribe(@NotNull String eventClassName,
+                                             @NotNull EventPriority eventPriority,
+                                             boolean ignoreCancelled,
+                                             @NotNull ILuaCallable closure) throws ClassNotFoundException {
+        Class<?> eventClass = findEventClass(eventClassName);
+        return this.doSubscribe(eventClass, closure, eventPriority, ignoreCancelled);
+    }
+
+    public LuaEventListenerBuilder subscribe(@NotNull String eventClassName,
+                                             @NotNull String eventPriority,
+                                             boolean ignoreCancelled,
+                                             @NotNull ILuaCallable closure) throws ClassNotFoundException {
+        EventPriority priority = EventPriority.valueOf(eventPriority.toUpperCase());
+        return this.subscribe(eventClassName, priority, ignoreCancelled, closure);
+    }
+
+    public LuaEventListenerBuilder subscribe(@NotNull String eventClassName,
+                                             boolean ignoreCancelled,
+                                             @NotNull ILuaCallable closure) throws ClassNotFoundException {
+        Class<?> eventClass = findEventClass(eventClassName);
+        return this.doSubscribe(eventClass, closure, null, ignoreCancelled);
+    }
+
+    public LuaEventListenerBuilder subscribe(@NotNull LuaTable table) throws Exception {
+        LuaEventProperty property = LuaTable2Object.covert(table, LuaEventProperty.class)
+                .getOrThrow();
+        if (property.getEvent() == null) {
+            throw new IllegalArgumentException("'event' property must not be nil'");
+        }
+        if (property.getHandler() == null) {
+            throw new IllegalArgumentException("'handler' property must not be nil'");
+        }
+        Class<?> eventClass = findEventClass(property.getEvent());
+        ILuaCallable callable = property.getHandler();
+        boolean ignoreCancelled = property.isIgnoreCancelled();
+        EventPriority priority;
+        if (property.getPriority() == null) {
+            priority = null;
+        } else {
+            priority = EventPriority.valueOf(property.getPriority());
+            System.out.println(priority);
+        }
+        return this.doSubscribe(eventClass, callable, priority, ignoreCancelled);
+    }
+
+    public LuaEventListenerBuilder subscribes(@NotNull LuaTable ... tables) throws Exception {
+        for (LuaTable t : tables) {
+            subscribe(t);
+        }
+        return this;
+    }
+
+    private LuaEventListenerBuilder doSubscribe(Class<?> eventClass, ILuaCallable closure,
                                              EventPriority eventPriority, Boolean ignoreCancelled) {
         this.eventConfigs.add(new EventConfig(eventClass, closure, eventPriority, ignoreCancelled));
         return this;
@@ -104,7 +152,7 @@ public class LuaEventListenerBuilder {
         for (EventConfig eventConfig : this.eventConfigs) {
             AnnotationDescription.Builder builder = AnnotationDescription.Builder.ofType(EventHandler.class);
             if (eventConfig.eventPriority != null) {
-                builder.define("priority", eventConfig.eventPriority);
+                builder.define("priority", new EnumerationDescription.ForLoadedEnumeration(eventConfig.eventPriority));
             }
             if (eventConfig.ignoreCancelled != null) {
                 builder.define("ignoreCancelled", eventConfig.ignoreCancelled);
@@ -119,6 +167,11 @@ public class LuaEventListenerBuilder {
                     .annotateMethod(eventHandler);
         }
         try (DynamicType.Unloaded<LuaEventListener> made = byteBuddy.make()) {
+            try {
+                made.toJar(luaEnv.file("abc.jar"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             Listener listener = made.load(LuaInMinecraftBukkit.instance().getClass().getClassLoader())
                     .getLoaded()
                     .getDeclaredConstructor(LuaEventHandler.class)
