@@ -7,6 +7,37 @@ import org.jetbrains.annotations.NotNull;
 
 public interface ILuaCommandClassBuilder {
     /**
+     * 设定指令别名, 当且仅当该指令为顶级指令时有效
+     *
+     * @param aliases 别名
+     * @return 构造器
+     */
+    ILuaCommandClassBuilder aliases(String... aliases);
+
+    /**
+     * 设置该类中所有指令都需要玩家才能执行.
+     *
+     * @return 该构造器
+     */
+    ILuaCommandClassBuilder needPlayer();
+
+    /**
+     * 设置该指令描述
+     *
+     * @param description 描述
+     * @return 构造器
+     */
+    ILuaCommandClassBuilder description(String description);
+
+    /**
+     * 设置该类下所有指令所需要的权限.
+     *
+     * @param permission 权限
+     * @return 构造器
+     */
+    ILuaCommandClassBuilder permission(String permission);
+
+    /**
      * 使用指令构造器新建一个指令. 对于它的其他方法重载来讲, 该方法可能更加优雅.
      *
      * @param commandName 指令名称
@@ -122,37 +153,6 @@ public interface ILuaCommandClassBuilder {
                                     @NotNull String command,
                                     String[] args, String description, String permission,
                                     boolean needPlayer, boolean unlimitedArgs);
-
-    /**
-     * 设定指令别名, 当且仅当该指令为顶级指令时有效
-     *
-     * @param aliases 别名
-     * @return 构造器
-     */
-    ILuaCommandClassBuilder aliases(String... aliases);
-
-    /**
-     * 设置该类中所有指令都需要玩家才能执行.
-     *
-     * @return 该构造器
-     */
-    ILuaCommandClassBuilder needPlayer();
-
-    /**
-     * 设置该指令描述
-     *
-     * @param description 描述
-     * @return 构造器
-     */
-    ILuaCommandClassBuilder description(String description);
-
-    /**
-     * 设置该类下所有指令所需要的权限.
-     *
-     * @param permission 权限
-     * @return 构造器
-     */
-    ILuaCommandClassBuilder permission(String permission);
 
     /**
      * 构建指令类型.
