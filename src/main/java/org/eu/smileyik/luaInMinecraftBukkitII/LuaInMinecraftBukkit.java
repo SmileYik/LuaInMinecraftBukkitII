@@ -1,9 +1,13 @@
 package org.eu.smileyik.luaInMinecraftBukkitII;
 
 import com.google.gson.Gson;
+import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.eu.smileyik.luaInMinecraftBukkitII.command.RootCommand;
 import org.eu.smileyik.luaInMinecraftBukkitII.config.Config;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.LuaStateEnv;
+import org.eu.smileyik.luaInMinecraftBukkitII.luaState.command.LuaCommandRegister;
+import org.eu.smileyik.simplecommand.CommandService;
 import org.eu.smileyik.simpledebug.DebugLogger;
 
 import java.io.File;
@@ -24,6 +28,7 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
     };
 
     private static LuaInMinecraftBukkit plugin;
+    @Getter
     private final Map<String, LuaStateEnv> envs = new HashMap<>();
 
     public LuaInMinecraftBukkit() {
@@ -52,6 +57,12 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
                 env.initialization();
                 envs.put(id, env);
             });
+
+            CommandService.newInstance(
+                    LuaCommandRegister.DEFAULT_TRANSLATOR,
+                    LuaCommandRegister.DEFAULT_FORMAT,
+                    RootCommand.class
+            ).registerToBukkit(this);
         } catch (Exception e) {
             e.printStackTrace();
         }

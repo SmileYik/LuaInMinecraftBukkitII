@@ -3,3 +3,9 @@ version: '1.0.0-SNAPSHOT'
 main: org.eu.smileyik.luaInMinecraftBukkitII.LuaInMinecraftBukkit
 api-version: '1.18'
 authors: [ SmileYik ]
+commands:
+  LuaInMinecraftBukkitII:
+    aliases:
+      - lua
+      - limb
+      - limb2

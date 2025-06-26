@@ -92,6 +92,7 @@ public class LuaStateEnv implements AutoCloseable {
                             .mapResultValue(it -> table.put("bukkit", Bukkit.class))
                             .mapResultValue(it -> table.put("server", LuaInMinecraftBukkit.instance().getServer()))
                             .mapResultValue(it -> table.put("log", LuaInMinecraftBukkit.instance().getLogger()))
+                            .mapResultValue(it -> table.put("helper", LuaHelper.class))
                             .mapResultValue(it -> Result.success(table));
                 })
                 .mapResultValue(table -> lua.setGlobal("luaBukkit", table))
@@ -123,6 +124,23 @@ public class LuaStateEnv implements AutoCloseable {
                     .getLogger()
                     .warning(String.format("Cannot find file: %s", file));
         }
+    }
+
+    /**
+     * 执行一个Lua闭包全局变量.
+     * @param globalClosureName Lua闭包全局变量名称.
+     * @param params 传递给闭包的参数.
+     * @return 调用结果
+     */
+    public Result<Object, Exception> callClosure(String globalClosureName, Object ... params) {
+        return lua.getGlobal(globalClosureName)
+                .mapResultValue(it -> it instanceof ILuaCallable ?
+                        Result.success((ILuaCallable) it) :
+                        Result.failure(new ClassCastException(String.format(
+                                "Cannot cast type '%s' to type: ILuaCallable",
+                                it == null ? null : it.getClass()))))
+                .mapResultValue(callable -> callable.call(params))
+                .justCast();
     }
 
     @Override
