@@ -41,7 +41,7 @@ dependencies {
     // SimpleDebug
     implementation 'org.eu.smileyik:SimpleDebug:1.0.2-SNAPSHOT'
     // byte buddy
-    implementation 'net.bytebuddy:byte-buddy:1.17.0'
+    implementation 'net.bytebuddy:byte-buddy:1.14.3'
 }
 
 tasks {
@@ -88,4 +88,5 @@ processResources {
 shadowJar {
     relocate 'org.eu.smileyik.simpledebug', 'org.eu.smileyik.luaInMinecraftBukkitII.simpledebug'
     relocate 'org.eu.smileyik.simplecommand', 'org.eu.smileyik.luaInMinecraftBukkitII.simplecommand'
+    relocate 'net.bytebuddy', 'org.eu.smileyik.luaInMinecraftBukkitII.bytebuddy'
 }

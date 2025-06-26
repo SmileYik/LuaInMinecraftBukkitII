@@ -218,9 +218,13 @@ public class LuaCommandClassBuilder implements ILuaCommandClassBuilder {
                             .getClass()
                             .getClassLoader())
                     .getLoaded();
+        } catch (Exception ee) {
+            throw new RuntimeException(ee);
         } finally {
             configs.clear();
         }
+
+
     }
 
     private static class CommandConfig {

@@ -109,7 +109,6 @@ public class LuaEventListenerBuilder implements ILuaEventListenerBuilder {
             priority = null;
         } else {
             priority = EventPriority.valueOf(property.getPriority());
-            System.out.println(priority);
         }
         return this.doSubscribe(eventClass, callable, priority, ignoreCancelled);
     }
@@ -166,6 +165,8 @@ public class LuaEventListenerBuilder implements ILuaEventListenerBuilder {
                     .getDeclaredConstructor(LuaEventHandler.class)
                     .newInstance(luaEventHandler);
             return new LuaUnregisteredListener(luaEnv, listener);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         } finally {
             eventConfigs.clear();
         }
