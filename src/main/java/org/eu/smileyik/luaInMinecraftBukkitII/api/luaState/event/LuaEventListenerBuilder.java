@@ -1,4 +1,4 @@
-package org.eu.smileyik.luaInMinecraftBukkitII.luaState.event;
+package org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.event;
 
 import lombok.Data;
 import net.bytebuddy.ByteBuddy;
@@ -12,7 +12,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.eu.smileyik.luaInMinecraftBukkitII.LuaInMinecraftBukkit;
-import org.eu.smileyik.luaInMinecraftBukkitII.luaState.ILuaEnv;
+import org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.ILuaEnv;
+import org.eu.smileyik.luaInMinecraftBukkitII.luaState.event.LuaEventHandler;
+import org.eu.smileyik.luaInMinecraftBukkitII.luaState.event.LuaEventListener;
 import org.eu.smileyik.luaInMinecraftBukkitII.reflect.LuaTable2Object;
 import org.eu.smileyik.luajava.type.ILuaCallable;
 import org.eu.smileyik.luajava.type.LuaTable;

@@ -1,4 +1,4 @@
-package org.eu.smileyik.luaInMinecraftBukkitII.luaState.event;
+package org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.event;
 
 import lombok.Data;
 import lombok.ToString;

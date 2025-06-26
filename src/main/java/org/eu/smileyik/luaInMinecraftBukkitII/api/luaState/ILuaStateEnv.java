@@ -1,4 +1,4 @@
-package org.eu.smileyik.luaInMinecraftBukkitII.luaState;
+package org.eu.smileyik.luaInMinecraftBukkitII.api.luaState;
 
 import org.eu.smileyik.luajava.exception.Result;
 import org.jetbrains.annotations.NotNull;

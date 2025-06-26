@@ -1,4 +1,4 @@
-package org.eu.smileyik.luaInMinecraftBukkitII.luaState.command;
+package org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.command;
 
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.description.annotation.AnnotationDescription;
@@ -7,6 +7,7 @@ import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.implementation.MethodDelegation;
 import org.bukkit.command.CommandSender;
 import org.eu.smileyik.luaInMinecraftBukkitII.LuaInMinecraftBukkit;
+import org.eu.smileyik.luaInMinecraftBukkitII.luaState.command.LuaCommandHandler;
 import org.eu.smileyik.luaInMinecraftBukkitII.reflect.LuaTable2Object;
 import org.eu.smileyik.luajava.type.ILuaCallable;
 import org.eu.smileyik.luajava.type.LuaTable;

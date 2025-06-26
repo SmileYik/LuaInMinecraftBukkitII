@@ -1,8 +1,8 @@
-package org.eu.smileyik.luaInMinecraftBukkitII.luaState;
+package org.eu.smileyik.luaInMinecraftBukkitII.api.luaState;
 
 import org.bukkit.event.Listener;
-import org.eu.smileyik.luaInMinecraftBukkitII.luaState.command.LuaCommandClassBuilder;
-import org.eu.smileyik.luaInMinecraftBukkitII.luaState.event.LuaEventListenerBuilder;
+import org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.command.LuaCommandClassBuilder;
+import org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.event.LuaEventListenerBuilder;
 import org.eu.smileyik.luajava.exception.Result;
 import org.eu.smileyik.luajava.type.ILuaCallable;
 

@@ -1,4 +1,4 @@
-package org.eu.smileyik.luaInMinecraftBukkitII.luaState.command;
+package org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.command;
 
 import lombok.Data;
 import lombok.ToString;
