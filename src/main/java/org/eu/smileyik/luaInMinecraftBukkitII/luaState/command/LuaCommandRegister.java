@@ -14,6 +14,7 @@ import java.io.InvalidClassException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 
 public class LuaCommandRegister {
     public static final CommandTranslator DEFAULT_TRANSLATOR = (msg, obj) -> msg;
@@ -69,15 +70,17 @@ public class LuaCommandRegister {
         }
     }
 
-    public static CommandService register(String rootCommand, Class<?> ... classes)
+    public static CommandService register(String rootCommand, String[] aliases, Class<?> ... classes)
             throws InvalidClassException,
             InvocationTargetException,
             NoSuchMethodException,
             InstantiationException,
             IllegalAccessException {
-
         LuaInMinecraftBukkit plugin = LuaInMinecraftBukkit.instance();
         PluginCommand pluginCommand = PLUGIN_COMMAND_CONSTRUCTOR.newInstance(rootCommand, plugin);
+        if (aliases != null) {
+            pluginCommand.setAliases(Arrays.asList(aliases));
+        }
         CommandMap commandMap = (CommandMap) COMMAND_MAP_FIELD.get(plugin.getServer());
         if (commandMap.register(rootCommand, plugin.getName(), pluginCommand)) {
             return CommandService.newInstance(

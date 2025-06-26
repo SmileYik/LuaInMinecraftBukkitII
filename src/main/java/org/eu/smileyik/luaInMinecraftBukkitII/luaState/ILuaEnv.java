@@ -76,6 +76,15 @@ public interface ILuaEnv {
     Result<Boolean, Exception> registerCommand(String rootCommand, Class<?>... classes);
 
     /**
+     * 注册指令
+     * @param rootCommand 指令名称.
+     * @param aliases     指令别名
+     * @param classes     指令类型.
+     * @return 注册结果.
+     */
+    Result<Boolean, Exception> registerCommand(String rootCommand, String[] aliases, Class<?>... classes);
+
+    /**
      * 注册清理器
      * @param cleaner 清理器, 是一个 lua function closure.
      */
