@@ -2,7 +2,7 @@ package org.eu.smileyik.luaInMinecraftBukkitII.command;
 
 import org.bukkit.command.CommandSender;
 import org.eu.smileyik.luaInMinecraftBukkitII.LuaInMinecraftBukkit;
-import org.eu.smileyik.luaInMinecraftBukkitII.luaState.LuaStateEnv;
+import org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.ILuaStateEnv;
 import org.eu.smileyik.simplecommand.annotation.Command;
 
 @Command(
@@ -24,7 +24,7 @@ public class RootCommand {
         }
         String env = args[0];
         String closureName = args[1];
-        LuaStateEnv luaEnv = LuaInMinecraftBukkit.instance().getEnvs().get(env);
+        ILuaStateEnv luaEnv = LuaInMinecraftBukkit.instance().getLuaStateManager().getEnv(env);
         if (luaEnv == null) {
             sender.sendMessage(String.format("环境 '%s' 不存在", env));
             return;

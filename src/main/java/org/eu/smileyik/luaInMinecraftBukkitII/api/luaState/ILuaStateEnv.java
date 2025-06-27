@@ -2,18 +2,15 @@ package org.eu.smileyik.luaInMinecraftBukkitII.api.luaState;
 
 import org.eu.smileyik.luajava.exception.Result;
 import org.jetbrains.annotations.NotNull;
+import org.keplerproject.luajava.LuaException;
 
-public interface ILuaStateEnv extends AutoCloseable {
+public interface ILuaStateEnv {
 
-    void initialization();
+    boolean isInitialized();
 
-    void evalFile(String file);
+    Result<Integer, LuaException> evalFile(String file);
 
     void evalLua(@NotNull String luaScript);
 
     Result<Object, Exception> callClosure(String globalClosureName, Object... params);
-
-    void close();
-
-    void reload();
 }

@@ -9,7 +9,11 @@
       "ignoreAccessLimit": false,
       // 初始化脚本列表, 下面填脚本名, 并且脚本文件得在rootDir中寻找的到.
       "initialization": [
-        "test.lua"
+        {
+          "file": "test.lua",
+          "autoReload": false,
+          "depends": []
+        }
       ]
     }
   }
