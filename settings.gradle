@@ -1,4 +1,0 @@
-rootProject.name = 'LuaInMinecraftBukkitII'
-
-include 'luajava:java'
-findProject('luajava:java')?.name = 'luajava-java'
