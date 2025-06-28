@@ -5,6 +5,8 @@
   "luaVersion": "lua-5.4.8",
   // 总是检查依赖库Hash是否正确
   "alwaysCheckHashes": false,
+  // debug 标志
+  "debug": true,
   // lua 环境
   "luaState": {
     // lua 环境 id

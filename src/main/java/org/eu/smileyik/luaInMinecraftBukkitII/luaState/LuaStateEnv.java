@@ -24,10 +24,7 @@ import org.keplerproject.luajava.LuaStateFacade;
 import org.keplerproject.luajava.LuaStateFactory;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInner {
     private final ILuaEnv luaEnv = new SimpleLuaEnv(this);
@@ -244,11 +241,16 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
             lua.close();
             lua = null;
         }
+
+        // clear initialized state
+        initialized = false;
+        Arrays.fill(initFileLoadedTimestamps, 0);
     }
 
     @Override
     public void reload() {
         close();
+        createEnv();
         initialization();
     }
 }

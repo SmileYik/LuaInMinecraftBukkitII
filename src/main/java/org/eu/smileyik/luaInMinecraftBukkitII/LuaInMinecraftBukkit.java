@@ -27,8 +27,8 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
             "scripts"
     };
 
-    private static LuaInMinecraftBukkit plugin;
     private static final AtomicBoolean LOADED_NATIVES = new AtomicBoolean(false);
+    private static LuaInMinecraftBukkit plugin;
     @Getter
     private ILuaStateManager luaStateManager = null;
 
@@ -40,7 +40,6 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
     public void onEnable() {
         // Plugin startup logic
         try {
-            DebugLogger.init(getLogger(), new File(getDataFolder(), "debug.log"), 0xFFFF);
             CommandService.newInstance(
                     LuaCommandRegister.DEFAULT_TRANSLATOR,
                     LuaCommandRegister.DEFAULT_FORMAT,
@@ -66,7 +65,7 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
         }
     }
 
-    private void reload() {
+    public void reload() {
         for (String folder : FOLDERS) {
             if (!new File(getDataFolder(), folder).exists()) {
                 new File(getDataFolder(), folder).mkdirs();
@@ -79,23 +78,29 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
         Config config;
         try {
             config = loadConfig();
+            if (config.isDebug()) {
+                DebugLogger.closeLogger();
+                DebugLogger.init(getLogger(), new File(getDataFolder(), "debug.log"), 0xFFFF);
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
+        // load native library.
         getServer().getScheduler().runTaskAsynchronously(this, () -> {
-            try {
-                if (LOADED_NATIVES.compareAndSet(false, true)) {
-                    getLogger().info("Loading lua native libraries...");
+            if (LOADED_NATIVES.compareAndSet(false, true)) {
+                getLogger().info("Loading lua native libraries...");
+                try {
                     NativeLoader.load(config);
-                    getLogger().info("Successfully loaded lua native libraries, lua version: " +
-                            LuaState.LUA_VERSION);
+                } catch (Exception e) {
+                    getPluginLoader().disablePlugin(this);
+                    throw new RuntimeException("Could not init lua state event: ", e);
                 }
-                getServer().getScheduler().runTask(this, () -> init(config));
-            } catch (Exception e) {
-                plugin.getPluginLoader().disablePlugin(this);
-                throw new RuntimeException("Could not init lua state event: ", e);
+                getLogger().info("Successfully loaded lua native libraries, lua version: " +
+                        LuaState.LUA_VERSION);
             }
+            // after loaded then init plugin.
+            getServer().getScheduler().runTask(this, () -> init(config));
         });
     }
 

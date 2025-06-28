@@ -13,4 +13,5 @@ public class Config {
     private String luaVersion = "lua-5.4.8";
     private Map<String, LuaStateConfig> luaState = new HashMap<>();
     private boolean alwaysCheckHashes = false;
+    private boolean debug = false;
 }
