@@ -24,22 +24,12 @@ import org.keplerproject.luajava.LuaStateFacade;
 import org.keplerproject.luajava.LuaStateFactory;
 
 import java.io.File;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInner {
-
-    static {
-        File folder = new File(
-                LuaInMinecraftBukkit.instance().getDataFolder(),
-                LuaInMinecraftBukkit.NATIVES_FOLDER);
-        if (!folder.exists()) {
-            throw new UnsupportedOperationException("Not found natives libraries");
-        }
-        for (File file : Objects.requireNonNull(folder.listFiles())) {
-            System.load(file.getAbsolutePath());
-        }
-    }
-
     private final ILuaEnv luaEnv = new SimpleLuaEnv(this);
 
     @Getter
@@ -150,7 +140,7 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
                 evalFile(luaInitConfig.getFile())
                         .ifSuccessThen(it -> {
                             initFileLoadedTimestamps[finalI] = System.currentTimeMillis();
-                            DebugLogger.debug("[ENV %s] lua file initialized: %s", id, luaInitConfig.getFile());
+                            DebugLogger.debug("[Lua env %s] lua file initialized: %s", id, luaInitConfig.getFile());
                         });
             } else {
                 initialized = false;
@@ -158,7 +148,7 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
         }
         this.initialized = initialized;
         if (initialized) {
-            DebugLogger.debug("[ENV %s] lua file all initialized", id);
+            DebugLogger.debug("[Lua env %s] lua file all initialized", id);
         }
     }
 

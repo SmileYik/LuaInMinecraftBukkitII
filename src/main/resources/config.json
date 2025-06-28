@@ -1,4 +1,10 @@
 {
+  // 项目资源地址
+  "projectUrl": "https://raw.githubusercontent.com/SmileYik/LuaInMinecraftBukkitII/refs/heads/gh-page",
+  // 使用的lua版本
+  "luaVersion": "lua-5.4.8",
+  // 总是检查依赖库Hash是否正确
+  "alwaysCheckHashes": false,
   // lua 环境
   "luaState": {
     // lua 环境 id

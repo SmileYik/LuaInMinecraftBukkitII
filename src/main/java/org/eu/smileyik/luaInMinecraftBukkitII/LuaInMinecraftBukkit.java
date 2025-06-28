@@ -9,11 +9,13 @@ import org.eu.smileyik.luaInMinecraftBukkitII.config.Config;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.command.LuaCommandRegister;
 import org.eu.smileyik.simplecommand.CommandService;
 import org.eu.smileyik.simpledebug.DebugLogger;
+import org.keplerproject.luajava.LuaState;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class LuaInMinecraftBukkit extends JavaPlugin {
     public static final String NATIVES_FOLDER = "natives";
@@ -26,6 +28,7 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
     };
 
     private static LuaInMinecraftBukkit plugin;
+    private static final AtomicBoolean LOADED_NATIVES = new AtomicBoolean(false);
     @Getter
     private ILuaStateManager luaStateManager = null;
 
@@ -79,10 +82,28 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        getServer().getScheduler().runTaskAsynchronously(this, () -> {
+            try {
+                if (LOADED_NATIVES.compareAndSet(false, true)) {
+                    getLogger().info("Loading lua native libraries...");
+                    NativeLoader.load(config);
+                    getLogger().info("Successfully loaded lua native libraries, lua version: " +
+                            LuaState.LUA_VERSION);
+                }
+                getServer().getScheduler().runTask(this, () -> init(config));
+            } catch (Exception e) {
+                plugin.getPluginLoader().disablePlugin(this);
+                throw new RuntimeException("Could not init lua state event: ", e);
+            }
+        });
+    }
+
+    private void init(Config config) {
         luaStateManager = new LuaStateManager(config);
     }
 
-    private Config loadConfig() throws IOException {
+    public Config loadConfig() throws IOException {
         List<String> strings = Files.readAllLines(new File(getDataFolder(), "config.json").toPath());
         String json = String.join("\n", strings);
         json = JsonUtil.stripComments(json);
