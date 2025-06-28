@@ -2,6 +2,7 @@ package org.eu.smileyik.luaInMinecraftBukkitII;
 
 import com.google.gson.Gson;
 import lombok.Getter;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.eu.smileyik.luaInMinecraftBukkitII.api.ILuaStateManager;
 import org.eu.smileyik.luaInMinecraftBukkitII.command.RootCommand;
@@ -22,6 +23,7 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
     public static final String LUA_STATE_FOLDER = "luaState";
     public static final String LUA_LIB_FOLDER = "luaLibrary";
 
+    private static final int BSTATE_CODE = 26298;
     private static final String[] FOLDERS = new String[] {
             LUA_STATE_FOLDER,
             NATIVES_FOLDER,
@@ -31,8 +33,10 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
 
     private static final AtomicBoolean LOADED_NATIVES = new AtomicBoolean(false);
     private static LuaInMinecraftBukkit plugin;
+
     @Getter
     private ILuaStateManager luaStateManager = null;
+    private Metrics metrics;
 
     public LuaInMinecraftBukkit() {
         plugin = this;
@@ -57,6 +61,10 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+        close();
+    }
+
+    private void close() {
         if (luaStateManager != null) {
             luaStateManager.close();
             luaStateManager = null;
@@ -66,9 +74,13 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        if (metrics != null) {
+            metrics.shutdown();
+        }
     }
 
     public void reload() {
+        close();
         for (String folder : FOLDERS) {
             if (!new File(getDataFolder(), folder).exists()) {
                 new File(getDataFolder(), folder).mkdirs();
@@ -81,16 +93,14 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
         Config config;
         try {
             config = loadConfig();
-            if (config.isDebug()) {
-                DebugLogger.closeLogger();
-                DebugLogger.init(getLogger(), new File(getDataFolder(), "debug.log"), 0xFFFF);
-            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         // load native library.
         getServer().getScheduler().runTaskAsynchronously(this, () -> {
+            asyncInit(config);
+
             if (LOADED_NATIVES.compareAndSet(false, true)) {
                 getLogger().info("Loading lua native libraries...");
                 try {
@@ -105,6 +115,27 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
             // after loaded then init plugin.
             getServer().getScheduler().runTask(this, () -> init(config));
         });
+    }
+
+    /**
+     * ahead of init().
+     */
+    private void asyncInit(Config config) {
+        // debug logger
+        if (config.isDebug()) {
+            try {
+                DebugLogger.closeLogger();
+                DebugLogger.init(getLogger(), new File(getDataFolder(), "debug.log"), 0xFFFF);
+                getLogger().info("Successfully initialized debug log");
+            } catch (IOException e) {
+                getLogger().warning("Could not init debug log!");
+            }
+        }
+
+        // bState
+        if (config.isBState()) {
+            metrics = new Metrics(this, BSTATE_CODE);
+        }
     }
 
     private void init(Config config) {

@@ -94,6 +94,8 @@ dependencies {
     implementation 'org.eu.smileyik:SimpleDebug:1.0.2-SNAPSHOT'
     // byte buddy
     implementation 'net.bytebuddy:byte-buddy:1.14.3'
+    // bstats
+    implementation 'org.bstats:bstats-bukkit:3.0.2'
 }
 
 tasks {
@@ -141,6 +143,7 @@ shadowJar {
     relocate 'org.eu.smileyik.simpledebug', 'org.eu.smileyik.luaInMinecraftBukkitII.simpledebug'
     relocate 'org.eu.smileyik.simplecommand', 'org.eu.smileyik.luaInMinecraftBukkitII.simplecommand'
     relocate 'net.bytebuddy', 'org.eu.smileyik.luaInMinecraftBukkitII.bytebuddy'
+    relocate 'org.bstats', 'org.eu.smileyik.luaInMinecraftBukkitII.bstats'
 }
 
 javadoc {
