@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [ '8', '11', '17', '21' ]
+        java: [ '8' ]
     permissions:
       contents: read
 
@@ -46,12 +46,12 @@ jobs:
       uses: actions/upload-artifact@v4.6.2
       with:
         # Artifact name
-        name: LuaInMinecraftBukkitII-${{ matrix.Java }}
+        name: LuaInMinecraftBukkitII-java-${{ matrix.Java }}
         path: "${{ github.workspace }}/build/libs"
     - name: Download a Build Artifact
       uses: actions/download-artifact@v4.3.0
       with:
-        name: LuaInMinecraftBukkitII-${{ matrix.Java }}
+        name: LuaInMinecraftBukkitII-java-${{ matrix.Java }}
         path: "${{ github.workspace }}/build/libs"
 
     # NOTE: The Gradle Wrapper is the default and recommended way to run Gradle (https://docs.gradle.org/current/userguide/gradle_wrapper.html).
