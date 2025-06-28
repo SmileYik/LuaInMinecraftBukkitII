@@ -7,6 +7,7 @@
   "alwaysCheckHashes": false,
   // debug 标志
   "debug": true,
+  "bStats": true,
   // lua 环境
   "luaState": {
     // lua 环境 id

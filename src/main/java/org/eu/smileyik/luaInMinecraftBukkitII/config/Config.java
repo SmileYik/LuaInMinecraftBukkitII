@@ -14,4 +14,5 @@ public class Config {
     private Map<String, LuaStateConfig> luaState = new HashMap<>();
     private boolean alwaysCheckHashes = false;
     private boolean debug = false;
+    private boolean bStats = true;
 }
