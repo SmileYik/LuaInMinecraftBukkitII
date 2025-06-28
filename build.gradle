@@ -1,11 +1,53 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     id 'java'
     id "xyz.jpenilla.run-paper" version "2.3.1"
     id "com.gradleup.shadow" version "8.3.6"
 }
 
+def getGitInfo(command, dir) {
+    def output = "unknown"
+    try {
+        def process = command.execute(null, dir)
+        process.waitFor()
+        if (process.exitValue() == 0) {
+            output = process.text.trim()
+        }
+    } catch (Exception ignore) {
+
+    }
+    return output
+}
+
+def getGitTag(dir) {
+    def tag = getGitInfo("git describe --tags --exact-match", dir)
+    return tag == "unknown" ? null : tag
+}
+
+def getGitHash(dir) {
+    def hash = getGitInfo("git rev-parse HEAD", dir)
+    return hash == "unknown" ? hash : hash.substring(0, 7)
+}
+
+def LUAJAVA_DIR = project.layout.projectDirectory.dir("luajava").asFile
+
+ext.gitHash    = getGitHash(project.rootDir)
+ext.gitBranch  = getGitInfo("git rev-parse --abbrev-ref HEAD", project.rootDir)
+ext.gitTag     = getGitTag(project.rootDir)
+ext.gitVersion = project.gitTag == null ?
+        "${project.gitBranch}-${project.gitHash}" : "${project.gitTag}"
+
+ext.gitHashLuajava   = getGitHash(LUAJAVA_DIR)
+ext.gitBranchLuajava = getGitInfo("git rev-parse --abbrev-ref HEAD", LUAJAVA_DIR)
+ext.gitTagLuajava    = getGitTag(LUAJAVA_DIR)
+ext.luajavaVersion   = project.gitTagLuajava == null ?
+        "${project.gitBranchLuajava}-${project.gitHashLuajava}" : "${project.gitTagLuajava}"
+
+ext.apiPath   = "org/eu/smileyik/luaInMinecraftBukkitII/api/**"
+
 group = 'org.eu.smileyik'
-version = '1.0.0-SNAPSHOT'
+version = "${project.gitVersion}+luajava-${project.luajavaVersion}"
 
 repositories {
     maven {
@@ -89,4 +131,71 @@ shadowJar {
     relocate 'org.eu.smileyik.simpledebug', 'org.eu.smileyik.luaInMinecraftBukkitII.simpledebug'
     relocate 'org.eu.smileyik.simplecommand', 'org.eu.smileyik.luaInMinecraftBukkitII.simplecommand'
     relocate 'net.bytebuddy', 'org.eu.smileyik.luaInMinecraftBukkitII.bytebuddy'
+}
+
+javadoc {
+    failOnError false
+    options {
+        encoding 'UTF-8'
+        charSet 'UTF-8'
+        author true
+        version true
+    }
+}
+
+tasks.register('sourcesJar', Jar) {
+    group = "custom jar"
+    dependsOn classes
+    archiveClassifier = 'sources'
+
+    from sourceSets.main.allSource
+}
+
+tasks.register("javadocJar", Jar) {
+    group = "custom jar"
+    dependsOn javadoc
+    archiveClassifier = 'javadoc'
+
+    from javadoc.destinationDir
+}
+
+tasks.register("apiJavadoc", Javadoc) {
+    destinationDir file("${destinationDir}/../api-javadoc/")
+    failOnError false
+    options {
+        encoding 'UTF-8'
+        charSet 'UTF-8'
+        author true
+        version true
+    }
+    source = sourceSets.main.allJava
+    include project.apiPath
+}
+
+tasks.register("apiJar", ShadowJar) {
+    group = "custom jar"
+    description = "Create Jar file just include api"
+    archiveClassifier = "api"
+    from sourceSets.main.output
+    include project.apiPath
+}
+
+tasks.register("apiJavadocJar", ShadowJar) {
+    group = "custom jar"
+    dependsOn apiJavadoc
+    description = "Create a Javadoc for api Jar"
+    archiveClassifier = "api-javadoc"
+    from apiJavadoc.destinationDir
+}
+
+tasks.register("apiSourcesJar", ShadowJar) {
+    group = "custom jar"
+    description = "Create a Javadoc for api Jar"
+    archiveClassifier = "api-sources"
+    from sourceSets.main.allSource
+    include project.apiPath
+}
+
+build {
+    dependsOn apiJar, apiJavadocJar, apiSourcesJar, javadocJar, sourcesJar, shadowJar
 }

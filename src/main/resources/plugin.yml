@@ -1,5 +1,5 @@
 name: LuaInMinecraftBukkitII
-version: '1.0.0-SNAPSHOT'
+version: '${version}'
 main: org.eu.smileyik.luaInMinecraftBukkitII.LuaInMinecraftBukkit
 authors: [ SmileYik ]
 commands:
