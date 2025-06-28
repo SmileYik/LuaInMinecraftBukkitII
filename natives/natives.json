@@ -1,0 +1,61 @@
+{
+    "urls": [
+        "https://smileyik.github.io/LuaInMinecraftBukkitII/natives"
+    ],
+    "files": {
+        "windows": {
+            "amd64": {
+                "lua-5.2.4": [
+                    "lua.dll",
+                    "luajava4Lua52.dll"
+                ],
+                "lua-5.3.6": [
+                    "lua.dll",
+                    "luajava4Lua53.dll"
+                ],
+                "lua-5.4.8": [
+                    "lua.dll",
+                    "luajava4Lua54.dll"
+                ],
+                "luajit": [
+                    "lua.dll",
+                    "luajava4Lua54.dll"
+                ]
+            }
+        },
+        "macos": {
+            "arm64": {
+                "lua-5.2.4": [
+                    "libluajava4Lua52.dylib"
+                ],
+                "lua-5.3.6": [
+                    "libluajava4Lua53.dylib"
+                ],
+                "lua-5.4.8": [
+                    "libluajava4Lua54.dylib"
+                ],
+                "luajit": [
+                    "libluajit.so",
+                    "libluajava4Luajit.dylib"
+                ]
+            }
+        },
+        "linux": {
+            "amd64": {
+                "lua-5.2.4": [
+                    "libluajava4Lua52.so"
+                ],
+                "lua-5.3.6": [
+                    "libluajava4Lua53.so"
+                ],
+                "lua-5.4.8": [
+                    "libluajava4Lua54.so"
+                ],
+                "luajit": [
+                    "libluajit.so",
+                    "libluajava4Luajit.so"
+                ]
+            }
+        }
+    }
+}
