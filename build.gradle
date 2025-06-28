@@ -51,10 +51,10 @@ version = "${project.gitVersion}+luajava-${project.luajavaVersion}"
 
 repositories {
     maven {
-        url "https://maven-v4.smileyik.eu.org:60081/public"
+        url "https://maven.smileyik.eu.org:60081/public"
     }
     maven {
-        url "https://maven.smileyik.eu.org:60081/public"
+        url "https://maven-v4.smileyik.eu.org:60081/public"
     }
 
     mavenCentral()
