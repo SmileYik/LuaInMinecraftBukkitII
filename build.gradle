@@ -6,7 +6,7 @@ plugins {
     id "com.gradleup.shadow" version "8.3.6"
 }
 
-def getGitInfo(command, dir) {
+static def getGitInfo(command, dir) {
     def output = "unknown"
     try {
         def process = command.execute(null, dir)
@@ -20,16 +20,17 @@ def getGitInfo(command, dir) {
     return output
 }
 
-def getGitTag(dir) {
+static def getGitTag(dir) {
     def tag = getGitInfo("git describe --tags --exact-match", dir)
     return tag == "unknown" ? null : tag
 }
 
-def getGitHash(dir) {
+static def getGitHash(dir) {
     def hash = getGitInfo("git rev-parse HEAD", dir)
     return hash == "unknown" ? hash : hash.substring(0, 7)
 }
 
+def IS_WORKFLOW = project.hasProperty('Workflow')
 def LUAJAVA_DIR = project.layout.projectDirectory.dir("luajava").asFile
 
 ext.gitHash    = getGitHash(project.rootDir)
@@ -50,13 +51,6 @@ group = 'org.eu.smileyik'
 version = "${project.gitVersion}+luajava-${project.luajavaVersion}"
 
 repositories {
-    maven {
-        url "https://maven.smileyik.eu.org:60081/public"
-    }
-    maven {
-        url "https://maven-v4.smileyik.eu.org:60081/public"
-    }
-
     mavenCentral()
     maven {
         name = "spigotmc-repo"
@@ -66,6 +60,19 @@ repositories {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/groups/public/"
     }
+    if (IS_WORKFLOW) {
+        maven {
+            url "https://raw.githubusercontent.com/SmileYik/LuaInMinecraftBukkitII/refs/heads/gh-page/repo"
+        }
+    } else {
+        maven {
+            url "https://maven-v4.smileyik.eu.org:60081/public"
+        }
+        maven {
+            url "https://maven.smileyik.eu.org:60081/public"
+        }
+    }
+
 }
 
 dependencies {
