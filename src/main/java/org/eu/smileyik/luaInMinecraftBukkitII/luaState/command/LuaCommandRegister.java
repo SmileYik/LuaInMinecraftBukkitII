@@ -82,13 +82,10 @@ public class LuaCommandRegister {
             pluginCommand.setAliases(Arrays.asList(aliases));
         }
         CommandMap commandMap = (CommandMap) COMMAND_MAP_FIELD.get(plugin.getServer());
-        if (commandMap.register(rootCommand, plugin.getName(), pluginCommand)) {
-            return CommandService.newInstance(
-                    DEFAULT_TRANSLATOR, DEFAULT_FORMAT,
-                    classes
-            );
-        }
-
-        return null;
+        commandMap.register(rootCommand, rootCommand, pluginCommand);
+        return CommandService.newInstance(
+                DEFAULT_TRANSLATOR, DEFAULT_FORMAT,
+                classes
+        );
     }
 }
