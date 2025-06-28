@@ -19,11 +19,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class LuaInMinecraftBukkit extends JavaPlugin {
     public static final String NATIVES_FOLDER = "natives";
-    public static final String LUA_STATE_FOLDER = "luastate";
+    public static final String LUA_STATE_FOLDER = "luaState";
+    public static final String LUA_LIB_FOLDER = "luaLibrary";
 
     private static final String[] FOLDERS = new String[] {
             LUA_STATE_FOLDER,
             NATIVES_FOLDER,
+            LUA_LIB_FOLDER,
             "scripts"
     };
 
@@ -46,7 +48,8 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
                     RootCommand.class
             ).registerToBukkit(this);
         } catch (Exception e) {
-            e.printStackTrace();
+            getLogger().warning("Cannot register command!");
+            DebugLogger.debug(e);
         }
         reload();
     }

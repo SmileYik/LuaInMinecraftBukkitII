@@ -66,7 +66,7 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
 
         this.lua = LuaStateFactory.newLuaState(!this.config.isIgnoreAccessLimit());
         String luaLibrary = new File(
-                LuaInMinecraftBukkit.instance().getLuaStateFolder(), "LuaLibrary")
+                LuaInMinecraftBukkit.instance().getLuaStateFolder(), LuaInMinecraftBukkit.LUA_LIB_FOLDER)
                 .getAbsolutePath();
         lua.openLibs();
         lua.getGlobal("package", LuaTable.class)

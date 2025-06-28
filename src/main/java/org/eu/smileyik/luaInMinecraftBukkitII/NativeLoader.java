@@ -67,6 +67,9 @@ public class NativeLoader {
 
         NativeLibraryConfig nativeConfig = getNativeConfig(baseUrl, nativeFolder);
         String[] files = nativeConfig.version(OS, ARCH, luaVer);
+        if (files == null) {
+            throw new RuntimeException("Sorry, this plugin is not supported on this platform");
+        }
         if (!Objects.equals(luaVer, currentVersion)) {
             clean(nativeFolder);
             Files.write(versionFile.toPath(), luaVer.getBytes(StandardCharsets.UTF_8),
@@ -237,7 +240,7 @@ public class NativeLoader {
                 for (File sub : subs) {
                     if (sub.isDirectory()) {
                         files.add(sub);
-                    } else {
+                    } else if (!sub.getName().endsWith(".hash")) {
                         String path = sub.getAbsolutePath();
                         String sha256Path = path + ".hash";
                         String sha256 = sha256(sub);
