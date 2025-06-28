@@ -9,6 +9,7 @@ import org.bukkit.plugin.PluginManager;
 import org.eu.smileyik.luaInMinecraftBukkitII.LuaInMinecraftBukkit;
 import org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState.ILuaEnv;
 import org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState.LuaHelper;
+import org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState.LuaIOHelper;
 import org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.ILuaStateEnv;
 import org.eu.smileyik.luaInMinecraftBukkitII.config.LuaInitConfig;
 import org.eu.smileyik.luaInMinecraftBukkitII.config.LuaStateConfig;
@@ -99,10 +100,12 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
                     LuaTable table = ((LuaTable) obj).asTable();
                     return table.put("env", luaEnv)
                             .mapResultValue(it -> table.put("helper", LuaHelper.class))
+                            .mapResultValue(it -> table.put("io",     LuaIOHelper.class))
                             .mapResultValue(it -> table.put("bukkit", Bukkit.class))
                             .mapResultValue(it -> table.put("plugin", plugin))
                             .mapResultValue(it -> table.put("server", plugin.getServer()))
                             .mapResultValue(it -> table.put("log",    plugin.getLogger()))
+                            .mapResultValue(it -> table.put("out",    System.out))
                             .mapResultValue(it -> Result.success(table));
                 })
                 .mapResultValue(table -> lua.setGlobal("luaBukkit", table))

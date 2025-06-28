@@ -65,9 +65,6 @@ public class SimpleLuaEnv implements ILuaEnv {
     public Result<Boolean, Exception> registerCommand(String rootCommand, String[] aliases, Class<?>... classes) {
         try {
             CommandService commandService = LuaCommandRegister.register(rootCommand, aliases, classes);
-            if (commandService == null) {
-                return Result.success(false);
-            }
             env.getCommandServices().put(rootCommand, commandService);
             commandService.registerToBukkit(LuaInMinecraftBukkit.instance());
             return Result.success(true);
