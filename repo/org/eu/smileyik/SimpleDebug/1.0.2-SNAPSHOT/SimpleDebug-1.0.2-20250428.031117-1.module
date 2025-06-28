@@ -1,0 +1,60 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "org.eu.smileyik",
+    "module": "SimpleDebug",
+    "version": "1.0.2-SNAPSHOT",
+    "attributes": {
+      "org.gradle.status": "integration"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "8.8"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api"
+      },
+      "files": [
+        {
+          "name": "SimpleDebug-1.0.2-SNAPSHOT.jar",
+          "url": "SimpleDebug-1.0.2-SNAPSHOT.jar",
+          "size": 7991,
+          "sha512": "927e05ae0d368b363b762995fe6a345224f7b1f667cf521080b407801f218cd95fe62fa2f11610c49a06d7e0b5e0b838efdf328fdd1e2de487ecfa8045ff34e2",
+          "sha256": "3c6f1cf135f7303551d175ca45344bf64fde5b6dc5d6d10be4c958c929b80dfb",
+          "sha1": "e46f6ffa19ebaaca0042447c8aa6f97f89090768",
+          "md5": "f2f508bdff7f9f130ce727b35673d557"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "SimpleDebug-1.0.2-SNAPSHOT.jar",
+          "url": "SimpleDebug-1.0.2-SNAPSHOT.jar",
+          "size": 7991,
+          "sha512": "927e05ae0d368b363b762995fe6a345224f7b1f667cf521080b407801f218cd95fe62fa2f11610c49a06d7e0b5e0b838efdf328fdd1e2de487ecfa8045ff34e2",
+          "sha256": "3c6f1cf135f7303551d175ca45344bf64fde5b6dc5d6d10be4c958c929b80dfb",
+          "sha1": "e46f6ffa19ebaaca0042447c8aa6f97f89090768",
+          "md5": "f2f508bdff7f9f130ce727b35673d557"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "org.eu.smileyik",
+    "module": "SimpleCommand",
+    "version": "1.0.7-SNAPSHOT",
+    "attributes": {
+      "org.gradle.status": "integration"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "8.8"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api"
+      },
+      "files": [
+        {
+          "name": "SimpleCommand-1.0.7-SNAPSHOT.jar",
+          "url": "SimpleCommand-1.0.7-SNAPSHOT.jar",
+          "size": 20029,
+          "sha512": "e2e405b4fa3386f10c7b6127b73c12f63f1e9a57f38af4d35ae178a782e6cf63a8cf39ef81f6e8c6ebb032fd094213321dd981a275a9dcef884dd307de53dde8",
+          "sha256": "df8eab6fd20324f1859af0fc2edc8f59cbf9ca48013d61ea28a6d2344aa75c83",
+          "sha1": "bf18e0b0d1e64efbe0464a4bf2e675b7fecf0e9c",
+          "md5": "2b406d433c8bbac6dbf36d6f5deef92c"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "SimpleCommand-1.0.7-SNAPSHOT.jar",
+          "url": "SimpleCommand-1.0.7-SNAPSHOT.jar",
+          "size": 20029,
+          "sha512": "e2e405b4fa3386f10c7b6127b73c12f63f1e9a57f38af4d35ae178a782e6cf63a8cf39ef81f6e8c6ebb032fd094213321dd981a275a9dcef884dd307de53dde8",
+          "sha256": "df8eab6fd20324f1859af0fc2edc8f59cbf9ca48013d61ea28a6d2344aa75c83",
+          "sha1": "bf18e0b0d1e64efbe0464a4bf2e675b7fecf0e9c",
+          "md5": "2b406d433c8bbac6dbf36d6f5deef92c"
+        }
+      ]
+    }
+  ]
+}
