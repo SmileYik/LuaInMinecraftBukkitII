@@ -1,10 +1,14 @@
-<div style="text-align:center">
+<p align="center">
     <img src="docs/logo.png" alt="logo"/>
-    <h1>LuaInMinecraftBukkit II</h1>
+</p>
+<p align="center">
+    <h1 align="center">LuaInMinecraftBukkit II</h1>
+</p>
+<p align="center">
     <img src="https://img.shields.io/github/last-commit/SmileYik/LuaInMinecraftBukkitII?style=flat-square" alt="GitHub last commit"/>
     <img src="https://img.shields.io/github/check-runs/SmileYik/LuaInMinecraftBukkitII/master?style=flat-square" alt="GitHub branch check runs"/>
     <img src="https://img.shields.io/github/actions/workflow/status/SmileYik/LuaInMinecraftBukkitII/gradle.yml?style=flat-square" alt="GitHub Actions Workflow Status"/>
-</div>
+</p>
 
 ## 简介
 
@@ -23,8 +27,8 @@ Lua 是一个小巧的脚本语言, 拥有非常简单的语法, 还有着较为
 
 基本上就支持两大功能:
 
-+ 注册指令
-+ 监听事件
++ 注册指令: 注册你想要的任何指令, 并且自动生成帮助信息和指令层级关系
++ 监听事件: 监听任何你想要的Bukkit事件, 即使这个时间是其他插件的自定义事件
 
 不过依托于Java的反射机制和动态代理机制, 目前可以实现在lua脚本中继承Java接口,
 调用Java类型中的任何公开方法, 公开属性. 也就是说本插件可以动态的加载脚本, 
