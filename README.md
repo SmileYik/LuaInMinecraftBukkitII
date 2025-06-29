@@ -11,6 +11,9 @@
     <img src="https://img.shields.io/github/check-runs/SmileYik/LuaInMinecraftBukkitII/master?style=flat-square" alt="GitHub branch check runs"/>
     <img src="https://img.shields.io/github/actions/workflow/status/SmileYik/LuaInMinecraftBukkitII/gradle.yml?style=flat-square" alt="GitHub Actions Workflow Status"/>
     <img src="https://img.shields.io/github/license/SmileYik/LuaInMinecraftBukkitII?style=flat-square" alt="GitHub License"/>
+    <a href="https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/gh-page/docs/QuickStart.md">
+        <img src="https://img.shields.io/badge/DOCS-QuickStart-blue?style=flat-square" alt="Docs-QuickStart"/>
+    </a>
 </p>
 
 ## 简介
