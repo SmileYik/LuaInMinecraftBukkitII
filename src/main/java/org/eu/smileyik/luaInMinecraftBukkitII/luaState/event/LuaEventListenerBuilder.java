@@ -5,6 +5,7 @@ import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.description.annotation.AnnotationDescription;
 import net.bytebuddy.description.modifier.Visibility;
 import net.bytebuddy.dynamic.DynamicType;
+import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 import net.bytebuddy.implementation.MethodCall;
 import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.matcher.ElementMatchers;
@@ -154,13 +155,14 @@ public class LuaEventListenerBuilder implements ILuaEventListenerBuilder {
 
             String methodName = String.format("on%s%d", eventConfig.eventClass.getSimpleName(), count++);
             callableMap.put(methodName, eventConfig.closure);
-            byteBuddy = byteBuddy.defineMethod(methodName, Void.class, Visibility.PUBLIC)
+            byteBuddy = byteBuddy.defineMethod(methodName, void.class, Visibility.PUBLIC)
                     .withParameters(eventConfig.eventClass)
                     .intercept(MethodDelegation.to(luaEventHandler))
                     .annotateMethod(eventHandler);
         }
         try (DynamicType.Unloaded<LuaEventListener> made = byteBuddy.make()) {
-            Listener listener = made.load(LuaInMinecraftBukkit.instance().getClass().getClassLoader())
+            Listener listener = made
+                    .load(LuaInMinecraftBukkit.instance().classLoader(), ClassLoadingStrategy.Default.INJECTION)
                     .getLoaded()
                     .getDeclaredConstructor(LuaEventHandler.class)
                     .newInstance(luaEventHandler);

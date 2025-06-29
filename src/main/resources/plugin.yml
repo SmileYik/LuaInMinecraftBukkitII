@@ -1,6 +1,7 @@
 name: LuaInMinecraftBukkitII
 version: '${version}'
 main: org.eu.smileyik.luaInMinecraftBukkitII.LuaInMinecraftBukkit
+api-version: 1.18
 authors: [ SmileYik ]
 commands:
   LuaInMinecraftBukkitII:

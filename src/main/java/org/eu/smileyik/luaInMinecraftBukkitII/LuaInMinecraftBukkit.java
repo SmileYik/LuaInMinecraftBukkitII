@@ -156,4 +156,8 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
     public File getLuaStateFolder() {
         return new File(getDataFolder(), LUA_STATE_FOLDER);
     }
+
+    public ClassLoader classLoader() {
+        return getClassLoader();
+    }
 }
