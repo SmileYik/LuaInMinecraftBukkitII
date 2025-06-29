@@ -11,12 +11,15 @@ import org.eu.smileyik.luaInMinecraftBukkitII.reflect.ReflectUtil;
 import org.eu.smileyik.simplecommand.CommandMessageFormat;
 import org.eu.smileyik.simplecommand.CommandService;
 import org.eu.smileyik.simplecommand.CommandTranslator;
+import org.eu.smileyik.simpledebug.DebugLogger;
 
 import java.io.InvalidClassException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class LuaCommandRegister {
     public static final CommandTranslator DEFAULT_TRANSLATOR = (msg, obj) -> msg;
@@ -79,18 +82,35 @@ public class LuaCommandRegister {
             InstantiationException,
             IllegalAccessException {
         LuaInMinecraftBukkit plugin = LuaInMinecraftBukkit.instance();
-        PluginCommand pluginCommand = PLUGIN_COMMAND_CONSTRUCTOR.newInstance(rootCommand, plugin);
+        PluginCommand pluginCommand = plugin.getCommand(rootCommand);
+        CommandMap commandMap = (CommandMap) COMMAND_MAP_FIELD.get(plugin.getServer());
+        if (pluginCommand == null) {
+            pluginCommand = PLUGIN_COMMAND_CONSTRUCTOR.newInstance(rootCommand, plugin);
+        }
         if (aliases != null) {
             pluginCommand.setAliases(Arrays.asList(aliases));
         }
-        CommandMap commandMap = (CommandMap) COMMAND_MAP_FIELD.get(plugin.getServer());
-        commandMap.register(rootCommand, plugin.getName(), pluginCommand);
+        commandMap.register(rootCommand, rootCommand, pluginCommand);
         CommandService commandService = CommandService.newInstance(
                 DEFAULT_TRANSLATOR, DEFAULT_FORMAT,
                 classes
         );
-        pluginCommand.setExecutor((CommandExecutor) commandService);
-        pluginCommand.setTabCompleter((TabCompleter) commandService);
+        try {
+            commandService.registerToBukkit(plugin);
+        } catch (NullPointerException e) {
+            DebugLogger.debug("Failed register command to bukkit, try manual register: %s", e.getMessage());
+            List<String> commands = new ArrayList<>();
+            commands.add(rootCommand);
+            commands.addAll(pluginCommand.getAliases());
+
+            for (String str : commands) {
+                PluginCommand command = plugin.getCommand(str);
+                if (command != null) {
+                    command.setExecutor((CommandExecutor) commandService);
+                    command.setTabCompleter((TabCompleter) commandService);
+                }
+            }
+        }
         return commandService;
     }
 }
