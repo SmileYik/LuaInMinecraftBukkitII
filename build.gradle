@@ -93,7 +93,7 @@ dependencies {
     // SimpleDebug
     implementation 'org.eu.smileyik:SimpleDebug:1.0.2-SNAPSHOT'
     // byte buddy
-    implementation 'net.bytebuddy:byte-buddy:1.17.0'
+    implementation 'net.bytebuddy:byte-buddy:1.14.3'
     // bstats
     implementation 'org.bstats:bstats-bukkit:3.0.2'
 }
