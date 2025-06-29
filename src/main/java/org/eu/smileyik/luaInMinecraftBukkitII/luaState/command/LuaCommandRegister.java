@@ -17,9 +17,8 @@ import java.io.InvalidClassException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class LuaCommandRegister {
     public static final CommandTranslator DEFAULT_TRANSLATOR = (msg, obj) -> msg;
@@ -102,14 +101,15 @@ public class LuaCommandRegister {
             List<String> commands = new ArrayList<>();
             commands.add(rootCommand);
             commands.addAll(pluginCommand.getAliases());
-
-            for (String str : commands) {
-                PluginCommand command = plugin.getCommand(str);
-                if (command != null) {
-                    command.setExecutor((CommandExecutor) commandService);
-                    command.setTabCompleter((TabCompleter) commandService);
-                }
-            }
+            Set<PluginCommand> collect = commands.stream()
+                    .map(plugin::getCommand)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+            collect.add(pluginCommand);
+            collect.forEach(command -> {
+                command.setExecutor((CommandExecutor) commandService);
+                command.setTabCompleter((TabCompleter) commandService);
+            });
         }
         return commandService;
     }
