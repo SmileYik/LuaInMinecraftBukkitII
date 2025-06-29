@@ -1,13 +1,16 @@
 <p align="center">
     <img src="docs/logo.png" alt="logo"/>
 </p>
+
 <p align="center">
     <h1 align="center">LuaInMinecraftBukkit II</h1>
 </p>
+
 <p align="center">
     <img src="https://img.shields.io/github/last-commit/SmileYik/LuaInMinecraftBukkitII?style=flat-square" alt="GitHub last commit"/>
     <img src="https://img.shields.io/github/check-runs/SmileYik/LuaInMinecraftBukkitII/master?style=flat-square" alt="GitHub branch check runs"/>
     <img src="https://img.shields.io/github/actions/workflow/status/SmileYik/LuaInMinecraftBukkitII/gradle.yml?style=flat-square" alt="GitHub Actions Workflow Status"/>
+    <img src="https://img.shields.io/github/license/SmileYik/LuaInMinecraftBukkitII?style=flat-square" alt="GitHub License"/>
 </p>
 
 ## 简介
