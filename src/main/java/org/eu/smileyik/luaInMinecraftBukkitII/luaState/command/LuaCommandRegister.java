@@ -1,8 +1,10 @@
 package org.eu.smileyik.luaInMinecraftBukkitII.luaState.command;
 
 import org.bukkit.Server;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.plugin.Plugin;
 import org.eu.smileyik.luaInMinecraftBukkitII.LuaInMinecraftBukkit;
 import org.eu.smileyik.luaInMinecraftBukkitII.reflect.ReflectUtil;
@@ -82,10 +84,13 @@ public class LuaCommandRegister {
             pluginCommand.setAliases(Arrays.asList(aliases));
         }
         CommandMap commandMap = (CommandMap) COMMAND_MAP_FIELD.get(plugin.getServer());
-        commandMap.register(rootCommand, rootCommand, pluginCommand);
-        return CommandService.newInstance(
+        commandMap.register(rootCommand, plugin.getName(), pluginCommand);
+        CommandService commandService = CommandService.newInstance(
                 DEFAULT_TRANSLATOR, DEFAULT_FORMAT,
                 classes
         );
+        pluginCommand.setExecutor((CommandExecutor) commandService);
+        pluginCommand.setTabCompleter((TabCompleter) commandService);
+        return commandService;
     }
 }
