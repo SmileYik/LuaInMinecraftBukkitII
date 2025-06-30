@@ -12,6 +12,9 @@ def LUAJAVA_DIR = project.layout.projectDirectory.dir("luajava").asFile
 ext.targetJavaVersion = 8
 if (project.hasProperty('TargetJava')) {
     ext.targetJavaVersion = Integer.parseInt(project.property('TargetJava').toString())
+    if (project.targetJavaVersion <= 8) {
+        execCommand("git apply ../patchs/luajava-java8.patch", LUAJAVA_DIR)
+    }
 }
 execCommand("git apply ../patchs/luajava-gradle.patch", LUAJAVA_DIR)
 
@@ -121,22 +124,7 @@ processResources {
     }
 }
 
-compileJava {
-    doFirst {
-        // patch LuaJavaApi.java
-        if (targetJavaVersion <= 8) {
-            exec {
-                workingDir layout.projectDirectory.dir("luajava")
-                commandLine 'git', 'apply', '../patchs/luajava-java8.patch'
-            }
-        } else {
-            exec {
-                workingDir layout.projectDirectory.dir("luajava")
-                commandLine 'git', 'restore', 'java/src/*'
-            }
-        }
-    }
-
+classes {
     // restore patch
     doLast {
         exec {
