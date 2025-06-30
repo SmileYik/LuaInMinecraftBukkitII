@@ -1,0 +1,21 @@
+diff --git a/java/build.gradle b/java/build.gradle
+index 8e133fd..af858c3 100644
+--- a/java/build.gradle
++++ b/java/build.gradle
+@@ -29,4 +29,14 @@ jar {
+             into rootProject.layout.buildDirectory.dir("outputs")
+         }
+     }
+-}
+\ No newline at end of file
++}
++
++def targetJavaVersion = rootProject.targetJavaVersion
++java {
++    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
++    sourceCompatibility = javaVersion
++    targetCompatibility = javaVersion
++    if (JavaVersion.current() < javaVersion) {
++        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
++    }
++}

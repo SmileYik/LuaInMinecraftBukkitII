@@ -139,6 +139,36 @@ processResources {
     }
 }
 
+classes {
+    doFirst {
+        // patch build.gradle
+        exec {
+            workingDir layout.projectDirectory.dir("luajava")
+            commandLine 'git', 'apply', '../patchs/luajava-gradle.patch'
+        }
+        // patch LuaJavaApi.java
+        if (targetJavaVersion <= 8) {
+            exec {
+                workingDir layout.projectDirectory.dir("luajava")
+                commandLine 'git', 'apply', '../patchs/luajava-java8.patch'
+            }
+        } else {
+            exec {
+                workingDir layout.projectDirectory.dir("luajava")
+                commandLine 'git', 'restore', 'java/src/*'
+            }
+        }
+    }
+
+    // restore patch
+    doLast {
+        exec {
+            workingDir layout.projectDirectory.dir("luajava")
+            commandLine 'git', 'restore', '*'
+        }
+    }
+}
+
 shadowJar {
     relocate 'org.eu.smileyik.simpledebug', 'org.eu.smileyik.luaInMinecraftBukkitII.simpledebug'
     relocate 'org.eu.smileyik.simplecommand', 'org.eu.smileyik.luaInMinecraftBukkitII.simplecommand'

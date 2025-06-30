@@ -1,0 +1,31 @@
+diff --git a/java/src/main/java/org/keplerproject/luajava/LuaJavaAPI.java b/java/src/main/java/org/keplerproject/luajava/LuaJavaAPI.java
+index 692dfc2..0fda18a 100755
+--- a/java/src/main/java/org/keplerproject/luajava/LuaJavaAPI.java
++++ b/java/src/main/java/org/keplerproject/luajava/LuaJavaAPI.java
+@@ -135,7 +135,7 @@ public final class LuaJavaAPI {
+ 
+         Object ret;
+         try {
+-            if (!method.canAccess(clazz == obj ? null : obj)) {
++            if (!method.isAccessible()) {
+                 method.setAccessible(true);
+             }
+ 
+@@ -226,7 +226,7 @@ public final class LuaJavaAPI {
+             throw new LuaException("Error accessing field " + fieldName);
+         }
+         // checkField method already checked the obj can access this field or not.
+-        if (!field.canAccess(isStatic ? null : obj)) {
++        if (!field.isAccessible()) {
+             field.setAccessible(true);
+         }
+ 
+@@ -361,7 +361,7 @@ public final class LuaJavaAPI {
+         if (field == null) return 0;
+         try {
+             Object ret;
+-            if (field.canAccess(isStatic ? null : obj)) {
++            if (field.isAccessible()) {
+                 ret = field.get(obj);
+             } else if (!luaStateFacade.isIgnoreNotPublic()) {
+                 field.setAccessible(true);
