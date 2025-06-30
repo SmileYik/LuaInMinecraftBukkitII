@@ -24,7 +24,7 @@ public interface ILuaEnv {
 
     /**
      * 获取事件监听构造器, 通过此构造器可以构造Bukkit Listener接口实例.
-     * <h1>Lua中的使用示例</h>
+     * <h1>Lua中的使用示例</h1>
      * <h2>构建一个 <code>PlayerJoinEvent</code></h2>
      * 以下是构建并注册一个单个Bukkit事件监听的例子.
      * 该示例将会监听玩家加入服务器事件, 并且在玩家加入服务器时发送玩家 "Hello 玩家名" 消息.
