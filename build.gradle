@@ -6,41 +6,23 @@ plugins {
     id "com.gradleup.shadow" version "8.3.6"
 }
 
-static def getGitInfo(command, dir) {
-    def output = "unknown"
-    try {
-        def process = command.execute(null, dir)
-        process.waitFor()
-        if (process.exitValue() == 0) {
-            output = process.text.trim()
-        }
-    } catch (Exception ignore) {
-
-    }
-    return output
-}
-
-static def getGitTag(dir) {
-    def tag = getGitInfo("git describe --tags --exact-match", dir)
-    return tag == "unknown" ? null : tag
-}
-
-static def getGitHash(dir) {
-    def hash = getGitInfo("git rev-parse HEAD", dir)
-    return hash == "unknown" ? hash : hash.substring(0, 7)
-}
-
 def IS_WORKFLOW = project.hasProperty('Workflow')
 def LUAJAVA_DIR = project.layout.projectDirectory.dir("luajava").asFile
 
+ext.targetJavaVersion = 8
+if (project.hasProperty('TargetJava')) {
+    ext.targetJavaVersion = Integer.parseInt(project.property('TargetJava').toString())
+}
+execCommand("git apply ../patchs/luajava-gradle.patch", LUAJAVA_DIR)
+
 ext.gitHash    = getGitHash(project.rootDir)
-ext.gitBranch  = getGitInfo("git rev-parse --abbrev-ref HEAD", project.rootDir)
+ext.gitBranch  = execCommand("git rev-parse --abbrev-ref HEAD", project.rootDir)
 ext.gitTag     = getGitTag(project.rootDir)
 ext.gitVersion = project.gitTag == null ?
         "${project.gitBranch}-${project.gitHash}" : "${project.gitTag}"
 
 ext.gitHashLuajava   = getGitHash(LUAJAVA_DIR)
-ext.gitBranchLuajava = getGitInfo("git rev-parse --abbrev-ref HEAD", LUAJAVA_DIR)
+ext.gitBranchLuajava = execCommand("git rev-parse --abbrev-ref HEAD", LUAJAVA_DIR)
 ext.gitTagLuajava    = getGitTag(LUAJAVA_DIR)
 ext.luajavaVersion   = project.gitTagLuajava == null ?
         "${project.gitBranchLuajava}-${project.gitHashLuajava}" : "${project.gitTagLuajava}"
@@ -103,7 +85,7 @@ tasks {
         // Configure the Minecraft version for our task.
         // This is the only required configuration besides applying the plugin.
         // Your plugin's jar (or shadowJar if present) will be used automatically.
-        minecraftVersion("1.12.2")
+        minecraftVersion("1.21.5")
     }
 }
 
@@ -112,7 +94,7 @@ test {
     useJUnitPlatform()
 }
 
-def targetJavaVersion = 8
+def targetJavaVersion = ext.targetJavaVersion
 java {
     def javaVersion = JavaVersion.toVersion(targetJavaVersion)
     sourceCompatibility = javaVersion
@@ -139,13 +121,8 @@ processResources {
     }
 }
 
-classes {
+compileJava {
     doFirst {
-        // patch build.gradle
-        exec {
-            workingDir layout.projectDirectory.dir("luajava")
-            commandLine 'git', 'apply', '../patchs/luajava-gradle.patch'
-        }
         // patch LuaJavaApi.java
         if (targetJavaVersion <= 8) {
             exec {
@@ -241,4 +218,28 @@ tasks.register("apiSourcesJar", ShadowJar) {
 
 build {
     dependsOn apiJar, apiJavadocJar, apiSourcesJar, javadocJar, sourcesJar, shadowJar
+}
+
+static def execCommand(command, dir) {
+    def output = "unknown"
+    try {
+        def process = command.execute(null, dir)
+        process.waitFor()
+        if (process.exitValue() == 0) {
+            output = process.text.trim()
+        }
+    } catch (Exception ignore) {
+
+    }
+    return output
+}
+
+static def getGitTag(dir) {
+    def tag = execCommand("git describe --tags --exact-match", dir)
+    return tag == "unknown" ? null : tag
+}
+
+static def getGitHash(dir) {
+    def hash = execCommand("git rev-parse HEAD", dir)
+    return hash == "unknown" ? hash : hash.substring(0, 7)
 }
