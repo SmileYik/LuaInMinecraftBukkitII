@@ -748,6 +748,17 @@ local onPlayerChat = function (event)
     -- Get the information sent by the player and send it to the player separately
     local msg = event:getMessage()
     player:sendMessage(msg)
+
+    -- Rewrite the print method. In this function body, the player variable is visible.
+    print = function (msg)
+        -- Userdata is usually a Java object, which can be directly concatenated with an empty string to form a string.
+        -- Other types must be converted to strings first
+        if type(msg) ~= "userdata" then
+            msg = tostring(msg)
+        end
+        player:sendMessage(msg .. "")
+    end
+
     -- Load and execute lua script
     -- Return execution success or failure and reason for failure
     local result, error = pcall(loadstring(msg))
