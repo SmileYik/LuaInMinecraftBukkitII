@@ -13,7 +13,7 @@ public interface ILuaEventListenerBuilder {
      *
      * @param eventClassName 事件全类名, 常见类名可以忽略包路径
      * @param closure        事件闭包, 固定一个形参, 为监听的事件实例.
-     * @return 此构造器
+     * @return 此构建器
      * @throws ClassNotFoundException 如果该事件类型不存在则抛出.
      */
     ILuaEventListenerBuilder subscribe(@NotNull String eventClassName,
@@ -25,7 +25,7 @@ public interface ILuaEventListenerBuilder {
      * @param eventClassName 事件全类名, 常见类名可以忽略包路径
      * @param eventPriority  事件优先级
      * @param closure        事件闭包, 固定一个形参, 为监听的事件实例.
-     * @return 此构造器
+     * @return 此构建器
      * @throws ClassNotFoundException 如果该事件类型不存在则抛出.
      */
     ILuaEventListenerBuilder subscribe(@NotNull String eventClassName,
@@ -39,7 +39,7 @@ public interface ILuaEventListenerBuilder {
      * @param eventPriority  事件优先级, 包含<code>LOWEST</code> <code>LOW</code> <code>NORMAL</code>
      *                       <code>HIGH</code> <code>HIGHEST</code> <code>MONITOR</code>
      * @param closure        事件闭包, 固定一个形参, 为监听的事件实例.
-     * @return 此构造器
+     * @return 此构建器
      * @throws ClassNotFoundException 如果该事件类型不存在则抛出.
      */
     ILuaEventListenerBuilder subscribe(@NotNull String eventClassName,
@@ -53,7 +53,7 @@ public interface ILuaEventListenerBuilder {
      * @param eventPriority   事件优先级
      * @param ignoreCancelled 是否忽略已取消的事件.
      * @param closure         事件闭包, 固定一个形参, 为监听的事件实例.
-     * @return 此构造器
+     * @return 此构建器
      * @throws ClassNotFoundException 如果该事件类型不存在则抛出.
      */
     ILuaEventListenerBuilder subscribe(@NotNull String eventClassName,
@@ -69,7 +69,7 @@ public interface ILuaEventListenerBuilder {
      *                        <code>HIGH</code> <code>HIGHEST</code> <code>MONITOR</code>
      * @param ignoreCancelled 是否忽略已取消的事件.
      * @param closure         事件闭包, 固定一个形参, 为监听的事件实例.
-     * @return 此构造器
+     * @return 此构建器
      * @throws ClassNotFoundException 如果该事件类型不存在则抛出.
      */
     ILuaEventListenerBuilder subscribe(@NotNull String eventClassName,
@@ -83,7 +83,7 @@ public interface ILuaEventListenerBuilder {
      * @param eventClassName  事件全类名, 常见类名可以忽略包路径
      * @param ignoreCancelled 是否忽略已取消的事件.
      * @param closure         事件闭包, 固定一个形参, 为监听的事件实例.
-     * @return 此构造器
+     * @return 此构建器
      * @throws ClassNotFoundException 如果该事件类型不存在则抛出.
      */
     ILuaEventListenerBuilder subscribe(@NotNull String eventClassName,
@@ -96,7 +96,7 @@ public interface ILuaEventListenerBuilder {
      * <code>handler</code>字段为Lua闭包, 并且包含一个形参.
      *
      * @param table LuaTable
-     * @return 此构造器
+     * @return 此构建器
      * @throws Exception 如果LuaTable不符合要求则抛出
      */
     ILuaEventListenerBuilder subscribe(@NotNull LuaTable table) throws Exception;
@@ -106,7 +106,7 @@ public interface ILuaEventListenerBuilder {
      * 以批量订阅事件.
      *
      * @param tables table组成的数组, 形似与<code>local tables = {{}, {}, {}}</code>
-     * @return 此构造器
+     * @return 此构建器
      * @throws Exception 如果LuaTable不符合要求则抛出
      */
     ILuaEventListenerBuilder subscribes(@NotNull LuaTable... tables) throws Exception;

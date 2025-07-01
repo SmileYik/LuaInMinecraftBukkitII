@@ -16,10 +16,10 @@ public class LuaUnregisteredListener {
     }
 
     /**
-     * 注册Bukkit事件, 需要提供事件名, 并且需要确保在同一个LuaState环境中,
-     * 所有注册的事件的事件名都必须唯一(没有重复的事件名). 并且后续可以通过
-     * 事件名去取消监听已注册的事件.
-     * @param eventName 事件名.
+     * 注册Bukkit事件, 需要提供事件监听器名, 并且需要确保在同一个LuaState环境中,
+     * 所有注册的事件的事件监听器名都必须唯一(没有重复的事件监听器名). 并且后续可以通过
+     * 事件监听器名去取消监听已注册的事件.
+     * @param eventName 事件监听器名.
      */
     public void register(String eventName) {
         this.luaEnv.registerEventListener(eventName, listener);
