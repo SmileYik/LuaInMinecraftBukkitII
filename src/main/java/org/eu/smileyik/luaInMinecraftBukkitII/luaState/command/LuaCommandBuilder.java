@@ -10,11 +10,11 @@ import org.eu.smileyik.luajava.type.ILuaCallable;
 public class LuaCommandBuilder implements ILuaCommandBuilder {
     private final ILuaCommandClassBuilder builder;
     private final String command;
-    private String[] args = null;
-    private String description = null;
-    private String permission = null;
-    private boolean needPlayer = false;
-    private boolean unlimitedArgs = false;
+    private String[] _args = null;
+    private String _description = null;
+    private String _permission = null;
+    private boolean _needPlayer = false;
+    private boolean _unlimitedArgs = false;
 
     protected LuaCommandBuilder(ILuaCommandClassBuilder builder, String command) {
         this.builder = builder;
@@ -23,43 +23,45 @@ public class LuaCommandBuilder implements ILuaCommandBuilder {
 
     @Override
     public ILuaCommandBuilder args(String... args) {
-        this.args = args;
+        this._args = args;
         return this;
     }
 
     @Override
     public ILuaCommandBuilder desc(String description) {
-        this.description = description;
+        this._description = description;
         return this;
     }
 
     @Override
     public ILuaCommandBuilder description(String description) {
-        this.description = description;
+        this._description = description;
         return this;
     }
 
     @Override
     public ILuaCommandBuilder permission(String permission) {
-        this.permission = permission;
+        this._permission = permission;
         return this;
     }
 
     @Override
     public ILuaCommandBuilder needPlayer() {
-        this.needPlayer = true;
+        this._needPlayer = true;
         return this;
     }
 
     @Override
     public ILuaCommandBuilder unlimitedArgs() {
-        this.unlimitedArgs = true;
+        this._unlimitedArgs = true;
         return this;
     }
 
     @Override
     public ILuaCommandClassBuilder handler(ILuaCallable callable) {
-        builder.command(callable, command, args, description, permission, needPlayer, unlimitedArgs);
+        builder.command(callable, command,
+                _args, _description, _permission,
+                _needPlayer, _unlimitedArgs);
         return builder;
     }
 }

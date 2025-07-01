@@ -26,10 +26,10 @@ import java.util.Map;
  */
 public class LuaCommandClassBuilder implements ILuaCommandClassBuilder {
     private final List<CommandConfig> configs = new LinkedList<>();
-    private String[] aliases = null;
-    private String description = null;
-    private String permission = null;
-    private boolean needPlayer = false;
+    private String[] _aliases = null;
+    private String _description = null;
+    private String _permission = null;
+    private boolean _needPlayer = false;
 
     @Override
     public ILuaCommandBuilder command(@NotNull String commandName) {
@@ -122,25 +122,25 @@ public class LuaCommandClassBuilder implements ILuaCommandClassBuilder {
 
     @Override
     public ILuaCommandClassBuilder aliases(String... aliases) {
-        this.aliases = aliases;
+        this._aliases = aliases;
         return this;
     }
 
     @Override
     public ILuaCommandClassBuilder needPlayer() {
-        this.needPlayer = true;
+        this._needPlayer = true;
         return this;
     }
 
     @Override
     public ILuaCommandClassBuilder description(String description) {
-        this.description = description;
+        this._description = description;
         return this;
     }
 
     @Override
     public ILuaCommandClassBuilder permission(String permission) {
-        this.permission = permission;
+        this._permission = permission;
         return this;
     }
 
@@ -152,10 +152,10 @@ public class LuaCommandClassBuilder implements ILuaCommandClassBuilder {
         if (properties.getCommand() == null) {
             throw new IllegalArgumentException("command field must be set in table!");
         }
-        this.aliases = properties.getAliases();
-        this.description = properties.getDescription();
-        this.permission = properties.getPermission();
-        this.needPlayer = properties.isNeedPlayer();
+        this._aliases = properties.getAliases();
+        this._description = properties.getDescription();
+        this._permission = properties.getPermission();
+        this._needPlayer = properties.isNeedPlayer();
         commands(commandTables);
         return build(properties.getCommand(), properties.getParentCommand());
     }
@@ -170,23 +170,23 @@ public class LuaCommandClassBuilder implements ILuaCommandClassBuilder {
         if (parentCommand == null) {
             parentCommand = "";
         }
-        if (aliases == null) {
-            aliases = new String[0];
+        if (_aliases == null) {
+            _aliases = new String[0];
         }
-        if (description == null) {
-            description = "";
+        if (_description == null) {
+            _description = "";
         }
-        if (permission == null) {
-            permission = "";
+        if (_permission == null) {
+            _permission = "";
         }
 
         AnnotationDescription annoClass = AnnotationDescription.Builder.ofType(Command.class)
                 .define("value", command)
                 .define("parentCommand", parentCommand)
-                .defineArray("aliases", aliases)
-                .define("description", description)
-                .define("permission", permission)
-                .define("needPlayer", needPlayer)
+                .defineArray("aliases", _aliases)
+                .define("description", _description)
+                .define("permission", _permission)
+                .define("needPlayer", _needPlayer)
                 .build();
         DynamicType.Builder<Object> byteBuddy = new ByteBuddy()
                 .subclass(Object.class)
