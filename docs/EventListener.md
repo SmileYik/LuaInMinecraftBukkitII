@@ -283,7 +283,7 @@ public interface ILuaEventListenerBuilder {
      * 与<code>subscribe(LuaTable)</code>类似, 但是是接受一个LuaTable数组(数组风格LuaTable),
      * 以批量订阅事件.
      *
-     * @param tables table组成的数组, 形似与<code>local tables = {{}, {}, {}}</code>
+     * @param tables table组成的数组, 形似与<code>local tables = {nil, {}, {}, {}, nil}</code>
      * @return 此构建器
      * @throws Exception 如果LuaTable不符合要求则抛出
      */
