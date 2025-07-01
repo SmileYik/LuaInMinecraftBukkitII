@@ -226,7 +226,7 @@ public class CommandProperties {
 这个类型对应的 Lua Table 结构如下:
 
 ```lua
-local eventListener = {
+local command = {
     command = "",
     parentCommand = "",
     aliases = {},
