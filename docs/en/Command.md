@@ -49,7 +49,7 @@ and then pass the command executor and command parameters as arguments to the co
 Of course, it is impossible for every command to conform to the form of `/[root command] [command name] [command parameter]`; 
 it must be in the form of `/[root command] [command name 1] [command name 2] [command name n] [command parameter]`, as shown in the figure below.
 
-![指令树](../images/SimpleCommand.CommandTree.png)
+![指令树](./../images/SimpleCommand.CommandTree.png)
 
 To solve this problem, `SimpleCommand` packages each command into a collection and names it, 
 so that all commands in this collection respond in the form of `/[collection name] [command name] [command parameters]`. 
@@ -61,7 +61,7 @@ When searching for a command, it first looks for which collection the command be
  and the **name of this root node collection is the root command name**, 
  the above `/[root command] [command name 1] [command name 2] [command name n] [command parameters]` command form can be achieved.
 
-![指令集合树](../images/SimpleCommand.CommandTree.2.png)
+![指令集合树](./../images/SimpleCommand.CommandTree.2.png)
 
 ## Registering Commands in Lua
 
