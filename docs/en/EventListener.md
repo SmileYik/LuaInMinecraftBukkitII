@@ -2,7 +2,7 @@
 
 > This page corresponds to the latest version of the LuaInMinecraftBukkit II plugin. For historical documentation, you can find the history of this page.
 
-> **!! The content of this file has machine translation !!** | [Origin](../EventListener.md)
+> **!! The content of this file has machine translation !!** | [Origin](./../EventListener.md)
 
 In this document, I will tell you how to subscribe Bukkit events in Lua.
 
@@ -138,7 +138,7 @@ luaBukkit.env:listenerBuilder()
 
 OK, now you can save the file, and then reload the Lua environment to see the effect in the game.
 
-![NoBreak](../images/EventListener.NoBreakListener.png)
+![NoBreak](./../images/EventListener.NoBreakListener.png)
 
 ## Lua Side API
 
