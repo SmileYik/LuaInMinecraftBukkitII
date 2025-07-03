@@ -1,4 +1,4 @@
-> Last updated on July 03, 2025 | [历史记录](https://github.com/SmileYik/LuaInMinecraftBukkitII/commits/gh-page/docs/en/EventListener.md)
+> Last updated on July 03, 2025 | [Histroy](https://github.com/SmileYik/LuaInMinecraftBukkitII/commits/gh-page/docs/en/EventListener.md)
 
 > This page corresponds to the latest version of the LuaInMinecraftBukkit II plugin. For historical documentation, you can find the history of this page.
 
