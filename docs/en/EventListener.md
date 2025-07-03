@@ -28,7 +28,7 @@ The event type is a string, which is the fully qualified name of the class in Ja
 For example, [BlockBreakEvent](https://hub.spigotmc.org/javadocs/spigot/org/bukkit/event/block/BlockBreakEvent.html) is an event which will trigered by player break blocks,
 It's class name can be found below Javadoc's title:
 
-![org.bukkit.event.block.BlockBreakEvent](./images/EventListener.1.png)
+![org.bukkit.event.block.BlockBreakEvent](../images/EventListener.1.png)
 
 The marked line is class name of `BlockBreakEvent`: `org.bukkit.event.block.BlockBreakEvent`
 
@@ -138,7 +138,7 @@ luaBukkit.env:listenerBuilder()
 
 OK, now you can save the file, and then reload the Lua environment to see the effect in the game.
 
-![NoBreak](./images/EventListener.NoBreakListener.png)
+![NoBreak](../images/EventListener.NoBreakListener.png)
 
 ## Lua Side API
 
