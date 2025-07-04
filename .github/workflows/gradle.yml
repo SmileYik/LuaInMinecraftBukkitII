@@ -10,6 +10,8 @@ name: Java CI with Gradle
 on:
   push:
     branches: [ "master" ]
+    tags:
+      - *
   pull_request:
     branches: [ "master" ]
 
@@ -30,11 +32,6 @@ jobs:
       with:
         java-version: ${{ matrix.Java }} 
         distribution: 'temurin'
-
-    - name: Check Tags
-      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-      run: |
-        echo "Will create release."
 
     # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
     # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
