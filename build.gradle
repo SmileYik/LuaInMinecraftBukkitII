@@ -35,7 +35,7 @@ ext.apiPath   = "org/eu/smileyik/luaInMinecraftBukkitII/api/**"
 group = 'org.eu.smileyik'
 version = project.gitTag == null ?
         "${project.gitVersion}+luajava-${project.luajavaVersion}+java-${project.targetJavaVersion}" :
-        "${project.gitVersion}+java-${project.targetJavaVersion}"
+        "${project.gitVersion}"
 
 repositories {
     mavenCentral()
