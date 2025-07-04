@@ -1,12 +1,12 @@
 diff --git a/java/src/main/java/org/keplerproject/luajava/LuaJavaAPI.java b/java/src/main/java/org/keplerproject/luajava/LuaJavaAPI.java
-index 692dfc2..0fda18a 100755
+index a787b9a..c0f2091 100755
 --- a/java/src/main/java/org/keplerproject/luajava/LuaJavaAPI.java
 +++ b/java/src/main/java/org/keplerproject/luajava/LuaJavaAPI.java
-@@ -135,7 +135,7 @@ public final class LuaJavaAPI {
- 
+@@ -136,7 +136,7 @@ public final class LuaJavaAPI {
          Object ret;
          try {
--            if (!method.canAccess(clazz == obj ? null : obj)) {
+             boolean isStatic = Modifier.isStatic(method.getModifiers());
+-            if (!method.canAccess(isStatic ? null : obj)) {
 +            if (!method.isAccessible()) {
                  method.setAccessible(true);
              }
@@ -15,7 +15,7 @@ index 692dfc2..0fda18a 100755
              throw new LuaException("Error accessing field " + fieldName);
          }
          // checkField method already checked the obj can access this field or not.
--        if (!field.canAccess(isStatic ? null : obj)) {
+-        if (!field.canAccess(Modifier.isStatic(field.getModifiers()) ? null : obj)) {
 +        if (!field.isAccessible()) {
              field.setAccessible(true);
          }
@@ -24,7 +24,7 @@ index 692dfc2..0fda18a 100755
          if (field == null) return 0;
          try {
              Object ret;
--            if (field.canAccess(isStatic ? null : obj)) {
+-            if (field.canAccess(Modifier.isStatic(field.getModifiers()) ? null : obj)) {
 +            if (field.isAccessible()) {
                  ret = field.get(obj);
              } else if (!luaStateFacade.isIgnoreNotPublic()) {
