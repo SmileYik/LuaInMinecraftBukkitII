@@ -53,7 +53,15 @@ jobs:
       with:
         name: LuaInMinecraftBukkitII-java-${{ matrix.Java }}
         path: "${{ github.workspace }}/build/libs"
-
+    - name: Create Release Draft
+      uses: ncipollo/release-action@v1
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+      with:
+        allowUpdates: true
+        draft: true
+        generateReleaseNotes: true
+        artifacts: "${{ github.workspace }}/build/libs/*.jar"
+        
     # NOTE: The Gradle Wrapper is the default and recommended way to run Gradle (https://docs.gradle.org/current/userguide/gradle_wrapper.html).
     # If your project does not have the Gradle Wrapper configured, you can use the following configuration to run Gradle with a specified version.
     #
