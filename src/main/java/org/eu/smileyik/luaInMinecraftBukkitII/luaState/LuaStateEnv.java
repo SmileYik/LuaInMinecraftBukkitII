@@ -191,8 +191,8 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
     }
 
     @Override
-    public void evalLua(@NotNull String luaScript) {
-        lua.evalString(luaScript)
+    public Result<Integer, LuaException> evalLua(@NotNull String luaScript) {
+        return lua.evalString(luaScript)
                 .ifFailureThen(err -> {
                     LuaInMinecraftBukkit.instance()
                             .getLogger()

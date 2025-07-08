@@ -10,7 +10,7 @@ public interface ILuaStateEnv {
 
     Result<Integer, LuaException> evalFile(String file);
 
-    void evalLua(@NotNull String luaScript);
+    Result<Integer, LuaException> evalLua(@NotNull String luaScript);
 
     Result<Object, Exception> callClosure(String globalClosureName, Object... params);
 }
