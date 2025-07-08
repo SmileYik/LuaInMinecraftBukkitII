@@ -3,13 +3,18 @@ package org.eu.smileyik.luaInMinecraftBukkitII;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
+import org.bukkit.plugin.Plugin;
 import org.eu.smileyik.luaInMinecraftBukkitII.api.ILuaStateManager;
 import org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.ILuaStateEnv;
+import org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.ILuaStatePluginEnv;
 import org.eu.smileyik.luaInMinecraftBukkitII.config.Config;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.ILuaStateEnvInner;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.LuaStateEnv;
+import org.eu.smileyik.luaInMinecraftBukkitII.luaState.PluginLuaEnv;
 import org.eu.smileyik.simpledebug.DebugLogger;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -17,9 +22,41 @@ import java.util.Map;
 
 public class LuaStateManager implements ILuaStateManager, Listener {
     private final Map<String, ILuaStateEnvInner> envs = new HashMap<>();
+    private final Map<Plugin, ILuaStateEnvInner> pluginEnvs = new HashMap<>();
 
     public LuaStateManager(Config config) {
         reload(config);
+    }
+
+    @Override
+    public ILuaStatePluginEnv createPluginEnv(@NotNull Plugin plugin) {
+        return createPluginEnv(plugin, false);
+    }
+
+    @Override
+    public ILuaStatePluginEnv createPluginEnv(@NotNull Plugin plugin, boolean ignoreAccessLimit) {
+        if (plugin == LuaInMinecraftBukkit.instance()) {
+            throw new IllegalArgumentException("Cannot create plugin env for LuaInMinecraftBukkit.");
+        }
+        destroyPluginEnv(plugin);
+        ILuaStatePluginEnv env = new PluginLuaEnv(ignoreAccessLimit);
+        ILuaStateEnvInner inner = (ILuaStateEnvInner) env;
+        inner.createEnv();
+        pluginEnvs.put(plugin, inner);
+        return env;
+    }
+
+    @Override
+    public ILuaStatePluginEnv getPluginEnv(@NotNull Plugin plugin) {
+        return (ILuaStatePluginEnv) pluginEnvs.get(plugin);
+    }
+
+    @Override
+    public void destroyPluginEnv(@NotNull Plugin plugin) {
+        ILuaStateEnvInner removed = pluginEnvs.remove(plugin);
+        if (removed != null) {
+            removed.close();
+        }
     }
 
     @Override
@@ -32,6 +69,8 @@ public class LuaStateManager implements ILuaStateManager, Listener {
     public void close() {
         envs.values().forEach(ILuaStateEnvInner::close);
         envs.clear();
+        pluginEnvs.values().forEach(ILuaStateEnvInner::close);
+        pluginEnvs.clear();
         HandlerList.unregisterAll(this);
     }
 
@@ -69,5 +108,10 @@ public class LuaStateManager implements ILuaStateManager, Listener {
     @EventHandler
     public void onPluginEnable(PluginEnableEvent event) {
         envs.values().forEach(ILuaStateEnvInner::initialization);
+    }
+
+    @EventHandler
+    public void onPluginDisable(PluginDisableEvent event) {
+        destroyPluginEnv(event.getPlugin());
     }
 }
