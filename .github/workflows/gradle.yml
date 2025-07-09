@@ -133,12 +133,12 @@ jobs:
         run: |
           cd "cffi-lua"
           mkdir deps
-          cp ../libraries/**/${{ runner.lua }}/*lua* ./deps
-          curl -L -o archive.tar.gz "https://www.lua.org/ftp/${{ runner.lua }}.tar.gz"
+          cp ../libraries/**/${{ matrix.Lua }}/*lua* ./deps
+          curl -L -o archive.tar.gz "https://www.lua.org/ftp/${{ matrix.Lua }}.tar.gz"
           tar -xzf archive.tar.gz
           ls
           ls deps
-          mv ${{ runner.lua }}/src ./deps/include
+          mv ${{ matrix.Lua }}/src ./deps/include
           mkdir build
           cd build 
           meson .. -Dlua_version=vendor -Dtests=false
