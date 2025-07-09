@@ -92,7 +92,7 @@ jobs:
         uses: actions/upload-artifact@v4.6.2
         with:
           name: luajava-dynamic-libraries-${{ runner.os }}
-          path: "${{ github.workspace }}/build/outputs"
+          path: "${{ github.workspace }}/luajava/build/outputs"
 
   build-cffi:
     strategy:
