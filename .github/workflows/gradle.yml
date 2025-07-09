@@ -59,20 +59,27 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: ./luajava
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
-
+      - name: Check working directory
+        run: |
+          pwd
+          ls
+          
       - name: Linux - Make
         if: runner.os == 'Linux'
-        run: cd luajava && make
+        run: make
 
       - name: macOS - Make
         if: runner.os == 'macOS'
-        run: cd luajava && make COMMAND="MACOSX_DEPLOYMENT_TARGET=12.0 ./gradlew"
+        run: make COMMAND="MACOSX_DEPLOYMENT_TARGET=12.0 ./gradlew"
 
       - name: Windows - Prepare VS Shell
         if: runner.os == 'Windows'
@@ -81,7 +88,7 @@ jobs:
           arch: x64
       - name: Windows - Make
         if: runner.os == 'Windows'
-        run: cd luajava && make COMMAND=.\gradlew
+        run: make COMMAND=.\gradlew
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4.6.2
