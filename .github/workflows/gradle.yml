@@ -133,7 +133,7 @@ jobs:
         id: vars
         if: runner.os == 'Linux'
         run: |
-          echo "EXTRA_LINKER_ARGS=-L../deps -llua" >> "$GITHUB_OUTPUT"
+          echo "EXTRA_LINKER_ARGS=-L${{ github.workspace }}/cffi-lua/deps -llua" >> "$GITHUB_OUTPUT"
       - name: Build cffi-lua
         run: |
           cd "cffi-lua"
@@ -142,9 +142,9 @@ jobs:
           rm ./deps/*.a || echo "Failed remove *.a"
           curl -L -o archive.tar.gz "https://www.lua.org/ftp/${{ matrix.Lua }}.tar.gz"
           tar -xzf archive.tar.gz
-          ls
-          ls deps
           mv ${{ matrix.Lua }}/src ./deps/include
+          echo "-----deps"
+          ls deps
           mkdir build
           cd build 
           echo "Extra linker args: ${{ steps.vars.outputs.EXTRA_LINKER_ARGS }}"
