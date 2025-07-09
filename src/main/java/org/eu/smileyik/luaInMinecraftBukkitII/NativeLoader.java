@@ -26,6 +26,10 @@ public class NativeLoader {
     public static final String ARCH_ARM64 = "arm64";
     public static final String ARCH_OTHERS = "others";
 
+    public static final String[] DYNAMIC_FILE_TYPE_LINUX = new String[] { ".so" };
+    public static final String[] DYNAMIC_FILE_TYPE_WINDOWS = new String[] { ".dll" };
+    public static final String[] DYNAMIC_FILE_TYPE_MACOS = new String[] { ".dylib", ".so" };
+
     public static final String OS, ARCH;
 
     private static final int BUFFER_SIZE = 4096;
@@ -82,6 +86,19 @@ public class NativeLoader {
             File lib = new File(nativeFolder, file);
             checkFile(lib, config, nativeConfig);
             System.load(lib.getAbsolutePath());
+        }
+    }
+
+    public static String[] getDynamicFileType() {
+        switch (OS) {
+            case OS_WINDOWS:
+                return DYNAMIC_FILE_TYPE_WINDOWS;
+            case OS_MACOS:
+                return DYNAMIC_FILE_TYPE_MACOS;
+            case OS_LINUX:
+                return DYNAMIC_FILE_TYPE_LINUX;
+            default:
+                return new String[0];
         }
     }
 

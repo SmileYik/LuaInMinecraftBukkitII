@@ -7,6 +7,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.eu.smileyik.luaInMinecraftBukkitII.LuaInMinecraftBukkit;
+import org.eu.smileyik.luaInMinecraftBukkitII.NativeLoader;
 import org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState.ILuaEnv;
 import org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState.LuaHelper;
 import org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState.LuaIOHelper;
@@ -73,10 +74,13 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
         lua.getGlobal("package", LuaTable.class)
                 .mapResultValue(table -> {
                     return table.get("cpath")
-                            .mapValue(path -> (path) +
-                                    ";" + rootDir.getAbsolutePath() + "/?.so" +
-                                    ";" + rootDir.getAbsolutePath() + "/?.dll"
-                            )
+                            .mapValue(path -> {
+                                for (String fileType : NativeLoader.getDynamicFileType()) {
+                                    path += ";" + rootDir.getAbsolutePath() + "/?" + fileType;
+                                    path += ";" + luaLibrary + "/?" +  fileType;
+                                }
+                                return path;
+                            })
                             .mapResultValue(cpath -> table.put("cpath", cpath))
                             .mapResultValue(it -> {
                                 return table.get("path")
