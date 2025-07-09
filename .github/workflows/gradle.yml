@@ -145,9 +145,7 @@ jobs:
           ninja
           mkdir ${{ runner.os }}
           mkdir ${{ runner.os }}/${{ matrix.Lua }}
-          mv *.so ${{ runner.os }}/${{ matrix.Lua }}
-          mv *.dylib ${{ runner.os }}/${{ matrix.Lua }}
-          mv *.dll ${{ runner.os }}/${{ matrix.Lua }}
+          mv *.so ${{ runner.os }}/${{ matrix.Lua }} || mv *.dylib ${{ runner.os }}/${{ matrix.Lua }} || mv *.dll ${{ runner.os }}/${{ matrix.Lua }}
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4.6.2
         with:
