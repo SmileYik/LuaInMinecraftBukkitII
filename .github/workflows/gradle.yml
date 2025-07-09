@@ -129,6 +129,11 @@ jobs:
           path: "libraries"
       - name: Clone cffi-lua
         run: git clone https://github.com/q66/cffi-lua
+      - name: Define variables 
+        id: vars
+        if: runner.os == 'Linux'
+        run: |
+          echo "EXTRA_LINKER_ARGS=-L${{ github.workspace }}/cffi-lua/deps -llua" >> "$GITHUB_OUTPUT"
       - name: Build cffi-lua
         run: |
           cd "cffi-lua"
@@ -137,12 +142,13 @@ jobs:
           rm ./deps/*.a || echo "Failed remove *.a"
           curl -L -o archive.tar.gz "https://www.lua.org/ftp/${{ matrix.Lua }}.tar.gz"
           tar -xzf archive.tar.gz
-          ls
-          ls deps
           mv ${{ matrix.Lua }}/src ./deps/include
+          echo "-----deps"
+          ls deps
           mkdir build
           cd build 
-          meson .. -Dlua_version=vendor -Dtests=false
+          echo "Extra linker args: ${{ steps.vars.outputs.EXTRA_LINKER_ARGS }}"
+          meson .. -Dlua_version=vendor -Dtests=false -Dcpp_link_args="${{ steps.vars.outputs.EXTRA_LINKER_ARGS }}"
           ninja
           mkdir -p cffi/${{ runner.os }}/${{ matrix.Lua }}
           mv *.so cffi/${{ runner.os }}/${{ matrix.Lua }} || echo "Not found *.so"
