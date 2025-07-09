@@ -134,7 +134,7 @@ jobs:
           cd "cffi-lua"
           mkdir deps
           cp ../libraries/**/${{ matrix.Lua }}/*lua* ./deps
-          rm -rf ./deps/*.a || echo "Failed remove *.a"
+          rm ./deps/*.a || echo "Failed remove *.a"
           curl -L -o archive.tar.gz "https://www.lua.org/ftp/${{ matrix.Lua }}.tar.gz"
           tar -xzf archive.tar.gz
           ls
