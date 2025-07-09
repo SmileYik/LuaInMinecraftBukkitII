@@ -154,7 +154,7 @@ jobs:
 
   collect-cffi:
   
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     needs: build-cffi
 
     steps:
