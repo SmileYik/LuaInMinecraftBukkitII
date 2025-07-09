@@ -143,14 +143,15 @@ jobs:
           cd build 
           meson .. -Dlua_version=vendor -Dtests=false
           ninja
-          mkdir ${{ runner.os }}
-          mkdir ${{ runner.os }}/${{ matrix.Lua }}
-          mv *.so ${{ runner.os }}/${{ matrix.Lua }} || mv *.dylib ${{ runner.os }}/${{ matrix.Lua }} || mv *.dll ${{ runner.os }}/${{ matrix.Lua }}
+          mkdir -p cffi/${{ runner.os }}/${{ matrix.Lua }}
+          mv *.so cffi/${{ runner.os }}/${{ matrix.Lua }} || echo "Not found *.so"
+          mv *.dylib cffi/${{ runner.os }}/${{ matrix.Lua }} || echo "Not found *.dylib"
+          mv *.dll cffi/${{ runner.os }}/${{ matrix.Lua }} || echo "Not found *.dll"
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4.6.2
         with:
           name: cffi-dynamic-libraries-${{ runner.os }}-${{ matrix.Lua }}
-          path: "${{ github.workspace }}/cffi-lua/build/${{ runner.os }}"
+          path: "${{ github.workspace }}/cffi-lua/build/cffi"
 
   collect-cffi:
   
@@ -169,7 +170,7 @@ jobs:
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: cffi-dynamic-libraries
+          name: cffi-dynamic-libraries-collected
           path: "${{ github.workspace }}/cffi-dynamic-libraries"
 
   release:
