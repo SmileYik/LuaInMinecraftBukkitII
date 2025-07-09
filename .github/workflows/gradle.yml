@@ -68,11 +68,11 @@ jobs:
 
       - name: Linux - Make
         if: runner.os == 'Linux'
-        run: make
+        run: cd luajava & make
 
       - name: macOS - Make
         if: runner.os == 'macOS'
-        run: make COMMAND="MACOSX_DEPLOYMENT_TARGET=12.0 ./gradlew"
+        run: cd luajava & make COMMAND="MACOSX_DEPLOYMENT_TARGET=12.0 ./gradlew"
 
       - name: Windows - Prepare VS Shell
         if: runner.os == 'Windows'
@@ -81,7 +81,7 @@ jobs:
           arch: x64
       - name: Windows - Make
         if: runner.os == 'Windows'
-        run: make COMMAND=.\gradlew
+        run: cd luajava & make COMMAND=.\gradlew
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4.6.2
