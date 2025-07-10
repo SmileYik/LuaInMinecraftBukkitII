@@ -251,6 +251,7 @@ jobs:
         run: ls -R downloaded-artifacts
       - name: Package shared libraries
         run: |
+          cd downloaded-artifacts
           tar -czf all-luajava-dynamic-libraries.tar.gz all-luajava-dynamic-libraries || echo "failed package luajava"
           tar -czf all-cffi-dynamic-libraries.tar.gz all-cffi-dynamic-libraries || echo "failed package cffi"
 
