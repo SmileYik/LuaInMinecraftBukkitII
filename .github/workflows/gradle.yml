@@ -140,9 +140,10 @@ jobs:
           echo "EXTRA_LINKER_ARGS=-L${{ github.workspace }}/cffi-lua/deps -llua" >> "$GITHUB_OUTPUT"
       - name: Build cffi-lua
         run: |
+          ls -R libraries
           cd "cffi-lua"
           mkdir deps
-          cp ../libraries/**/${{ matrix.Lua }}/*lua* ./deps
+          cp ../libraries/${{ runner.os }}/**/${{ matrix.Lua }}/*lua* ./deps
           rm ./deps/*.a || echo "Failed remove *.a"
           curl -L -o archive.tar.gz "https://www.lua.org/ftp/${{ matrix.Lua }}.tar.gz"
           tar -xzf archive.tar.gz
@@ -201,7 +202,7 @@ jobs:
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: luajava-dynamic-libraries-all
+          name: all-luajava-dynamic-libraries
           path: "${{ github.workspace }}/output"
 
   collect-cffi:
@@ -221,7 +222,7 @@ jobs:
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: cffi-dynamic-libraries-all
+          name: all-cffi-dynamic-libraries
           path: "${{ github.workspace }}/cffi-dynamic-libraries"
 
   release:
