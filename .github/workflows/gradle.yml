@@ -197,6 +197,8 @@ jobs:
           mv luajava-dynamic-libraries/macOS/shared/* output/macos/arm64 || echo "Failed mv to macos"
           mkdir -p output/windows/amd64 || echo "Failed mkdir for windows"
           mv luajava-dynamic-libraries/Windows/shared/* output/windows/amd64 || echo "Failed mv to windows"
+          rm -rf output/windows/amd64/**/*.lib || echo "Failed remove *.lib"
+          rm -rf output/windows/amd64/**/*.exp || echo "Failed remove *.exp"
           mv plugin/*-all.jar plugin/a.jar
           java -cp plugin/a.jar org.eu.smileyik.luaInMinecraftBukkitII.NativeLoader ./output
       - name: Upload Build Artifact
@@ -228,7 +230,10 @@ jobs:
   release:
 
     runs-on: ubuntu-latest
-    needs: build-plugin
+    needs:
+      - build-plugin
+      - collect-cffi
+      - collect-luajava
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
 
     permissions:
@@ -244,6 +249,10 @@ jobs:
 
       - name: List Downloaded Artifacts
         run: ls -R downloaded-artifacts
+      - name: Package shared libraries
+        run: |
+          tar -czf all-luajava-dynamic-libraries.tar.gz all-luajava-dynamic-libraries || echo "failed package luajava"
+          tar -czf all-cffi-dynamic-libraries.tar.gz all-cffi-dynamic-libraries || echo "failed package cffi"
 
       - name: Create Release Draft
         uses: ncipollo/release-action@v1
@@ -251,5 +260,5 @@ jobs:
           allowUpdates: true
           draft: true
           generateReleaseNotes: true
-          artifacts: "downloaded-artifacts/LuaInMinecraftBukkitII-java-8/*.jar"
+          artifacts: "downloaded-artifacts/LuaInMinecraftBukkitII-java-8/*.jar,downloaded-artifacts/*.tar.gz"
           token: ${{ secrets.GITHUB_TOKEN }}
