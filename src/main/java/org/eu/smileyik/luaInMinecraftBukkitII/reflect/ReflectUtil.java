@@ -2,10 +2,7 @@ package org.eu.smileyik.luaInMinecraftBukkitII.reflect;
 
 import org.eu.smileyik.luajava.reflect.LuaInvokedMethod;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.util.Arrays;
 import java.util.LinkedList;
 
@@ -66,7 +63,8 @@ public class ReflectUtil {
         invokedMethod.getOverwriteParams().forEach((idx, value) -> args[idx] = value);
         Method executable = invokedMethod.getExecutable();
         executable.setAccessible(true);
-        return executable.invoke(object, args);
+        boolean isStaticMethod = Modifier.isStatic(executable.getModifiers());
+        return executable.invoke(isStaticMethod ? null : object, args);
     }
 
     public static boolean hasMethod(Object object, String methodName) {
@@ -89,5 +87,41 @@ public class ReflectUtil {
         }
         return org.eu.smileyik.luajava.reflect.ReflectUtil.findFieldByName(
                 object.getClass(), fieldName, false, false, false, false) != null;
+    }
+
+    public static void setField(Object object, String fieldName, Object value) throws IllegalAccessException {
+        if (object == null) {
+            throw new NullPointerException("object is null");
+        }
+        if (fieldName == null || fieldName.isEmpty()) {
+            throw new NullPointerException("fieldName is null or empty");
+        }
+        Field field = org.eu.smileyik.luajava.reflect.ReflectUtil.findFieldByName(
+                object.getClass(), fieldName, false, false, false, false
+        );
+        if  (field == null) {
+            throw new NullPointerException("No field found for " + fieldName + " in " + object.getClass());
+        }
+        field.setAccessible(true);
+        boolean isStaticField = Modifier.isStatic(field.getModifiers());
+        field.set(isStaticField ? null : object, value);
+    }
+
+    public static Object getField(Object object, String fieldName) throws IllegalAccessException {
+        if (object == null) {
+            throw new NullPointerException("object is null");
+        }
+        if (fieldName == null || fieldName.isEmpty()) {
+            throw new NullPointerException("fieldName is null or empty");
+        }
+        Field field = org.eu.smileyik.luajava.reflect.ReflectUtil.findFieldByName(
+                object.getClass(), fieldName, false, false, false, false
+        );
+        if  (field == null) {
+            throw new NullPointerException("No field found for " + fieldName + " in " + object.getClass());
+        }
+        field.setAccessible(true);
+        boolean isStaticField = Modifier.isStatic(field.getModifiers());
+        return field.get(isStaticField ? null : object);
     }
 }
