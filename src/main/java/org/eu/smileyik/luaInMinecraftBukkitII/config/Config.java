@@ -3,7 +3,9 @@ package org.eu.smileyik.luaInMinecraftBukkitII.config;
 import lombok.Data;
 import lombok.ToString;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -15,4 +17,5 @@ public class Config {
     private boolean alwaysCheckHashes = false;
     private boolean debug = false;
     private boolean bStats = true;
+    private List<String> enableModules = new ArrayList<>();
 }

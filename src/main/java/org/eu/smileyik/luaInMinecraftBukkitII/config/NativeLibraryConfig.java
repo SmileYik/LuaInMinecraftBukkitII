@@ -21,6 +21,11 @@ public class NativeLibraryConfig {
      */
     private Map<String, Map<String, Map<String, String[]>>> files;
 
+    /**
+     * native modules. like files, but not require.
+     */
+    private Map<String, Map<String, Map<String, String[]>>> modules;
+
     public Collection<String> systems() {
         return files.keySet();
     }
@@ -40,5 +45,27 @@ public class NativeLibraryConfig {
         return files.getOrDefault(system, Collections.emptyMap())
                 .getOrDefault(architecture, Collections.emptyMap())
                 .get(version);
+    }
+
+    /**
+     * available module collection.
+     * @param system       target system
+     * @param architecture target arch
+     * @return available modules
+     */
+    public Collection<String> availableModules(String system, String architecture) {
+        return modules.getOrDefault(system, Collections.emptyMap())
+                .getOrDefault(architecture, Collections.emptyMap())
+                .keySet();
+    }
+
+    /**
+     * get module's native files
+     */
+    @Nullable
+    public String[] module(String system, String architecture, String module) {
+        return modules.getOrDefault(system, Collections.emptyMap())
+                .getOrDefault(architecture, Collections.emptyMap())
+                .get(module);
     }
 }
