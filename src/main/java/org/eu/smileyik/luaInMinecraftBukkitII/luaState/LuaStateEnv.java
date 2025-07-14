@@ -101,6 +101,14 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
                             "Error initializing lua package path: %s", it.getMessage());
                     DebugLogger.debug(DebugLogger.ERROR, it);
                 });
+        lua.getGlobal("require", ILuaCallable.class)
+                .mapResultValue(callable ->
+                        lua.setGlobal("require", new WrapperedRequireFunction(lua,  callable, rootDir)))
+                .ifFailureThen(it -> {
+                    DebugLogger.debug(DebugLogger.WARN,
+                            "Error initializing lua package path: %s", it.getMessage());
+                    DebugLogger.debug(DebugLogger.ERROR, it);
+                });
 
         LuaInMinecraftBukkit plugin = LuaInMinecraftBukkit.instance();
         lua.newTable();

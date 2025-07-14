@@ -221,11 +221,18 @@ jobs:
           pattern: cffi-dynamic-libraries-*
           merge-multiple: true
       - run: ls -R cffi-dynamic-libraries
+      - run: |
+          mkdir -p output/linux/amd64 || echo "Failed mkdir for linux"
+          mv cffi-dynamic-libraries/Linux/X64/* output/linux/amd64 || echo "Failed mv to linux"
+          mkdir -p output/macos/arm64 || echo "Failed mkdir for macos"
+          mv cffi-dynamic-libraries/macOS/ARM64/* output/macos/arm64 || echo "Failed mv to macos"
+          mkdir -p output/windows/amd64 || echo "Failed mkdir for windows"
+          mv cffi-dynamic-libraries/Windows/X64/* output/windows/amd64 || echo "Failed mv to windows"
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4.6.2
         with:
           name: all-cffi-dynamic-libraries
-          path: "${{ github.workspace }}/cffi-dynamic-libraries"
+          path: "${{ github.workspace }}/output"
 
   release:
 
