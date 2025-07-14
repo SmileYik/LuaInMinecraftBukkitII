@@ -29,6 +29,7 @@
   },
   // 需要加载的模组
   "enableModules": [
+    "cffi",
     "jni-bridge"
   ]
 }
