@@ -84,11 +84,12 @@ public class WrapperedRequireFunction extends JavaFunction {
         if (fileName.contains("/")) {
             fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
         }
+        String fileNameWithSuffix = fileName;
         if (fileName.contains(".")) {
             fileName = fileName.substring(0, fileName.lastIndexOf("."));
         }
 
-        File out = new File(tempDir, fileName);
+        File out = new File(tempDir, fileNameWithSuffix);
         URL url = new URL(urlStr);
         URLConnection urlConnection = url.openConnection();
         try (
@@ -97,6 +98,6 @@ public class WrapperedRequireFunction extends JavaFunction {
         ) {
             LuaIOHelper.transfer(bis, bos, 2048);
         }
-        return out;
+        return new File(tempDir, fileName);
     }
 }

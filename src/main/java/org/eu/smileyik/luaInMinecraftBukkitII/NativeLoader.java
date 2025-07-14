@@ -86,7 +86,7 @@ public class NativeLoader {
 
         for (String file : files) {
             File lib = new File(nativeFolder, file);
-            checkFile(lib, config, nativeConfig);
+            checkFile(lib, config, nativeConfig, config.getLuaVersion());
             System.load(lib.getAbsolutePath());
         }
 
@@ -106,8 +106,8 @@ public class NativeLoader {
             String realModule = null;
             if (availableModules.contains(module)) {
                 realModule = module;
-            } else if (availableModules.contains(module + "-" + currentVersion)) {
-                realModule = module + "-" + currentVersion;
+            } else if (availableModules.contains(module + "-" + config.getLuaVersion())) {
+                realModule = module + "-" + config.getLuaVersion();
             } else {
                 LuaInMinecraftBukkit.instance().getLogger().warning(String.format(
                         "Skipping module '%s' because not available.", module));
@@ -115,20 +115,26 @@ public class NativeLoader {
             }
 
             if (!nativeModule.isInitialized()) {
-                File nativeBaseDir = nativeModule.baseDir();
+                try {
+                    File nativeBaseDir = nativeModule.baseDir();
 
-                String[] moduleFiles = nativeConfig.module(OS, ARCH, realModule);
-                LinkedList<String> paths = new LinkedList<>();
-                if (moduleFiles != null) {
-                    for (String file : moduleFiles) {
-                        if (file != null) {
-                            File lib = new File(nativeBaseDir, file);
-                            checkFile(lib, config, nativeConfig);
-                            paths.add(lib.getAbsolutePath());
+                    String[] moduleFiles = nativeConfig.module(OS, ARCH, realModule);
+                    LinkedList<String> paths = new LinkedList<>();
+                    if (moduleFiles != null) {
+                        for (String file : moduleFiles) {
+                            if (file != null) {
+                                File lib = new File(nativeBaseDir, file);
+                                checkFile(lib, config, nativeConfig, realModule);
+                                paths.add(lib.getAbsolutePath());
+                            }
                         }
                     }
+                    nativeModule.initialize(paths);
+                } catch (Exception e) {
+                    LuaInMinecraftBukkit.instance().getLogger().warning(String.format(
+                            "Load module '%s' failed: %s", module, e.getMessage()));
+                    continue;
                 }
-                nativeModule.initialize(paths);
             }
             LuaInMinecraftBukkit.instance().getLogger().warning(String.format(
                     "Loaded module '%s'(%s) %s.",
@@ -215,10 +221,10 @@ public class NativeLoader {
         }
     }
 
-    private static void checkFile(File lib, Config config, NativeLibraryConfig libraryConfig) {
+    private static void checkFile(File lib, Config config, NativeLibraryConfig libraryConfig, String module) {
         if (!lib.exists() || config.isAlwaysCheckHashes()) {
             for (String baseUrl : libraryConfig.getUrls()) {
-                baseUrl = String.join("/", baseUrl, OS, ARCH, config.getLuaVersion());
+                baseUrl = String.join("/", baseUrl, OS, ARCH, module);
                 String fileUrl = baseUrl + "/" + lib.getName();
                 String hashUrl = fileUrl + ".hash";
                 try {
