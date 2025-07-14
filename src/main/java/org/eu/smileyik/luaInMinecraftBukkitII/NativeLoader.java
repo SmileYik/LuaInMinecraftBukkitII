@@ -3,8 +3,7 @@ package org.eu.smileyik.luaInMinecraftBukkitII;
 import com.google.gson.Gson;
 import org.eu.smileyik.luaInMinecraftBukkitII.config.Config;
 import org.eu.smileyik.luaInMinecraftBukkitII.config.NativeLibraryConfig;
-import org.eu.smileyik.luaInMinecraftBukkitII.jniBridge.JNIBridge;
-import org.jetbrains.annotations.Nullable;
+import org.eu.smileyik.luaInMinecraftBukkitII.module.NativeModule;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -15,7 +14,9 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.Objects;
 
 public class NativeLoader {
     public static final String OS_LINUX = "linux";
@@ -35,8 +36,6 @@ public class NativeLoader {
 
     private static final int BUFFER_SIZE = 4096;
     private static final String VERSION_FILE = "VERSION";
-
-    private static final Map<String, NativeModule> MODULES = new HashMap<>();
 
     static {
         String osName = System.getProperty("os.name").toLowerCase();
@@ -59,9 +58,6 @@ public class NativeLoader {
             arch = ARCH_ARM64;
         }
         ARCH = arch;
-
-        // register modules.
-        MODULES.put(JNIBridge.MODULE_NAME, new JNIBridge());
     }
 
     public static void load(Config config) throws IOException {
@@ -98,29 +94,35 @@ public class NativeLoader {
         Collection<String> availableModules = nativeConfig.availableModules(OS, ARCH);
         for (String module : config.getEnableModules()) {
             if (!availableModules.contains(module)) {
-                LuaInMinecraftBukkit.instance().getLogger().info(String.format(
+                LuaInMinecraftBukkit.instance().getLogger().warning(String.format(
                         "Skipping module '%s' because not available.", module));
                 continue;
             }
-            NativeModule nativeModule = MODULES.get(module);
+            NativeModule nativeModule = NativeModule.MODULES.get(module);
             if (nativeModule == null) {
-                LuaInMinecraftBukkit.instance().getLogger().info(String.format(
+                LuaInMinecraftBukkit.instance().getLogger().warning(String.format(
                         "Skipping module '%s' because not found.", module));
                 continue;
-            }
+            } else if (!nativeModule.isInitialized()) {
+                File nativeBaseDir = nativeModule.baseDir();
 
-            @Nullable String[] moduleFiles = nativeConfig.module(OS, ARCH, module);
-            LinkedList<String> paths = new LinkedList<>();
-            if (moduleFiles != null) {
-                for (String file : moduleFiles) {
-                    if (file != null) {
-                        File lib = new File(nativeFolder, file);
-                        checkFile(lib, config, nativeConfig);
-                        paths.add(lib.getAbsolutePath());
+                String[] moduleFiles = nativeConfig.module(OS, ARCH, module);
+                LinkedList<String> paths = new LinkedList<>();
+                if (moduleFiles != null) {
+                    for (String file : moduleFiles) {
+                        if (file != null) {
+                            File lib = new File(nativeBaseDir, file);
+                            checkFile(lib, config, nativeConfig);
+                            paths.add(lib.getAbsolutePath());
+                        }
                     }
                 }
+                nativeModule.initialize(paths);
             }
-            nativeModule.initialize(paths);
+            LuaInMinecraftBukkit.instance().getLogger().warning(String.format(
+                    "Loaded module '%s' %s.",
+                    module,
+                    nativeModule.isInitialized() ? "successfully" : "failed"));
         }
     }
 

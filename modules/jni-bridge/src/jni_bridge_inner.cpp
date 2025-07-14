@@ -7,6 +7,6 @@
  * Signature: ()V
  */
 JNIEXPORT 
-void JNICALL Java_org_eu_smileyik_luaInMinecraftBukkitII_jniBridge_JNIBridge_initBridge(JNIEnv* env, jclass obj) {
+void JNICALL Java_org_eu_smileyik_luaInMinecraftBukkitII_module_jniBridge_JNIBridge_initBridge(JNIEnv* env, jclass obj) {
     initJNIEnv(env);
 }

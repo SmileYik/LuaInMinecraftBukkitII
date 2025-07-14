@@ -12,7 +12,7 @@ if(ENABLE_DEBUG)
 endif()
 
 if(NOT LuaInMinecraftBukkitDir)
-    set(LuaInMinecraftBukkitDir "${LuaInMinecraftBukkitDir}/../../")
+    set(LuaInMinecraftBukkitDir "${PROJECT_SOURCE_DIR}/../../")
 endif()
 message(STATUS "LuaInMinecraftBukkit Project Directory: ${LuaInMinecraftBukkitDir}")
 
@@ -50,10 +50,12 @@ target_include_directories(jni-bridge PUBLIC ${PROJECT_INCLUDE_DIRECTORIES})
 target_compile_definitions(jni-bridge PRIVATE JNI_BRIDGE_EXPORTS)
 add_custom_target(generateHeader
     WORKING_DIRECTORY "${LuaInMinecraftBukkitDir}/src/main/java"
-    COMMAND ${Java_JAVAC_EXECUTABLE} -cp "${LuaInMinecraftBukkitDir}/src/main/java" -d "${PROJECT_SOURCE_DIR}/build/classes" -h "${PROJECT_SOURCE_DIR}/build/headers" "org/eu/smileyik/luaInMinecraftBukkitII/jniBridge/JNIBridge.java"
-    COMMAND cmake -E copy_if_different "${PROJECT_SOURCE_DIR}/build/headers/org_eu_smileyik_luaInMinecraftBukkitII_jniBridge_JNIBridge.h" "${PROJECT_SOURCE_DIR}/build/headers/jni_bridge_inner.h"
+    COMMAND ${Java_JAVAC_EXECUTABLE} -cp "${LuaInMinecraftBukkitDir}/src/main/java" -d "${PROJECT_SOURCE_DIR}/build/classes" -h "${PROJECT_SOURCE_DIR}/build/headers" "org/eu/smileyik/luaInMinecraftBukkitII/module/jniBridge/JNIBridge.java"
+    COMMAND cmake -E copy_if_different "${PROJECT_SOURCE_DIR}/build/headers/org_eu_smileyik_luaInMinecraftBukkitII_module_jniBridge_JNIBridge.h" "${PROJECT_SOURCE_DIR}/build/headers/jni_bridge_inner.h"
 )
-add_dependencies(jni-bridge generateHeader)
+if (NOT SKIP_GENERATE_HEADER)
+    add_dependencies(jni-bridge generateHeader)
+endif()
 
 set(PLUGIN_SOURCES
     src/plugin/ffi_init.cpp
