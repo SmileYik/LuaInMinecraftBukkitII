@@ -6,7 +6,7 @@
   // 总是检查依赖库Hash是否正确
   "alwaysCheckHashes": false,
   // debug 标志
-  "debug": true,
+  "debug": false,
   "bStats": true,
   // lua 环境
   "luaState": {
@@ -21,6 +21,7 @@
         {
           "file": "test.lua",
           "autoReload": false,
+          "asyncLoad": false,
           "depends": []
         }
       ]

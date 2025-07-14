@@ -93,20 +93,31 @@ public class NativeLoader {
         // load modules
         Collection<String> availableModules = nativeConfig.availableModules(OS, ARCH);
         for (String module : config.getEnableModules()) {
-            if (!availableModules.contains(module)) {
-                LuaInMinecraftBukkit.instance().getLogger().warning(String.format(
-                        "Skipping module '%s' because not available.", module));
-                continue;
-            }
             NativeModule nativeModule = NativeModule.MODULES.get(module);
             if (nativeModule == null) {
                 LuaInMinecraftBukkit.instance().getLogger().warning(String.format(
                         "Skipping module '%s' because not found.", module));
                 continue;
-            } else if (!nativeModule.isInitialized()) {
+            }
+
+            // find real module name.
+            // sometimes module depends on lua version.
+            // if depends on it then the real name should be "module-luaVersion"
+            String realModule = null;
+            if (availableModules.contains(module)) {
+                realModule = module;
+            } else if (availableModules.contains(module + "-" + currentVersion)) {
+                realModule = module + "-" + currentVersion;
+            } else {
+                LuaInMinecraftBukkit.instance().getLogger().warning(String.format(
+                        "Skipping module '%s' because not available.", module));
+                continue;
+            }
+
+            if (!nativeModule.isInitialized()) {
                 File nativeBaseDir = nativeModule.baseDir();
 
-                String[] moduleFiles = nativeConfig.module(OS, ARCH, module);
+                String[] moduleFiles = nativeConfig.module(OS, ARCH, realModule);
                 LinkedList<String> paths = new LinkedList<>();
                 if (moduleFiles != null) {
                     for (String file : moduleFiles) {
@@ -120,8 +131,8 @@ public class NativeLoader {
                 nativeModule.initialize(paths);
             }
             LuaInMinecraftBukkit.instance().getLogger().warning(String.format(
-                    "Loaded module '%s' %s.",
-                    module,
+                    "Loaded module '%s'(%s) %s.",
+                    module, realModule,
                     nativeModule.isInitialized() ? "successfully" : "failed"));
         }
     }

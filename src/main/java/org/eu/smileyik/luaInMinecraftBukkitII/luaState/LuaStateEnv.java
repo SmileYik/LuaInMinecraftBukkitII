@@ -36,6 +36,7 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
     @Getter
     private final LuaStateConfig config;
     private final long[] initFileLoadedTimestamps;
+    private final Object[] initFileLoadedLock;
     @Getter
     private final File rootDir;
 
@@ -54,6 +55,10 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
         this.id = id;
         this.config = config;
         this.initFileLoadedTimestamps = new long[config.getInitialization().length];
+        this.initFileLoadedLock = new Object[config.getInitialization().length];
+        for (int i = 0; i < this.initFileLoadedLock.length; i++) {
+            this.initFileLoadedLock[i] = new Object();
+        }
         this.rootDir = new File(LuaInMinecraftBukkit.instance().getLuaStateFolder(), this.config.getRootDir());
         if (!rootDir.exists() && !rootDir.mkdirs()) {
             DebugLogger.debug("Cannot create new directory: %s", rootDir);
@@ -126,26 +131,30 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
         }
 
         boolean initialized = true;
-        PluginManager pluginManager = LuaInMinecraftBukkit.instance().getServer().getPluginManager();
+        LuaInMinecraftBukkit plugin = LuaInMinecraftBukkit.instance();
+        PluginManager pluginManager = plugin.getServer().getPluginManager();
         for (int i = 0; i < initFileLoadedTimestamps.length; i++) {
             if (initFileLoadedTimestamps[i] != 0) {
                 continue;
             }
             LuaInitConfig luaInitConfig = config.getInitialization()[i];
             boolean flag = true;
-            for (String plugin : luaInitConfig.getDepends()) {
-                if (!pluginManager.isPluginEnabled(plugin)) {
+            for (String pluginName : luaInitConfig.getDepends()) {
+                if (!pluginManager.isPluginEnabled(pluginName)) {
                     flag = false;
                     break;
                 }
             }
             if (flag) {
                 final int finalI = i;
-                evalFile(luaInitConfig.getFile())
-                        .ifSuccessThen(it -> {
-                            initFileLoadedTimestamps[finalI] = System.currentTimeMillis();
-                            DebugLogger.debug("[Lua env %s] lua file initialized: %s", id, luaInitConfig.getFile());
-                        });
+                if (luaInitConfig.isAsyncLoad()) {
+                    plugin.getServer().getScheduler().runTaskAsynchronously(
+                            plugin, () -> evalInitFile(luaInitConfig, finalI)
+                    );
+                } else {
+                    evalInitFile(luaInitConfig, finalI);
+                }
+
             } else {
                 initialized = false;
             }
@@ -156,13 +165,23 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
         }
     }
 
+    private void evalInitFile(LuaInitConfig luaInitConfig, int idx) {
+        synchronized (initFileLoadedLock[idx]) {
+            evalFile(luaInitConfig.getFile())
+                    .ifSuccessThen(it -> {
+                        initFileLoadedTimestamps[idx] = System.currentTimeMillis();
+                        DebugLogger.debug("[Lua env %s] lua file initialized: %s", id, luaInitConfig.getFile());
+                    });
+        }
+    }
+
     @Override
     public void checkScriptFilesUpdate() {
         for (int i = 0; i < initFileLoadedTimestamps.length; i++) {
             if (initFileLoadedTimestamps[i] == 0) {
                 continue;
             }
-
+            
             LuaInitConfig luaInitConfig = config.getInitialization()[i];
             File file = luaEnv.file(luaInitConfig.getFile());
             long lasted = file.lastModified();
