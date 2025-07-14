@@ -49,12 +49,15 @@ add_library(jni-bridge SHARED ${PROJECT_SOURCES})
 target_include_directories(jni-bridge PUBLIC ${PROJECT_INCLUDE_DIRECTORIES})
 target_compile_definitions(jni-bridge PRIVATE JNI_BRIDGE_EXPORTS)
 add_custom_target(generateHeader
-    WORKING_DIRECTORY "${LuaInMinecraftBukkitDir}/src/main/java"
-    COMMAND ${Java_JAVAC_EXECUTABLE} -cp "${LuaInMinecraftBukkitDir}/src/main/java" -d "${PROJECT_SOURCE_DIR}/build/classes" -h "${PROJECT_SOURCE_DIR}/build/headers" "org/eu/smileyik/luaInMinecraftBukkitII/module/jniBridge/JNIBridge.java"
-    COMMAND cmake -E copy_if_different "${PROJECT_SOURCE_DIR}/build/headers/org_eu_smileyik_luaInMinecraftBukkitII_module_jniBridge_JNIBridge.h" "${PROJECT_SOURCE_DIR}/build/headers/jni_bridge_inner.h"
+    USES_TERMINAL
+    WORKING_DIRECTORY "${LuaInMinecraftBukkitDir}"
+    COMMAND "${LuaInMinecraftBukkitDir}/gradlew" ":build"
+    COMMAND cmake -E copy_if_different "${LuaInMinecraftBukkitDir}/build/generated/sources/headers/java/main/org_eu_smileyik_luaInMinecraftBukkitII_module_jniBridge_JNIBridge.h" "${PROJECT_SOURCE_DIR}/build/headers/jni_bridge_inner.h"
 )
 if (NOT SKIP_GENERATE_HEADER)
     add_dependencies(jni-bridge generateHeader)
+else()
+    message(STATUS "Skip generate header.")
 endif()
 
 set(PLUGIN_SOURCES
