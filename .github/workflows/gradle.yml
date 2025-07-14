@@ -139,12 +139,12 @@ jobs:
         run: |
           echo "EXTRA_LINKER_ARGS=-L${{ github.workspace }}/cffi-lua/deps -llua" >> "$GITHUB_OUTPUT"
       - name: Define arch variables
-        id: arch
+        id: vars
         if: runner.os == 'macOS'
         run: |
           echo "ARCH_NAME=arm64" >> "$GITHUB_OUTPUT"
       - name: Define arch variables
-        id: arch
+        id: vars
         if: runner.os != 'macOS'
         run: |
           echo "ARCH_NAME=amd" >> "$GITHUB_OUTPUT"
@@ -165,10 +165,10 @@ jobs:
           echo "Extra linker args: ${{ steps.vars.outputs.EXTRA_LINKER_ARGS }}"
           meson .. -Dlua_version=vendor -Dtests=false -Dcpp_link_args="${{ steps.vars.outputs.EXTRA_LINKER_ARGS }}"
           ninja
-          mkdir -p cffi/${{ runner.os }}/${{ steps.arch.outputs.ARCH_NAME }}/cffi-${{ matrix.Lua }}
-          mv *.so cffi/${{ runner.os }}/${{ steps.arch.outputs.ARCH_NAME }}/cffi-${{ matrix.Lua }} || echo "Not found *.so"
-          mv *.dylib cffi/${{ runner.os }}/${{ steps.arch.outputs.ARCH_NAME }}/cffi-${{ matrix.Lua }} || echo "Not found *.dylib"
-          mv *.dll cffi/${{ runner.os }}/${{ steps.arch.outputs.ARCH_NAME }}/cffi-${{ matrix.Lua }} || echo "Not found *.dll"
+          mkdir -p cffi/${{ runner.os }}/${{ steps.vars.outputs.ARCH_NAME }}/cffi-${{ matrix.Lua }}
+          mv *.so cffi/${{ runner.os }}/${{ steps.vars.outputs.ARCH_NAME }}/cffi-${{ matrix.Lua }} || echo "Not found *.so"
+          mv *.dylib cffi/${{ runner.os }}/${{ steps.vars.outputs.ARCH_NAME }}/cffi-${{ matrix.Lua }} || echo "Not found *.dylib"
+          mv *.dll cffi/${{ runner.os }}/${{ steps.vars.outputs.ARCH_NAME }}/cffi-${{ matrix.Lua }} || echo "Not found *.dll"
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4.6.2
         with:
