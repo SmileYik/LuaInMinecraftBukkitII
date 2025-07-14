@@ -28,12 +28,15 @@
         "macos": {
             "arm64": {
                 "lua-5.2.4": [
+                    "liblua.dylib",
                     "libluajava4Lua52.dylib"
                 ],
                 "lua-5.3.6": [
+                    "liblua.dylib",
                     "libluajava4Lua53.dylib"
                 ],
                 "lua-5.4.8": [
+                    "liblua.dylib",
                     "libluajava4Lua54.dylib"
                 ],
                 "luajit": [
@@ -45,18 +48,45 @@
         "linux": {
             "amd64": {
                 "lua-5.2.4": [
+                    "liblua.so",
                     "libluajava4Lua52.so"
                 ],
                 "lua-5.3.6": [
+                    "liblua.so",
                     "libluajava4Lua53.so"
                 ],
                 "lua-5.4.8": [
+                    "liblua.so",
                     "libluajava4Lua54.so"
                 ],
                 "luajit": [
                     "libluajit.so",
                     "libluajava4Luajit.so"
                 ]
+            }
+        }
+    },
+    "modules": {
+        "windows": {
+            "amd64": {
+                "cffi-lua-5.2.4": ["cffi.dll"],
+                "cffi-lua-5.3.6": ["cffi.dll"],
+                "cffi-lua-5.4.8": ["cffi.dll"]
+            }
+        },
+        "macos": {
+            "arm64": {
+                "cffi-lua-5.2.4": ["cffi.so"],
+                "cffi-lua-5.3.6": ["cffi.so"],
+                "cffi-lua-5.4.8": ["cffi.so"]
+            }
+        },
+        "linux": {
+            "amd64": {
+                "cffi-lua-5.2.4": ["cffi.so"],
+                "cffi-lua-5.3.6": ["cffi.so"],
+                "cffi-lua-5.4.8": ["cffi.so"],
+                "jni-bridge": ["libjni-bridge.so"]
             }
         }
     }
