@@ -60,4 +60,20 @@ public class RootCommand {
         ((ILuaStateEnvInner) env).reload();
         sender.sendMessage("Reloaded Lua Environment");
     }
+
+    @Command(
+            value = "softReloadEnv",
+            args = {"lua_env"},
+            description = "Soft Reload Lua Environment"
+    )
+    public void softReloadEnv(CommandSender sender, String[] args) throws Exception {
+        String luaEnv = args[0];
+        ILuaStateEnv env = LuaInMinecraftBukkit.instance().getLuaStateManager().getEnv(luaEnv);
+        if (env == null) {
+            sender.sendMessage("Lua Environment '" + luaEnv + "' not found");
+            return;
+        }
+        ((ILuaStateEnvInner) env).softReload();
+        sender.sendMessage("Soft Reloaded Lua Environment");
+    }
 }

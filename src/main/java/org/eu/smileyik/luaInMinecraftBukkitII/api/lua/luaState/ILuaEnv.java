@@ -91,6 +91,13 @@ public interface ILuaEnv {
     void registerCleaner(ILuaCallable cleaner);
 
     /**
+     * 注册软重载闭包. 这个闭包将会在软重启Lua环境时调用.
+     * @param luaCallable 闭包
+     * @return 如果注册失败则返回失败信息.
+     */
+    Result<Void, String> registerSoftReload(ILuaCallable luaCallable);
+
+    /**
      * 获取文件路径.
      * @param path 文件名
      * @return 文件实际存放的路径.

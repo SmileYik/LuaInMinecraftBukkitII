@@ -86,6 +86,15 @@ public class SimpleLuaEnv implements ILuaEnv {
     }
 
     @Override
+    public Result<Void, String> registerSoftReload(ILuaCallable luaCallable) {
+        if (luaCallable == null) {
+            return Result.failure("lua callable is null");
+        }
+        env.registerSoftReload(luaCallable);
+        return Result.success(null);
+    }
+
+    @Override
     public String path(String path) {
         return file(path).toString();
     }

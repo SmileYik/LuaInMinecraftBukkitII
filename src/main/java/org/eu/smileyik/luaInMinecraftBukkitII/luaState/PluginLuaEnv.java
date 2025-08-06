@@ -85,7 +85,7 @@ public class PluginLuaEnv implements ILuaStateEnvInner, ILuaStateEnv, ILuaStateP
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         if (lua != null) {
             callClosure("onClose");
             lua.close();
@@ -94,9 +94,14 @@ public class PluginLuaEnv implements ILuaStateEnvInner, ILuaStateEnv, ILuaStateP
     }
 
     @Override
-    public void reload() {
+    public synchronized void reload() {
         close();
         createEnv();
+    }
+
+    @Override
+    public void softReload() {
+
     }
 
     @Override

@@ -46,6 +46,7 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
     private final Map<String, CommandService> commandServices = new HashMap<>();
     @Getter(AccessLevel.PROTECTED)
     private final List<ILuaCallable> cleaners = new LinkedList<>();
+    private final List<ILuaCallable> softReloadCallables = new LinkedList<>();
 
     private LuaStateFacade lua;
     @Getter(AccessLevel.PUBLIC)
@@ -66,7 +67,7 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
     }
 
     @Override
-    public void createEnv() {
+    public synchronized void createEnv() {
         if (this.lua != null && !this.lua.isClosed()) {
             return;
         }
@@ -252,12 +253,17 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
+        // clean soft reloads
+        softReloadCallables.clear();
+
+        // clean cleaners
         for (ILuaCallable cleaner : cleaners) {
             cleaner.call();
         }
         cleaners.clear();
 
+        // unregister listeners
         listeners.forEach((name, listener) -> {
             HandlerList.unregisterAll(listener);
             if (listener instanceof LuaEventListener) {
@@ -266,11 +272,13 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
         });
         listeners.clear();
 
+        // unregister commands.
         commandServices.forEach((name, commandService) -> {
             commandService.shutdown();
         });
         commandServices.clear();
 
+        // close lua state.
         if (lua != null) {
             lua.close();
             lua = null;
@@ -282,9 +290,35 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
     }
 
     @Override
-    public void reload() {
+    public synchronized void reload() {
         close();
         createEnv();
         initialization();
+    }
+
+    /**
+     * 注册软重载闭包.
+     * @param luaCallable 软重载闭包
+     */
+    protected synchronized void registerSoftReload(@NotNull ILuaCallable luaCallable) {
+        this.softReloadCallables.add(luaCallable);
+    }
+
+    /**
+     * 软重载.
+     */
+    @Override
+    public synchronized void softReload() {
+        this.softReloadCallables.forEach(it -> {
+            try {
+                it.call();
+            } catch (Exception err) {
+                LuaInMinecraftBukkit.instance()
+                        .getLogger()
+                        .severe(String.format(
+                                "Failed when calling soft reload callable: %s", err.getMessage()));
+                DebugLogger.debug(DebugLogger.ERROR, err);
+            }
+        });
     }
 }
