@@ -8,6 +8,7 @@ import org.eu.smileyik.luaInMinecraftBukkitII.api.ILuaStateManager;
 import org.eu.smileyik.luaInMinecraftBukkitII.command.RootCommand;
 import org.eu.smileyik.luaInMinecraftBukkitII.config.Config;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.command.LuaCommandRegister;
+import org.eu.smileyik.luaInMinecraftBukkitII.util.ResourcesExtractor;
 import org.eu.smileyik.simplecommand.CommandService;
 import org.eu.smileyik.simpledebug.DebugLogger;
 import org.keplerproject.luajava.LuaState;
@@ -16,6 +17,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class LuaInMinecraftBukkit extends JavaPlugin {
@@ -99,7 +102,11 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
 
         // load native library.
         getServer().getScheduler().runTaskAsynchronously(this, () -> {
-            asyncInit(config);
+            CompletableFuture<Object> future = new CompletableFuture<>();
+            getServer().getScheduler().runTaskAsynchronously(this, () -> {
+                asyncInit(config);
+                future.complete(null);
+            });
 
             if (LOADED_NATIVES.compareAndSet(false, true)) {
                 getLogger().info("Loading lua native libraries...");
@@ -113,6 +120,14 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
                         LuaState.LUA_VERSION);
             }
             // after loaded then init plugin.
+            try {
+                future.get();
+            } catch (InterruptedException ignored) {
+            } catch (ExecutionException e) {
+                DebugLogger.debug(DebugLogger.ERROR,
+                        "Failed to waiting 'asyncInit' method complete.");
+                DebugLogger.debug(e);
+            }
             getServer().getScheduler().runTask(this, () -> init(config));
         });
     }
@@ -121,6 +136,10 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
      * ahead of init().
      */
     private void asyncInit(Config config) {
+        // extract resources
+        getLogger().info("Extract resources: " + LUA_LIB_FOLDER);
+        ResourcesExtractor.extractResources(LUA_LIB_FOLDER, new File(getDataFolder(), LUA_LIB_FOLDER));
+
         // debug logger
         if (config.isDebug()) {
             try {
@@ -138,6 +157,9 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
         }
     }
 
+    /**
+     * init will call after asyncInit method.
+     */
     private void init(Config config) {
         luaStateManager = new LuaStateManager(config);
     }
