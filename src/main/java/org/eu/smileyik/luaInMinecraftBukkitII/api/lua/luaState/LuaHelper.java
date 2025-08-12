@@ -2,6 +2,7 @@ package org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState;
 
 import org.bukkit.scheduler.BukkitTask;
 import org.eu.smileyik.luaInMinecraftBukkitII.LuaInMinecraftBukkit;
+import org.eu.smileyik.luaInMinecraftBukkitII.luaState.UnsafeLuaCallable;
 import org.eu.smileyik.luaInMinecraftBukkitII.reflect.ReflectUtil;
 import org.eu.smileyik.luajava.exception.Result;
 import org.eu.smileyik.luajava.type.ILuaCallable;
@@ -42,6 +43,14 @@ public interface LuaHelper {
      */
     public static <T, R> Function<T, R> function(ILuaCallable callable) {
         return t -> (R) callable.call(t).getOrSneakyThrow();
+    }
+
+    /**
+     * 构建一个不安全的 Lua Function, 该 Function 不受锁保护. 在多线程情况下可能会出现问题.
+     * <strong>这可能会导致段错误, 从而引发JVM崩溃!</strong>
+     */
+    public static ILuaCallable unsafeCallable(ILuaCallable callable) {
+        return UnsafeLuaCallable.of(callable);
     }
 
     /**
