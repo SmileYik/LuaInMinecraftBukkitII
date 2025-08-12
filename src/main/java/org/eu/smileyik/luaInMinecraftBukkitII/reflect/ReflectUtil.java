@@ -3,10 +3,44 @@ package org.eu.smileyik.luaInMinecraftBukkitII.reflect;
 import org.eu.smileyik.luajava.reflect.LuaInvokedMethod;
 
 import java.lang.reflect.*;
-import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ReflectUtil {
+    public static final String PRIMITIVE_TYPE_PATTERN_STR = "(byte|short|int|long|float|double|char|boolean)";
+    // public static final Pattern PRIMITIVE_TYPE_PATTERN = Pattern.compile(String.format("^%s$", PRIMITIVE_TYPE_PATTERN_STR));
+    public static final Pattern PRIMITIVE_TYPE_PATTERN = Pattern.compile(String.format("^%s(\\[\\])*$", PRIMITIVE_TYPE_PATTERN_STR));
+
+    public static final String FULL_CLASS_NAME_PATTERN_STR = "([a-zA-Z_$][a-zA-Z\\d_$]*\\.)*[a-zA-Z_$][a-zA-Z\\d_$]*";
+    public static final Pattern FULL_CLASS_NAME_PATTERN = Pattern.compile(String.format("^%s$", FULL_CLASS_NAME_PATTERN_STR));
+    public static final Pattern FULL_CLASS_ARRAY_NAME_PATTERN_1 = Pattern.compile(String.format("^\\[+L%s;$", FULL_CLASS_NAME_PATTERN_STR));
+    public static final Pattern FULL_CLASS_ARRAY_NAME_PATTERN_2 = Pattern.compile(String.format("^%s(\\[\\])+$", FULL_CLASS_NAME_PATTERN_STR));
+
+    private static final Map<String, Class<?>> PRIMITIVE_NAME_2_TYPE_MAP;
+
+    static {
+        Map<String, Class<?>> primitiveName2TypeMap = new HashMap<String, Class<?>>();
+        primitiveName2TypeMap.put("byte", byte.class);
+        primitiveName2TypeMap.put("short", short.class);
+        primitiveName2TypeMap.put("int", int.class);
+        primitiveName2TypeMap.put("long", long.class);
+        primitiveName2TypeMap.put("float", float.class);
+        primitiveName2TypeMap.put("double", double.class);
+        primitiveName2TypeMap.put("char", char.class);
+        primitiveName2TypeMap.put("boolean", boolean.class);
+        primitiveName2TypeMap.put("void", void.class);
+        primitiveName2TypeMap.put("B", byte.class);
+        primitiveName2TypeMap.put("S", short.class);
+        primitiveName2TypeMap.put("I", int.class);
+        primitiveName2TypeMap.put("J", long.class);
+        primitiveName2TypeMap.put("F", float.class);
+        primitiveName2TypeMap.put("D", double.class);
+        primitiveName2TypeMap.put("C", char.class);
+        primitiveName2TypeMap.put("Z", boolean.class);
+        primitiveName2TypeMap.put("V", void.class);
+        PRIMITIVE_NAME_2_TYPE_MAP = Collections.unmodifiableMap(primitiveName2TypeMap);
+    }
 
     public static Field findFieldByType(Class<?> clazz, Class<?> targetType) {
         while (clazz != null) {
@@ -123,5 +157,100 @@ public class ReflectUtil {
         field.setAccessible(true);
         boolean isStaticField = Modifier.isStatic(field.getModifiers());
         return field.get(isStaticField ? null : object);
+    }
+
+    /**
+     * 快速构建重复字符串
+     * @param str   字符串
+     * @param times 重复次数
+     */
+    private static String fastRepeat(String str, int times) {
+        if (str == null || str.isEmpty()) return str;
+        if (times <= 0) return "";
+
+        StringBuilder result = new StringBuilder();
+        StringBuilder s = new StringBuilder(str);
+        while (times > 0) {
+            if ((times & 1) == 1) {
+                result.append(s);
+            }
+            s.append(s);
+            times >>= 1;
+        }
+        return result.toString();
+    }
+
+    /**
+     * 能够以 int/int[]/java.lang.String[] 等形式读取Java类型.
+     * @param className 类名
+     * @return 指定的类实例
+     * @throws ClassNotFoundException 如果未找到相应的类
+     */
+    public static Class<?> forName(String className) throws ClassNotFoundException {
+        // primitive type; int/int[] style
+        {
+            if (PRIMITIVE_NAME_2_TYPE_MAP.containsKey(className)) {
+                return PRIMITIVE_NAME_2_TYPE_MAP.get(className);
+            }
+
+            Matcher matcher = PRIMITIVE_TYPE_PATTERN.matcher(className);
+            if (matcher.matches()) {
+                String primitiveType = matcher.group(1);
+                int d = (className.length() - primitiveType.length()) >> 1;
+                String realClassName = null;
+                Class<?> realClass = null;
+                switch (primitiveType) {
+                    case "byte":
+                        realClass = byte.class;
+                        realClassName = "B";
+                        break;
+                    case "short":
+                        realClass = short.class;
+                        realClassName = "S";
+                        break;
+                    case "int":
+                        realClass = int.class;
+                        realClassName = "I";
+                        break;
+                    case "long":
+                        realClass = long.class;
+                        realClassName = "J";
+                        break;
+                    case "float":
+                        realClass = float.class;
+                        realClassName = "F";
+                        break;
+                    case "double":
+                        realClass = double.class;
+                        realClassName = "D";
+                        break;
+                    case "char":
+                        realClass = char.class;
+                        realClassName = "C";
+                        break;
+                    case "boolean":
+                        realClass = boolean.class;
+                        realClassName = "Z";
+                        break;
+                }
+                return d > 0 ? Class.forName(fastRepeat("[", d) + realClassName) : realClass;
+            }
+        }
+
+        // normal
+        if (
+                FULL_CLASS_NAME_PATTERN.matcher(className).matches() ||
+                FULL_CLASS_ARRAY_NAME_PATTERN_1.matcher(className).matches()
+        ) {
+            return Class.forName(className);
+        }
+
+        // java.lang.String[] Style.
+        if (!FULL_CLASS_ARRAY_NAME_PATTERN_2.matcher(className).matches()) {
+            throw new ClassNotFoundException(className);
+        }
+        int idx = className.indexOf('[');
+        int d = (className.length() - idx) >> 1;
+        return Class.forName(fastRepeat("[", d) + "L" + className.substring(0, idx) + ";");
     }
 }
