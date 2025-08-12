@@ -269,7 +269,7 @@ public interface LuaHelper {
      * @throws ClassNotFoundException 如果类型不存在则抛出
      */
     public static Optional<Object> castArray(String className, LuaArray array) throws ClassNotFoundException {
-        return castArray(Class.forName(className), array);
+        return castArray(ReflectUtil.forName(className), array);
     }
 
     /**
@@ -279,9 +279,17 @@ public interface LuaHelper {
      * @return Java 数组
      */
     public static Optional<Object> castArray(Class<?> type, LuaArray array) {
-        ParamRef<Object> ref = ParamRef.wrapper();
-        byte result = ConvertablePriority.isConvertableType(Integer.MAX_VALUE, array, type, ref);
-        return result == ConvertablePriority.NOT_MATCH ?
-                Optional.empty() : Optional.of(ref.getParam());
+        Result<?, ? extends Exception> result = Result.success();
+        try {
+            if (type.isPrimitive()) {
+                Object o = Array.newInstance(type, 0);
+                type = o.getClass();
+                result = array.asPrimitiveArray(type);
+            } else {
+                result = array.asArray(type);
+            }
+        } catch (Exception ignore) {
+        }
+        return result != null && result.isSuccess() ? Optional.ofNullable(result.getValue()) : Optional.empty();
     }
 }
