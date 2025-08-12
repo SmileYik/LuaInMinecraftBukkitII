@@ -162,7 +162,7 @@ In the current version, the `luaBukkit` table contains the following instances:
 
 ### ILuaEnv
 
-Source code: [ILuaEnv][ILuaEnv]
+Source code: [ILuaEnv][ILuaEnv]  
 Usage: `luaBukkit.env:methodName`
 
 #### listenerBuilder - Listener builder
@@ -301,7 +301,7 @@ end
 
 ### LuaHelper
 
-Source code: [LuaHelper][LuaHelper]
+Source code: [LuaHelper][LuaHelper]  
 Usage: `luaBukkit.helper:methodName`
 
 #### runnable - Build a Runnable instance.
@@ -791,7 +791,7 @@ local array = luaBukkit.helper:castArray(
 
 ### LuaIOHelper
 
-Source code: [LuaIOHelper][LuaIOHelper]
+Source code: [LuaIOHelper][LuaIOHelper]  
 Usage: `luaBukkit.io:methodName`
 
 #### transferAndClose - Transfer input stream to output stream and close both
