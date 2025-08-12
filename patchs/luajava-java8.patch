@@ -25,7 +25,7 @@ index a787b9a..c0f2091 100755
          try {
              Object ret;
 -            if (field.canAccess(Modifier.isStatic(field.getModifiers()) ? null : obj)) {
-+            if (field.isAccessible()) {
++            if (luaStateFacade.isIgnoreNotPublic()) { //
                  ret = field.get(obj);
              } else if (!luaStateFacade.isIgnoreNotPublic()) {
                  field.setAccessible(true);
