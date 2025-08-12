@@ -2,11 +2,12 @@ package org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState;
 
 import org.bukkit.scheduler.BukkitTask;
 import org.eu.smileyik.luaInMinecraftBukkitII.LuaInMinecraftBukkit;
-import org.eu.smileyik.luajava.reflect.ConvertablePriority;
+import org.eu.smileyik.luaInMinecraftBukkitII.reflect.ReflectUtil;
+import org.eu.smileyik.luajava.exception.Result;
 import org.eu.smileyik.luajava.type.ILuaCallable;
 import org.eu.smileyik.luajava.type.LuaArray;
-import org.eu.smileyik.luajava.util.ParamRef;
 
+import java.lang.reflect.Array;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -52,11 +53,11 @@ public interface LuaHelper {
         CompletableFuture<Object> future = new CompletableFuture<>();
         LuaInMinecraftBukkit plugin = LuaInMinecraftBukkit.instance();
         plugin.getServer().getScheduler().runTask(plugin, () -> {
+            Object result = null;
             try {
-                Object result = callable.call().getOrSneakyThrow();
-                future.complete(result);
+                result = callable.call().getOrSneakyThrow();
             } finally {
-                future.complete(null);
+                future.complete(result);
             }
         });
         return future;
@@ -72,11 +73,11 @@ public interface LuaHelper {
         CompletableFuture<Object> future = new CompletableFuture<>();
         LuaInMinecraftBukkit plugin = LuaInMinecraftBukkit.instance();
         plugin.getServer().getScheduler().runTask(plugin, () -> {
+            Object result = null;
             try {
-                Object result = callable.call(params).getOrSneakyThrow();
-                future.complete(result);
+                result = callable.call(params).getOrSneakyThrow();
             } finally {
-                future.complete(null);
+                future.complete(result);
             }
         });
         return future;
@@ -92,11 +93,11 @@ public interface LuaHelper {
         CompletableFuture<Object> future = new CompletableFuture<>();
         LuaInMinecraftBukkit plugin = LuaInMinecraftBukkit.instance();
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            Object result = null;
             try {
-                Object result = callable.call().getOrSneakyThrow();
-                future.complete(result);
+                result = callable.call().getOrSneakyThrow();
             } finally {
-                future.complete(null);
+                future.complete(result);
             }
         }, tick);
         return future;
@@ -112,12 +113,11 @@ public interface LuaHelper {
     public static CompletableFuture<Object> syncCallLater(ILuaCallable callable, long tick, Object ... params) {
         CompletableFuture<Object> future = new CompletableFuture<>();
         LuaInMinecraftBukkit plugin = LuaInMinecraftBukkit.instance();
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {Object result = null;
             try {
-                Object result = callable.call(params).getOrSneakyThrow();
-                future.complete(result);
+                result = callable.call(params).getOrSneakyThrow();
             } finally {
-                future.complete(null);
+                future.complete(result);
             }
         }, tick);
         return future;
@@ -161,11 +161,11 @@ public interface LuaHelper {
         CompletableFuture<Object> future = new CompletableFuture<>();
         LuaInMinecraftBukkit plugin = LuaInMinecraftBukkit.instance();
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
+            Object result = null;
             try {
-                Object result = callable.call().getOrSneakyThrow();
-                future.complete(result);
+                result = callable.call().getOrSneakyThrow();
             } finally {
-                future.complete(null);
+                future.complete(result);
             }
         });
         return future;
@@ -181,11 +181,11 @@ public interface LuaHelper {
         CompletableFuture<Object> future = new CompletableFuture<>();
         LuaInMinecraftBukkit plugin = LuaInMinecraftBukkit.instance();
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
+            Object result = null;
             try {
-                Object result = callable.call(params).getOrSneakyThrow();
-                future.complete(result);
+                result = callable.call(params).getOrSneakyThrow();
             } finally {
-                future.complete(null);
+                future.complete(result);
             }
         });
         return future;
@@ -201,11 +201,11 @@ public interface LuaHelper {
         CompletableFuture<Object> future = new CompletableFuture<>();
         LuaInMinecraftBukkit plugin = LuaInMinecraftBukkit.instance();
         plugin.getServer().getScheduler().runTaskLaterAsynchronously(plugin, () -> {
+            Object result = null;
             try {
-                Object result = callable.call().getOrSneakyThrow();
-                future.complete(result);
+                result = callable.call().getOrSneakyThrow();
             } finally {
-                future.complete(null);
+                future.complete(result);
             }
         }, tick);
         return future;
@@ -222,11 +222,11 @@ public interface LuaHelper {
         CompletableFuture<Object> future = new CompletableFuture<>();
         LuaInMinecraftBukkit plugin = LuaInMinecraftBukkit.instance();
         plugin.getServer().getScheduler().runTaskLaterAsynchronously(plugin, () -> {
+            Object result = null;
             try {
-                Object result = callable.call(params).getOrSneakyThrow();
-                future.complete(result);
+                result = callable.call(params).getOrSneakyThrow();
             } finally {
-                future.complete(null);
+                future.complete(result);
             }
         }, tick);
         return future;
