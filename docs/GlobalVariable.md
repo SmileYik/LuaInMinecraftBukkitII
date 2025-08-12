@@ -2,7 +2,21 @@
 [LuaJava]: https://github.com/SmileYik/luajava
 [LuaInMinecraftBukkit II]: https://github.com/SmileYik/LuaInMinecraftBukkitII
 
-> 最后更新于2025年08月11日 | [历史记录]
+[ILuaEnv]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/master/src/main/java/org/eu/smileyik/luaInMinecraftBukkitII/api/lua/luaState/ILuaEnv.java
+[LuaHelper]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/master/src/main/java/org/eu/smileyik/luaInMinecraftBukkitII/api/lua/luaState/LuaHelper.java
+[LuaIOHelper]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/master/src/main/java/org/eu/smileyik/luaInMinecraftBukkitII/api/lua/luaState/LuaIOHelper.java
+[Bukkit]: https://bukkit.windit.net/javadoc/org/bukkit/Bukkit.html
+[LuaInMinecraftBukkit]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/master/src/main/java/org/eu/smileyik/luaInMinecraftBukkitII/LuaInMinecraftBukkit.java
+[Server]: https://bukkit.windit.net/javadoc/org/bukkit/Server.html
+[Logger]: https://docs.oracle.com/en/java/javase/17/docs/api/java.logging/java/util/logging/Logger.html
+[PrintStream]: https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/PrintStream.html
+
+[Command 章节]: ../Command.md
+[EventListener 章节]: ../EventListener.md
+[ILuaEventListenerBuilder]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/master/src/main/java/org/eu/smileyik/luaInMinecraftBukkitII/api/lua/luaState/event/ILuaEventListenerBuilder.java
+[ILuaCommandClassBuilder]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/master/src/main/java/org/eu/smileyik/luaInMinecraftBukkitII/api/lua/luaState/command/ILuaCommandClassBuilder.java
+
+> 最后更新于2025年08月12日 | [历史记录]
 
 > 此页面内容对应于 LuaInMinecraftBukkit II 插件的最新版本 **1.0.7**, 历史文档可以插件此页面的历史记录
 
@@ -119,15 +133,6 @@ print(clazz:getName())
 
 ## luaBukkit
 
-[ILuaEnv]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/master/src/main/java/org/eu/smileyik/luaInMinecraftBukkitII/api/lua/luaState/ILuaEnv.java
-[LuaHelper]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/master/src/main/java/org/eu/smileyik/luaInMinecraftBukkitII/api/lua/luaState/LuaHelper.java
-[LuaIOHelper]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/master/src/main/java/org/eu/smileyik/luaInMinecraftBukkitII/api/lua/luaState/LuaIOHelper.java
-[Bukkit]: https://bukkit.windit.net/javadoc/org/bukkit/Bukkit.html
-[LuaInMinecraftBukkit]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/master/src/main/java/org/eu/smileyik/luaInMinecraftBukkitII/LuaInMinecraftBukkit.java
-[Server]: https://bukkit.windit.net/javadoc/org/bukkit/Server.html
-[Logger]: https://docs.oracle.com/en/java/javase/17/docs/api/java.logging/java/util/logging/Logger.html
-[PrintStream]: https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/PrintStream.html
-
 `luaBukkit` 全局表为 [LuaInMinecraftBukkit II] 中添加的一个方法表, 意在与辅助 **Lua** 与 **Bukkit** 服务器之间的交互.
 
 当前版本下, `luaBukkit` 表中包含以下实例:
@@ -144,11 +149,6 @@ print(clazz:getName())
 | out    | [PrintStream]          | `System.out` 标准输出流 |
 
 ### ILuaEnv
-
-[Command 章节]: ../Command.md
-[EventListener 章节]: ../EventListener.md
-[ILuaEventListenerBuilder]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/master/src/main/java/org/eu/smileyik/luaInMinecraftBukkitII/api/lua/luaState/event/ILuaEventListenerBuilder.java
-[ILuaCommandClassBuilder]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/master/src/main/java/org/eu/smileyik/luaInMinecraftBukkitII/api/lua/luaState/command/ILuaCommandClassBuilder.java
 
 源代码: [ILuaEnv]  
 使用方法: `luaBukkit.env:方法名`
