@@ -5,18 +5,19 @@
 [ILuaEnv]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/master/src/main/java/org/eu/smileyik/luaInMinecraftBukkitII/api/lua/luaState/ILuaEnv.java
 [LuaHelper]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/master/src/main/java/org/eu/smileyik/luaInMinecraftBukkitII/api/lua/luaState/LuaHelper.java
 [LuaIOHelper]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/master/src/main/java/org/eu/smileyik/luaInMinecraftBukkitII/api/lua/luaState/LuaIOHelper.java
-[Bukkit]: https://bukkit.windit.net/javadoc/org/bukkit/Bukkit.html
 [LuaInMinecraftBukkit]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/master/src/main/java/org/eu/smileyik/luaInMinecraftBukkitII/LuaInMinecraftBukkit.java
-[Server]: https://bukkit.windit.net/javadoc/org/bukkit/Server.html
-[Logger]: https://docs.oracle.com/en/java/javase/17/docs/api/java.logging/java/util/logging/Logger.html
-[PrintStream]: https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/PrintStream.html
-
-[Command 章节]: ../Command.md
-[EventListener 章节]: ../EventListener.md
 [ILuaEventListenerBuilder]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/master/src/main/java/org/eu/smileyik/luaInMinecraftBukkitII/api/lua/luaState/event/ILuaEventListenerBuilder.java
 [ILuaCommandClassBuilder]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/master/src/main/java/org/eu/smileyik/luaInMinecraftBukkitII/api/lua/luaState/command/ILuaCommandClassBuilder.java
 
-> Last updated on August 12, 2025 | [History][History]
+[Bukkit]: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Bukkit.html
+[Server]: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Server.html
+[Logger]: https://docs.oracle.com/en/java/javase/17/docs/api/java.logging/java/util/logging/Logger.html
+[PrintStream]: https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/PrintStream.html
+
+[Command Section]: ./../Command.md
+[EventListener Section]: ./../EventListener.md
+
+> Last updated on August 13, 2025 | [History][History]
 
 > The content of this page corresponds to the latest version of the LuaInMinecraftBukkit II plugin, **1.0.7**. For historical documentation, please check the historical records of this page.
 

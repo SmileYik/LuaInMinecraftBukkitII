@@ -5,18 +5,19 @@
 [ILuaEnv]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/master/src/main/java/org/eu/smileyik/luaInMinecraftBukkitII/api/lua/luaState/ILuaEnv.java
 [LuaHelper]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/master/src/main/java/org/eu/smileyik/luaInMinecraftBukkitII/api/lua/luaState/LuaHelper.java
 [LuaIOHelper]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/master/src/main/java/org/eu/smileyik/luaInMinecraftBukkitII/api/lua/luaState/LuaIOHelper.java
-[Bukkit]: https://bukkit.windit.net/javadoc/org/bukkit/Bukkit.html
 [LuaInMinecraftBukkit]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/master/src/main/java/org/eu/smileyik/luaInMinecraftBukkitII/LuaInMinecraftBukkit.java
+[ILuaEventListenerBuilder]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/master/src/main/java/org/eu/smileyik/luaInMinecraftBukkitII/api/lua/luaState/event/ILuaEventListenerBuilder.java
+[ILuaCommandClassBuilder]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/master/src/main/java/org/eu/smileyik/luaInMinecraftBukkitII/api/lua/luaState/command/ILuaCommandClassBuilder.java
+
+[Bukkit]: https://bukkit.windit.net/javadoc/org/bukkit/Bukkit.html
 [Server]: https://bukkit.windit.net/javadoc/org/bukkit/Server.html
 [Logger]: https://docs.oracle.com/en/java/javase/17/docs/api/java.logging/java/util/logging/Logger.html
 [PrintStream]: https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/PrintStream.html
 
-[Command 章节]: ../Command.md
-[EventListener 章节]: ../EventListener.md
-[ILuaEventListenerBuilder]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/master/src/main/java/org/eu/smileyik/luaInMinecraftBukkitII/api/lua/luaState/event/ILuaEventListenerBuilder.java
-[ILuaCommandClassBuilder]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/master/src/main/java/org/eu/smileyik/luaInMinecraftBukkitII/api/lua/luaState/command/ILuaCommandClassBuilder.java
+[Command 章节]: ./../Command.md
+[EventListener 章节]: ./../EventListener.md
 
-> 最后更新于2025年08月12日 | [历史记录]
+> 最后更新于2025年08月13日 | [历史记录]
 
 > 此页面内容对应于 LuaInMinecraftBukkit II 插件的最新版本 **1.0.7**, 历史文档可以插件此页面的历史记录
 
