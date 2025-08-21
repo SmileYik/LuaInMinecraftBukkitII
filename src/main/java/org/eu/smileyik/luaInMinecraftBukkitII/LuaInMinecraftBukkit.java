@@ -9,9 +9,9 @@ import org.eu.smileyik.luaInMinecraftBukkitII.command.RootCommand;
 import org.eu.smileyik.luaInMinecraftBukkitII.config.Config;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.command.LuaCommandRegister;
 import org.eu.smileyik.luaInMinecraftBukkitII.util.ResourcesExtractor;
+import org.eu.smileyik.luajava.LuaState;
 import org.eu.smileyik.simplecommand.CommandService;
 import org.eu.smileyik.simpledebug.DebugLogger;
-import org.keplerproject.luajava.LuaState;
 
 import java.io.File;
 import java.io.IOException;

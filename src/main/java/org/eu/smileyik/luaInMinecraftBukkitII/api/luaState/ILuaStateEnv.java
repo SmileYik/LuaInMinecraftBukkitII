@@ -1,8 +1,8 @@
 package org.eu.smileyik.luaInMinecraftBukkitII.api.luaState;
 
+import org.eu.smileyik.luajava.LuaException;
 import org.eu.smileyik.luajava.exception.Result;
 import org.jetbrains.annotations.NotNull;
-import org.keplerproject.luajava.LuaException;
 
 public interface ILuaStateEnv {
 

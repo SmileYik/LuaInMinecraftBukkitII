@@ -1,13 +1,13 @@
 package org.eu.smileyik.luaInMinecraftBukkitII.luaState;
 
 import org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState.LuaIOHelper;
+import org.eu.smileyik.luajava.JavaFunction;
+import org.eu.smileyik.luajava.LuaException;
+import org.eu.smileyik.luajava.LuaState;
+import org.eu.smileyik.luajava.LuaStateFacade;
 import org.eu.smileyik.luajava.exception.Result;
 import org.eu.smileyik.luajava.type.ILuaCallable;
 import org.eu.smileyik.simpledebug.DebugLogger;
-import org.keplerproject.luajava.JavaFunction;
-import org.keplerproject.luajava.LuaException;
-import org.keplerproject.luajava.LuaState;
-import org.keplerproject.luajava.LuaStateFacade;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

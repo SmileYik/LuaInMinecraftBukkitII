@@ -15,15 +15,15 @@ import org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.ILuaStateEnv;
 import org.eu.smileyik.luaInMinecraftBukkitII.config.LuaInitConfig;
 import org.eu.smileyik.luaInMinecraftBukkitII.config.LuaStateConfig;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.event.LuaEventListener;
+import org.eu.smileyik.luajava.LuaException;
+import org.eu.smileyik.luajava.LuaStateFacade;
+import org.eu.smileyik.luajava.LuaStateFactory;
 import org.eu.smileyik.luajava.exception.Result;
 import org.eu.smileyik.luajava.type.ILuaCallable;
 import org.eu.smileyik.luajava.type.LuaTable;
 import org.eu.smileyik.simplecommand.CommandService;
 import org.eu.smileyik.simpledebug.DebugLogger;
 import org.jetbrains.annotations.NotNull;
-import org.keplerproject.luajava.LuaException;
-import org.keplerproject.luajava.LuaStateFacade;
-import org.keplerproject.luajava.LuaStateFactory;
 
 import java.io.File;
 import java.util.*;

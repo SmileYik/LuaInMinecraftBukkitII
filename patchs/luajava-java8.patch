@@ -1,8 +1,8 @@
-diff --git a/java/src/main/java/org/keplerproject/luajava/LuaJavaAPI.java b/java/src/main/java/org/keplerproject/luajava/LuaJavaAPI.java
-index a787b9a..c0f2091 100755
---- a/java/src/main/java/org/keplerproject/luajava/LuaJavaAPI.java
-+++ b/java/src/main/java/org/keplerproject/luajava/LuaJavaAPI.java
-@@ -136,7 +136,7 @@ public final class LuaJavaAPI {
+diff --git a/java/src/main/java/org/eu/smileyik/luajava/LuaJavaAPI.java b/java/src/main/java/org/eu/smileyik/luajava/LuaJavaAPI.java
+index 2e8919f..3340015 100755
+--- a/java/src/main/java/org/eu/smileyik/luajava/LuaJavaAPI.java
++++ b/java/src/main/java/org/eu/smileyik/luajava/LuaJavaAPI.java
+@@ -181,7 +181,7 @@ public final class LuaJavaAPI {
          Object ret;
          try {
              boolean isStatic = Modifier.isStatic(method.getModifiers());
@@ -10,8 +10,8 @@ index a787b9a..c0f2091 100755
 +            if (!method.isAccessible()) {
                  method.setAccessible(true);
              }
- 
-@@ -226,7 +226,7 @@ public final class LuaJavaAPI {
+
+@@ -271,7 +271,7 @@ public final class LuaJavaAPI {
              throw new LuaException("Error accessing field " + fieldName);
          }
          // checkField method already checked the obj can access this field or not.
@@ -19,13 +19,34 @@ index a787b9a..c0f2091 100755
 +        if (!field.isAccessible()) {
              field.setAccessible(true);
          }
- 
-@@ -361,7 +361,7 @@ public final class LuaJavaAPI {
+
+@@ -409,14 +409,10 @@ public final class LuaJavaAPI {
          if (field == null) return 0;
          try {
              Object ret;
 -            if (field.canAccess(Modifier.isStatic(field.getModifiers()) ? null : obj)) {
-+            if (luaStateFacade.isIgnoreNotPublic()) { //
-                 ret = field.get(obj);
-             } else if (!luaStateFacade.isIgnoreNotPublic()) {
+-                ret = field.get(obj);
+-            } else if (!luaStateFacade.isIgnoreNotPublic()) {
++            if (!luaStateFacade.isIgnoreNotPublic()) {
                  field.setAccessible(true);
+-                ret = field.get(obj);
+-            } else {
+-                return 0;
+             }
++            ret = field.get(obj);
+             luaStateFacade.rawPushObjectValue(ret).justThrow(LuaException.class);
+             return 1;
+         } catch (IllegalAccessException ignore) { }
+diff --git a/java/src/main/java/org/eu/smileyik/luajava/type/LuaTable.java b/java/src/main/java/org/eu/smileyik/luajava/type/LuaTable.java
+index 1e2e9e6..ec1daf2 100644
+--- a/java/src/main/java/org/eu/smileyik/luajava/type/LuaTable.java
++++ b/java/src/main/java/org/eu/smileyik/luajava/type/LuaTable.java
+@@ -149,7 +149,7 @@ public class LuaTable extends LuaObject implements ILuaCallable, ILuaFieldGettab
+      * @throws Exception throw any exception
+      */
+     public <K, V> Result<Map<K, V>, ? extends Exception> asDeepMap(Class<K> kClass, Class<V> vClass) {
+-        return asDeepMap(new HashSet<>(List.of(this)), kClass, vClass);
++        return asDeepMap(new HashSet<>(Collections.singletonList(this)), kClass, vClass);
+     }
+
+     protected <K, V> Result<Map<K, V>, ? extends Exception> asDeepMap(
