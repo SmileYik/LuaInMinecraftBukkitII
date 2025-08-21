@@ -15,6 +15,8 @@ import org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.ILuaStateEnv;
 import org.eu.smileyik.luaInMinecraftBukkitII.config.LuaInitConfig;
 import org.eu.smileyik.luaInMinecraftBukkitII.config.LuaStateConfig;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.event.LuaEventListener;
+import org.eu.smileyik.luaInMinecraftBukkitII.luaState.pool.LuaPool;
+import org.eu.smileyik.luaInMinecraftBukkitII.luaState.pool.SimpleLuaPool;
 import org.eu.smileyik.luajava.LuaException;
 import org.eu.smileyik.luajava.LuaStateFacade;
 import org.eu.smileyik.luajava.LuaStateFactory;
@@ -30,6 +32,8 @@ import java.util.*;
 
 public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInner {
     private final ILuaEnv luaEnv = new SimpleLuaEnv(this);
+    @Getter(AccessLevel.PROTECTED)
+    private final LuaPool luaPool = new SimpleLuaPool(this, 16);
 
     @Getter
     private final String id;
@@ -71,8 +75,11 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
         if (this.lua != null && !this.lua.isClosed()) {
             return;
         }
+        this.lua = createLuaState();
+    }
 
-        this.lua = LuaStateFactory.newLuaState(!this.config.isIgnoreAccessLimit());
+    public LuaStateFacade createLuaState() {
+        LuaStateFacade lua = LuaStateFactory.newLuaState(!this.config.isIgnoreAccessLimit());
         String luaLibrary = new File(
                 LuaInMinecraftBukkit.instance().getDataFolder(), LuaInMinecraftBukkit.LUA_LIB_FOLDER)
                 .getAbsolutePath();
@@ -132,6 +139,8 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
                             "Error initializing global variable 'luaBukkit': %s", err.getMessage());
                     DebugLogger.debug(DebugLogger.ERROR, err);
                 });
+        lua.getLuaState().newGlobalTable();
+        return lua;
     }
 
     public synchronized void initialization() {

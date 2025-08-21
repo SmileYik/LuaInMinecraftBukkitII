@@ -95,6 +95,11 @@ public class SimpleLuaEnv implements ILuaEnv {
     }
 
     @Override
+    public ILuaCallable pooledCallable(ILuaCallable callable) {
+        return PooledLuaCallable.of(callable, env.getLuaPool());
+    }
+
+    @Override
     public String path(String path) {
         return file(path).toString();
     }

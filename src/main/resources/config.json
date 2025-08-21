@@ -27,6 +27,10 @@
       ]
     }
   },
+  // 暂定配置 Lua池, 能够提供并发运行Lua的能力
+  "luaPool": {
+    "max": 16
+  },
   // 需要加载的模组
   "enableModules": [
     "cffi",

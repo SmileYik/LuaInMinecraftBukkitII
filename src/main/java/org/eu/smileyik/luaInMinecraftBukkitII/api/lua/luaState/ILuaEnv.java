@@ -98,6 +98,16 @@ public interface ILuaEnv {
     Result<Void, String> registerSoftReload(ILuaCallable luaCallable);
 
     /**
+     * 将传入的闭包转为 Lua 池用闭包, 该 Lua 池用闭包会运行在其他 Lua 状态机中,
+     * 在其他 Lua 状态机运行时, 会自动传输该闭包下所用到的一切 `local` 标记的局部变量.
+     * 在使用中尽量让闭包与当前环境的全局变量无关, 并且尽量使用 Java 实例来传递数值.
+     * 若一定需要使用某个全局变量, 请以形参方式传输.
+     * @param callable 闭包
+     * @return 池化闭包
+     */
+    public ILuaCallable pooledCallable(ILuaCallable callable);
+
+    /**
      * 获取文件路径.
      * @param path 文件名
      * @return 文件实际存放的路径.
