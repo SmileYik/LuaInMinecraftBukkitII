@@ -10,6 +10,7 @@ import org.eu.smileyik.luaInMinecraftBukkitII.luaState.command.LuaCommandClassBu
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.command.LuaCommandRegister;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.event.LuaEventListener;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.event.LuaEventListenerBuilder;
+import org.eu.smileyik.luaInMinecraftBukkitII.luaState.pool.PooledLuaCallable;
 import org.eu.smileyik.luajava.exception.Result;
 import org.eu.smileyik.luajava.type.ILuaCallable;
 import org.eu.smileyik.simplecommand.CommandService;

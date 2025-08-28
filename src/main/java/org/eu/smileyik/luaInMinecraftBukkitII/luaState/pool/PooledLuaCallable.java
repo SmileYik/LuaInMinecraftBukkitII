@@ -1,6 +1,5 @@
-package org.eu.smileyik.luaInMinecraftBukkitII.luaState;
+package org.eu.smileyik.luaInMinecraftBukkitII.luaState.pool;
 
-import org.eu.smileyik.luaInMinecraftBukkitII.luaState.pool.LuaPool;
 import org.eu.smileyik.luajava.LuaException;
 import org.eu.smileyik.luajava.LuaObject;
 import org.eu.smileyik.luajava.LuaStateFacade;
