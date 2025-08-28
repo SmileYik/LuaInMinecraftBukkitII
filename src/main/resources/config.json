@@ -1,31 +1,38 @@
 {
-  // 项目资源地址
-  "projectUrl": "https://raw.githubusercontent.com/SmileYik/LuaInMinecraftBukkitII/refs/heads/gh-page",
-  // 使用的lua版本
+  // 项目资源地址, 用于下载预编译好的动态链接库
+  "projectUrl": "https://raw.githubusercontent.com/SmileYik/LuaInMinecraftBukkitII/refs/tags/resources-1.0.8",
+  // 选择插件使用的lua版本
   "luaVersion": "lua-5.4.8",
-  // 总是检查依赖库Hash是否正确
+  // 总是检查依赖库Hash是否正确.
+  // 若启用该选项, 则会每次启动服务器时, 校验依赖文件于线上中的依赖文件是否相同, 并获取最新的依赖文件.
   "alwaysCheckHashes": false,
   // debug 标志
   "debug": false,
+  // 是否启用 bStats 统计信息
   "bStats": true,
-  // lua 环境
+  // lua 环境设置, 可以同时设置多个 Lua 环境
   "luaState": {
     // lua 环境 id
     "default": {
-      // 该环境运行在哪个目录下, "/" 代表插件目录下的luastate目录.
+      // 该环境运行在哪个目录下, "/" 代表插件目录下的 luaState 目录.
       "rootDir": "/",
       // 是否忽略访问限制, 忽略访问限制时可以强制访问java中的私有方法.
       "ignoreAccessLimit": false,
-      // 初始化脚本列表, 下面填脚本名, 并且脚本文件得在rootDir中寻找的到.
+      // 初始化脚本列表
       "initialization": [
+        // 可以加载多个脚本文件
         {
+          // 脚本文件名, 需要能在rootDir设置的文件夹中寻找的到.
           "file": "test.lua",
-          "autoReload": false,
+          // 脚本异步加载, 若启用, 则该脚本在初始化时, 将不会在 Bukkit 主线程中运行.
           "asyncLoad": false,
+          // 该脚本所依赖插件, 是插件列表
+          // 例如: "depends": ["PlaceholderAPI"], 则将会在 PlaceholderAPI 插件加载时, 才会加载该脚本.
           "depends": []
         }
       ],
-      // Lua 池
+      // Lua 池设置
+      // Lua 池可以突破 Lua 的单线程限制, 将 Lua 闭包转移至 Lua 池中的状态机中运行, 并在运行完闭后, 将闭包返回的结果返回至主状态机中.
       "pool": {
         // 是否启用
         "enable": true,
@@ -40,7 +47,7 @@
       }
     }
   },
-  // 需要加载的模组
+  // 需要加载的模组, 目前可用模组有 "cffi", "jni-bridge"
   "enableModules": [
     "cffi",
     "jni-bridge"

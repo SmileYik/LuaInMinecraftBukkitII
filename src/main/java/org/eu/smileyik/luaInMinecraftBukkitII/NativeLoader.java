@@ -14,9 +14,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Objects;
+import java.util.*;
 
 public class NativeLoader {
     public static final String OS_LINUX = "linux";
@@ -223,7 +221,10 @@ public class NativeLoader {
 
     private static void checkFile(File lib, Config config, NativeLibraryConfig libraryConfig, String module) {
         if (!lib.exists() || config.isAlwaysCheckHashes()) {
-            for (String baseUrl : libraryConfig.getUrls()) {
+            List<String> urls = new ArrayList<>();
+            urls.add(config.getProjectUrl() + "/natives");
+            urls.addAll(Arrays.asList(libraryConfig.getUrls()));
+            for (String baseUrl : urls) {
                 baseUrl = String.join("/", baseUrl, OS, ARCH, module);
                 String fileUrl = baseUrl + "/" + lib.getName();
                 String hashUrl = fileUrl + ".hash";
