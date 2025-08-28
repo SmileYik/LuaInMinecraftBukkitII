@@ -17,9 +17,9 @@
 [Command Section]: ./../Command.md
 [EventListener Section]: ./../EventListener.md
 
-> Last updated on August 13, 2025 | [History][History]
+> Last updated on August 28, 2025 | [History][History]
 
-> The content of this page corresponds to the latest version of the LuaInMinecraftBukkit II plugin, **1.0.7**. For historical documentation, please check the historical records of this page.
+> The content of this page corresponds to the latest version of the LuaInMinecraftBukkit II plugin, **1.0.8**. For historical documentation, please check the historical records of this page.
 
 > **!! The content of this file has machine translation !!** | [Origin](./../GlobalVariable.md)
 
@@ -262,6 +262,66 @@ luaBukkit.env:registerSoftReload(function ()
     counter = 0
     luaBukkit.log:info("Reloading...")
 end)
+```
+
+#### pooledCallable - Transform a Lua closure into a closure that can be run in the Lua pool
+
+**Method Description**: Wraps a `function() end` so it can run in the Lua pool. When it runs, it transfers the wrapped method to a **new Lua state machine**. This method should be used in a different thread from the current one. Additionally, the Lua pool must be enabled for the current Lua environment in `config.yml`.  
+**Return Type**: A closure that can be run in the Lua pool.  
+**Parameter List**:  
+| Parameter | Parameter Type | Description |
+| :-: | :-: | :-: |
+| `luaCallable` | `LuaFunction` | The closure |
+
+**Examples**:
+
+1.  Running 2 infinite loops in parallel:
+
+```lua
+local import = require "import"
+local Thread = import "java.lang.Thread"
+
+for i = 1, 2 do
+    luaBukkit.helper:asyncCall(luaBukkit.env:pooledCallable(
+        function ()
+            while true do
+                luaBukkit.log:info(Thread:currentThread():getName() .. " async call " .. i .. "!")
+                Thread:sleep(1000)
+            end
+        end
+    ))
+end
+```
+
+2.  Getting return values:
+
+```lua
+local import = require "import"
+import "java.lang.Thread"
+
+for i = 1, 10 do
+    local future = luaBukkit.helper:asyncCall(luaBukkit.env:pooledCallable(
+        function ()
+            while true do
+                luaBukkit.log:info(Thread:currentThread():getName() .. " async call " .. i .. "!")
+                break
+            end
+            return {
+                abc = "abc" .. i
+            }
+        end
+    ))
+    
+    -- print result
+    future:thenAccept(luaBukkit.helper:consumer(
+        function(result)
+            print(result)
+            for k, v in pairs(result) do
+                luaBukkit.log:info(k .. ": " .. v)
+            end
+        end
+    ))
+end
 ```
 
 #### path - Get file path

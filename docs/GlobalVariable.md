@@ -17,9 +17,9 @@
 [Command 章节]: ./../Command.md
 [EventListener 章节]: ./../EventListener.md
 
-> 最后更新于2025年08月13日 | [历史记录]
+> 最后更新于2025年08月28日 | [历史记录]
 
-> 此页面内容对应于 LuaInMinecraftBukkit II 插件的最新版本 **1.0.7**, 历史文档可以插件此页面的历史记录
+> 此页面内容对应于 LuaInMinecraftBukkit II 插件的最新版本 **1.0.8**, 历史文档可以插件此页面的历史记录
 
 在 Lua 部分拥有一些全局变量, 以方便您让 Lua 与 Bukkit 服务器之间的交互更为简单.
 
@@ -242,6 +242,65 @@ luaBukkit.env:registerSoftReload(function ()
     counter = 0
     luaBukkit.log:info("Reloading...")
 end)
+```
+
+#### pooledCallable - 将 Lua 闭包变为可在 Lua 池中运行的闭包
+
+**方法说明**: 包裹 `function() end` 使其能够在 Lua 池中运行. 运行时, 会将包裹着的方法转移至一个 **新的Lua状态机** 中, 使用该方法时应当在非当前线程使用. 此外, 需要在 `config.yml` 中, 为当前 Lua 环境启用 Lua 池.  
+**返回类型**: 能够在 Lua 池中运行的闭包.  
+**形参列表**: 
+| 形参 | 形参类型 | 说明 |
+| :-: | :-: | :-: |
+| `luaCallable` | `LuaFunction` | 闭包 |
+
+**例子**:   
+
+1. 并行运行2个死循环:
+```lua
+local import = require "import"
+local Thread = import "java.lang.Thread"
+
+for i = 1, 2 do
+    luaBukkit.helper:asyncCall(luaBukkit.env:pooledCallable(
+        function ()
+            while true do
+                luaBukkit.log:info(Thread:currentThread():getName() .. " async call " .. i .. "!")
+                Thread:sleep(1000)
+            end
+        end
+    ))
+end
+```
+
+2. 获取返回值:
+
+```lua
+local import = require "import"
+import "java.lang.Thread"
+
+for i = 1, 10 do
+    local future = luaBukkit.helper:asyncCall(luaBukkit.env:pooledCallable(
+        function ()
+            while true do
+                luaBukkit.log:info(Thread:currentThread():getName() .. " async call " .. i .. "!")
+                break
+            end
+            return {
+                abc = "abc" .. i
+            }
+        end
+    ))
+    
+    -- print result
+    future:thenAccept(luaBukkit.helper:consumer(
+        function(result)
+            print(result)
+            for k, v in pairs(result) do
+                luaBukkit.log:info(k .. ": " .. v)
+            end
+        end
+    ))
+end
 ```
 
 #### path - 获取文件路径
