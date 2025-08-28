@@ -4,6 +4,9 @@
 
 <p align="center">
     <h1 align="center">LuaInMinecraftBukkit II</h1>
+    <p align="center">
+        English | <a href="./docs/README.zh.md">中文</a>
+    </p>
 </p>
 
 <p align="center">
@@ -16,48 +19,44 @@
     </a>
 </p>
 
-## 简介
+[luajava-jasonsantos]: https://github.com/jasonsantos/luajava
+[luajava-smileyik]: https://github.com/SmileYik/luajava
+[lua-pool-example]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/gh-page/docs/en/GlobalVariable.md#pooledcallable---transform-a-lua-closure-into-a-closure-that-can-be-run-in-the-lua-pool
 
-LuaInMinecraftBukkit II 是一个 Minecraft Bukkit 服务端插件, 目的是实现使用 Lua 脚本与Bukkit服务器交互.
+## Introduction
 
-Lua 是一个小巧的脚本语言, 拥有非常简单的语法, 还有着较为不错的运行速度. 
-试想一下, 用一个轻巧的, 不需要编译就可以运行的脚本编写Bukkit插件将多么美好. 
-如果要修改一个地方, 那就修改, 然后重新加载脚本就好了, 简直就像梦一样.
+LuaInMinecraftBukkit II is a Minecraft Bukkit server plugin that aims to use Lua scripts to interact with Bukkit servers.
 
-## 与上一代的区别
+Lua is a small scripting language with very simple syntax and decent execution speed. Just imagine how wonderful it would be to write a Bukkit plugin with a lightweight script that doesn't need to be compiled to run. If you need to modify something, you can just change it and reload the script—it's like a dream.
 
-相比于上一代, 本代更注重于Lua原生虚拟机. 同样的, 本代也基于[luajava](https://github.com/jasonsantos/luajava)项目.
-不过与上一代相比, 本代使用[克隆后的luajava](https://github.com/SmileYik/luajava)仓库. 与原仓库相比, 克隆后的luajava仓库基本上重写了反射部分功能, 能够进一步简化Lua调用Java方法之间的过程, 并且在C语言端提供了非常友好的异常提示.
+## Differences from the Previous Generation
 
-## 能做什么?
+Compared to the previous generation, this version focuses more on the native Lua virtual machine. Similarly, this version is also based on the [luajava][luajava-jasonsantos] project. However, this version uses a [cloned luajava][luajava-smileyik] repository. Compared to the original repository, the cloned luajava repository has fundamentally rewritten parts of the reflection functionality, further simplifying the process of Lua calling Java methods, and provides very friendly exception messages on the C language side.
 
-基本上就支持两大功能:
+## What Can It Do?
 
-+ 注册指令: 注册你想要的任何指令, 并且自动生成帮助信息和指令层级关系
-+ 监听事件: 监听任何你想要的Bukkit事件, 即使这个时间是其他插件的自定义事件
+It basically supports three major functions:
 
-不过依托于Java的反射机制和动态代理机制, 目前可以实现在lua脚本中继承Java接口,
-调用Java类型中的任何公开方法, 公开属性. 也就是说本插件可以动态的加载脚本, 
-享受Java的子集功能. 当然, 反射也不是万能的, 还是会出现很多Lua端无法处理的情况, 
-此时就需要使用Java为Lua架桥了. 不过在开发过程中我会尽量简化Lua与Java中的交互流程.
++ **Command Registration**: Register any command you want, and it will automatically generate help information and command hierarchy.
++ **Event Listening**: Listen for any Bukkit event you want, even if it's a custom event from another plugin.
++ **Lua Pooling**: By pooling Lua, you can submit Lua closures to run on other state machines to achieve true multi-threaded parallel execution: [Example][lua-pool-example].
 
-除开上述所说内容, 与第一代相同, 还能够加载C/C++所编写的动态链接库. 当然这都是
-Lua 语言本身就支持的功能.
+However, relying on Java's reflection and dynamic proxy mechanisms, it is currently possible to inherit Java interfaces and call any public method or public attribute of a Java type in a Lua script. This means this plugin can dynamically load scripts and enjoy a subset of Java's functionality. Of course, reflection isn't a silver bullet, and there will still be many situations that cannot be handled on the Lua side. In such cases, Java needs to bridge the gap for Lua. But in the development process, I will try to simplify the interaction between Lua and Java.
+
+In addition to what has been mentioned, similar to the first generation, it can also load dynamic link libraries written in C/C++. Of course, these are features that the Lua language itself supports.
 
 ## JNIBridge
 
-多亏了 cffi 的加持, JNIBridge 为此而生! 现在能够与动态链接库进行交互了.
-目前 JNIBridge 还在完善中, 现支持功能有:
+Thanks to the support of cffi, JNIBridge was born\! Now it's possible to interact with dynamic link libraries. JNIBridge is still being improved, but currently supports:
 
-+ [x] Java 方法调用
-+ [x] 基础类型转换
++ [x] Java method invocation
++ [x] Basic type conversion
 
-下一阶段计划支持的功能有:
+Features planned for the next stage include:
 
-- [ ] 字段访问与赋值
-- [ ] 数组访问与赋值
+- [ ] Field access and assignment
+- [ ] Array access and assignment
 
-下图是一个简单的玩家加入服务器事件, 不过事件处理逻辑由 Cpp 端处理.
+The image below shows a simple player join event, but the event handling logic is managed on the Cpp side.
 
 ![ffi-plugin](./docs/ffi-plugin.png)
-
