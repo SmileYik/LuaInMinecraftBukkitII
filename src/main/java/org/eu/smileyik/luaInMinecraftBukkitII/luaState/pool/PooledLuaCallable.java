@@ -25,7 +25,7 @@ public class PooledLuaCallable implements ILuaCallable {
 
     @Override
     public Result<Object, ? extends LuaException> call(Object... args) {
-        return pool.submit(callable, 0, args)
+        return pool.submit(callable, 1, args)
                 .mapResultValue(objs -> Result.success(objs.length > 0 ? objs[0] : null));
     }
 

@@ -16,7 +16,6 @@ import org.eu.smileyik.luaInMinecraftBukkitII.config.LuaInitConfig;
 import org.eu.smileyik.luaInMinecraftBukkitII.config.LuaStateConfig;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.event.LuaEventListener;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.pool.LuaPool;
-import org.eu.smileyik.luaInMinecraftBukkitII.luaState.pool.SimpleLuaPool;
 import org.eu.smileyik.luajava.LuaException;
 import org.eu.smileyik.luajava.LuaStateFacade;
 import org.eu.smileyik.luajava.LuaStateFactory;
@@ -28,12 +27,16 @@ import org.eu.smileyik.simpledebug.DebugLogger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.logging.Logger;
 
 public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInner {
+    private final Logger log = LuaInMinecraftBukkit.instance().getLogger();
+
     private final ILuaEnv luaEnv = new SimpleLuaEnv(this);
     @Getter(AccessLevel.PROTECTED)
-    private final LuaPool luaPool = new SimpleLuaPool(this, 16);
+    private LuaPool luaPool;
 
     @Getter
     private final String id;
@@ -68,6 +71,8 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
         if (!rootDir.exists() && !rootDir.mkdirs()) {
             DebugLogger.debug("Cannot create new directory: %s", rootDir);
         }
+
+        DebugLogger.debug("Create Lua environment '%s' from config: %s", id, config);
     }
 
     @Override
@@ -76,8 +81,29 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
             return;
         }
         this.lua = createLuaState();
+        this.luaPool = createLuaPool();
     }
 
+    protected LuaPool createLuaPool() {
+        LuaPool luaPool = null;
+        if (config.getPool() != null && config.getPool().isEnable()) {
+            try {
+                luaPool = LuaPool.create(this, config.getPool());
+            } catch (ClassNotFoundException e) {
+                log.warning("Not found Lua pool type: " + config.getPool().getType());
+                DebugLogger.debug(e);
+            } catch (NoSuchMethodException e) {
+                log.warning("Cannot found construction in Lua pool type: " + config.getPool().getType());
+                DebugLogger.debug(e);
+            } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+                log.warning("Cannot instantiate Lua pool type: " + config.getPool().getType());
+                DebugLogger.debug(e);
+            }
+        }
+        return luaPool;
+    }
+
+    @Override
     public LuaStateFacade createLuaState() {
         LuaStateFacade lua = LuaStateFactory.newLuaState(!this.config.isIgnoreAccessLimit());
         String luaLibrary = new File(
@@ -217,16 +243,12 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
         if (scripFile.exists()) {
             return lua.evalFile(absolutePath)
                     .ifFailureThen(err -> {
-                        LuaInMinecraftBukkit.instance()
-                                .getLogger()
-                                .warning(String.format(
+                        log.warning(String.format(
                                         "Failed to eval lua file '%s', because: %s", file, err.getMessage()));
                         DebugLogger.debug(DebugLogger.ERROR, err);
                     });
         } else {
-            LuaInMinecraftBukkit.instance()
-                    .getLogger()
-                    .warning(String.format("Cannot find file: %s", file));
+            log.warning(String.format("Cannot find file: %s", file));
             return Result.success(-1);
         }
     }
@@ -235,9 +257,7 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
     public Result<Integer, LuaException> evalLua(@NotNull String luaScript) {
         return lua.evalString(luaScript)
                 .ifFailureThen(err -> {
-                    LuaInMinecraftBukkit.instance()
-                            .getLogger()
-                            .warning(String.format(
+                    log.warning(String.format(
                                     "Failed to eval lua script '%s', because: %s", luaScript, err.getMessage()));
                     DebugLogger.debug(DebugLogger.ERROR, err);
                 });
@@ -287,6 +307,12 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
         });
         commandServices.clear();
 
+        // close lua pool
+        if (luaPool != null) {
+            luaPool.close();
+            luaPool = null;
+        }
+
         // close lua state.
         if (lua != null) {
             lua.close();
@@ -322,9 +348,7 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
             try {
                 it.call();
             } catch (Exception err) {
-                LuaInMinecraftBukkit.instance()
-                        .getLogger()
-                        .severe(String.format(
+                log.severe(String.format(
                                 "Failed when calling soft reload callable: %s", err.getMessage()));
                 DebugLogger.debug(DebugLogger.ERROR, err);
             }

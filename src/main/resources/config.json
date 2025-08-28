@@ -24,12 +24,21 @@
           "asyncLoad": false,
           "depends": []
         }
-      ]
+      ],
+      // Lua 池
+      "pool": {
+        // 是否启用
+        "enable": true,
+        // Lua 池类型
+        "type": "org.eu.smileyik.luaInMinecraftBukkitII.luaState.pool.simplePool.SimpleLuaPool",
+        // Lua 池中最大 Lua 状态机数量
+        "maxSize": 2,
+        // 允许空闲中的 Lua 状态机数量
+        "idleSize": 1,
+        // 当状态机空闲多少时间(毫秒)时会将其清理. 注意: 仅在空闲状态机数量大于 `idleSize` 中设定的数量时才会进行清理.
+        "idleTimeout": 6000000
+      }
     }
-  },
-  // 暂定配置 Lua池, 能够提供并发运行Lua的能力
-  "luaPool": {
-    "max": 16
   },
   // 需要加载的模组
   "enableModules": [

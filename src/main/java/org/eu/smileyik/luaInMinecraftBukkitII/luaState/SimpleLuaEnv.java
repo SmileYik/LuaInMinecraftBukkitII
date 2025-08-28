@@ -97,6 +97,14 @@ public class SimpleLuaEnv implements ILuaEnv {
 
     @Override
     public ILuaCallable pooledCallable(ILuaCallable callable) {
+        if (env.getLuaPool() == null) {
+            LuaInMinecraftBukkit.instance()
+                    .getLogger()
+                    .warning(String.format(
+                            "Lua environment '%s' don't enable lua pool, will using current lua state to call this closure.",
+                            env.getId()));
+            return callable;
+        }
         return PooledLuaCallable.of(callable, env.getLuaPool());
     }
 

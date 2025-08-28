@@ -1,9 +1,12 @@
 package org.eu.smileyik.luaInMinecraftBukkitII.luaState;
 
 import org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.ILuaStateEnv;
+import org.eu.smileyik.luajava.LuaStateFacade;
 
 public interface ILuaStateEnvInner extends ILuaStateEnv, AutoCloseable {
     void createEnv();
+
+    LuaStateFacade createLuaState();
 
     void initialization();
 

@@ -32,8 +32,12 @@ public class PluginLuaEnv implements ILuaStateEnvInner, ILuaStateEnv, ILuaStateP
         if (this.lua != null && !this.lua.isClosed()) {
             return;
         }
+        this.lua = createLuaState();
+    }
 
-        this.lua = LuaStateFactory.newLuaState(!ignoreAccessLimit);
+    @Override
+    public LuaStateFacade createLuaState() {
+        LuaStateFacade lua = LuaStateFactory.newLuaState(!ignoreAccessLimit);
         String luaLibrary = new File(
                 LuaInMinecraftBukkit.instance().getLuaStateFolder(), LuaInMinecraftBukkit.LUA_LIB_FOLDER)
                 .getAbsolutePath();
@@ -72,6 +76,7 @@ public class PluginLuaEnv implements ILuaStateEnvInner, ILuaStateEnv, ILuaStateP
                             "Error initializing global variable 'luaBukkit': %s", err.getMessage());
                     DebugLogger.debug(DebugLogger.ERROR, err);
                 });
+        return lua;
     }
 
     @Override
