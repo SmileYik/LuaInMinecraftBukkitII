@@ -1,4 +1,11 @@
 rootProject.name = 'LuaInMinecraftBukkitII'
 
+gradle.ext.foliaSupport = gradle.startParameter.projectProperties.containsKey('FoliaSupport')
+
 include 'luajava:java'
 findProject('luajava:java')?.name = 'luajava-java'
+include 'scheduler'
+
+if (gradle.ext.foliaSupport) {
+    include 'scheduler:scheduler-folia'
+}

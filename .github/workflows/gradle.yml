@@ -42,7 +42,7 @@ jobs:
       run: |
         git submodule update --init --recursive
         chmod +x ./gradlew
-        ./gradlew build -x test -PWorkflow=YES -PTargetJava=${{ matrix.Java }} 
+        ./gradlew build -x test -PWorkflow=YES -PTargetJava=${{ matrix.Java }} -PFoliaSupport || ./gradlew build -x test -PWorkflow=YES -PTargetJava=${{ matrix.Java }}
 
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v4.6.2

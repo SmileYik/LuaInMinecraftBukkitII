@@ -192,7 +192,7 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
             if (flag) {
                 final int finalI = i;
                 if (luaInitConfig.isAsyncLoad()) {
-                    plugin.getServer().getScheduler().runTaskAsynchronously(
+                    plugin.getScheduler().runTaskAsynchronously(
                             plugin, () -> evalInitFile(luaInitConfig, finalI)
                     );
                 } else {

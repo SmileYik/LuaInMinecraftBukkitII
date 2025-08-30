@@ -36,6 +36,7 @@ group = 'org.eu.smileyik'
 version = project.gitTag == null ?
         "${project.gitVersion}+luajava-${project.luajavaVersion}+java-${project.targetJavaVersion}" :
         "${project.gitVersion}"
+if (gradle.foliaSupport) version += "+folia"
 
 repositories {
     mavenCentral()
@@ -83,6 +84,12 @@ dependencies {
     implementation 'net.bytebuddy:byte-buddy:1.14.3'
     // bstats
     implementation 'org.bstats:bstats-bukkit:3.0.2'
+
+    // scheduler
+    implementation project(":scheduler")
+    if (gradle.foliaSupport) {
+        implementation project(":scheduler:scheduler-folia")
+    }
 }
 
 tasks {
@@ -118,7 +125,10 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 processResources {
-    def props = [version: version]
+    def props = [
+            version: version,
+            foliaSupported: gradle.foliaSupport
+    ]
     inputs.properties props
     filteringCharset 'UTF-8'
     filesMatching('plugin.yml') {

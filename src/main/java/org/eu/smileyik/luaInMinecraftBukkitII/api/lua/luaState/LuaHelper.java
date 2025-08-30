@@ -1,9 +1,9 @@
 package org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState;
 
-import org.bukkit.scheduler.BukkitTask;
 import org.eu.smileyik.luaInMinecraftBukkitII.LuaInMinecraftBukkit;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.UnsafeLuaCallable;
 import org.eu.smileyik.luaInMinecraftBukkitII.reflect.ReflectUtil;
+import org.eu.smileyik.luaInMinecraftBukkitII.scheduler.ScheduledTaskWrapper;
 import org.eu.smileyik.luajava.exception.Result;
 import org.eu.smileyik.luajava.type.ILuaCallable;
 import org.eu.smileyik.luajava.type.LuaArray;
@@ -61,7 +61,7 @@ public interface LuaHelper {
     public static CompletableFuture<Object> syncCall(ILuaCallable callable) {
         CompletableFuture<Object> future = new CompletableFuture<>();
         LuaInMinecraftBukkit plugin = LuaInMinecraftBukkit.instance();
-        plugin.getServer().getScheduler().runTask(plugin, () -> {
+        plugin.getScheduler().runTask(plugin, () -> {
             Object result = null;
             try {
                 result = callable.call().getOrSneakyThrow();
@@ -81,7 +81,7 @@ public interface LuaHelper {
     public static CompletableFuture<Object> syncCall(ILuaCallable callable, Object ... params) {
         CompletableFuture<Object> future = new CompletableFuture<>();
         LuaInMinecraftBukkit plugin = LuaInMinecraftBukkit.instance();
-        plugin.getServer().getScheduler().runTask(plugin, () -> {
+        plugin.getScheduler().runTask(plugin, () -> {
             Object result = null;
             try {
                 result = callable.call(params).getOrSneakyThrow();
@@ -101,7 +101,7 @@ public interface LuaHelper {
     public static CompletableFuture<Object> syncCallLater(ILuaCallable callable, long tick) {
         CompletableFuture<Object> future = new CompletableFuture<>();
         LuaInMinecraftBukkit plugin = LuaInMinecraftBukkit.instance();
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+        plugin.getScheduler().runTaskLater(plugin, () -> {
             Object result = null;
             try {
                 result = callable.call().getOrSneakyThrow();
@@ -122,7 +122,7 @@ public interface LuaHelper {
     public static CompletableFuture<Object> syncCallLater(ILuaCallable callable, long tick, Object ... params) {
         CompletableFuture<Object> future = new CompletableFuture<>();
         LuaInMinecraftBukkit plugin = LuaInMinecraftBukkit.instance();
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {Object result = null;
+        plugin.getScheduler().runTaskLater(plugin, () -> {Object result = null;
             try {
                 result = callable.call(params).getOrSneakyThrow();
             } finally {
@@ -137,12 +137,11 @@ public interface LuaHelper {
      * @param callable Lua 闭包
      * @param delay    延迟执行, 单位: tick
      * @param period   间隔执行, 单位: tick
-     * @return BukkitTask.
+     * @return ScheduledTaskWrapper<?>.
      */
-    public static BukkitTask syncTimer(ILuaCallable callable, long delay, long period) {
+    public static ScheduledTaskWrapper<?> syncTimer(ILuaCallable callable, long delay, long period) {
         LuaInMinecraftBukkit plugin = LuaInMinecraftBukkit.instance();
-        return plugin.getServer()
-                .getScheduler()
+        return plugin.getScheduler()
                 .runTaskTimer(plugin, () -> callable.call(), delay, period);
     }
 
@@ -152,12 +151,11 @@ public interface LuaHelper {
      * @param delay    延迟执行, 单位: tick
      * @param period   间隔执行, 单位: tick
      * @param params   传入闭包参数.
-     * @return BukkitTask.
+     * @return ScheduledTaskWrapper<?>
      */
-    public static BukkitTask syncTimer(ILuaCallable callable, long delay, long period, Object ... params) {
+    public static ScheduledTaskWrapper<?> syncTimer(ILuaCallable callable, long delay, long period, Object ... params) {
         LuaInMinecraftBukkit plugin = LuaInMinecraftBukkit.instance();
-        return plugin.getServer()
-                .getScheduler()
+        return plugin.getScheduler()
                 .runTaskTimer(plugin, () -> callable.call(params), delay, period);
     }
 
@@ -169,7 +167,7 @@ public interface LuaHelper {
     public static CompletableFuture<Object> asyncCall(ILuaCallable callable) {
         CompletableFuture<Object> future = new CompletableFuture<>();
         LuaInMinecraftBukkit plugin = LuaInMinecraftBukkit.instance();
-        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
+        plugin.getScheduler().runTaskAsynchronously(plugin, () -> {
             Object result = null;
             try {
                 result = callable.call().getOrSneakyThrow();
@@ -189,7 +187,7 @@ public interface LuaHelper {
     public static CompletableFuture<Object> asyncCall(ILuaCallable callable, Object ... params) {
         CompletableFuture<Object> future = new CompletableFuture<>();
         LuaInMinecraftBukkit plugin = LuaInMinecraftBukkit.instance();
-        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
+        plugin.getScheduler().runTaskAsynchronously(plugin, () -> {
             Object result = null;
             try {
                 result = callable.call(params).getOrSneakyThrow();
@@ -209,7 +207,7 @@ public interface LuaHelper {
     public static CompletableFuture<Object> asyncCallLater(ILuaCallable callable, long tick) {
         CompletableFuture<Object> future = new CompletableFuture<>();
         LuaInMinecraftBukkit plugin = LuaInMinecraftBukkit.instance();
-        plugin.getServer().getScheduler().runTaskLaterAsynchronously(plugin, () -> {
+        plugin.getScheduler().runTaskLaterAsynchronously(plugin, () -> {
             Object result = null;
             try {
                 result = callable.call().getOrSneakyThrow();
@@ -230,7 +228,7 @@ public interface LuaHelper {
     public static CompletableFuture<Object> asyncCallLater(ILuaCallable callable, long tick, Object ... params) {
         CompletableFuture<Object> future = new CompletableFuture<>();
         LuaInMinecraftBukkit plugin = LuaInMinecraftBukkit.instance();
-        plugin.getServer().getScheduler().runTaskLaterAsynchronously(plugin, () -> {
+        plugin.getScheduler().runTaskLaterAsynchronously(plugin, () -> {
             Object result = null;
             try {
                 result = callable.call(params).getOrSneakyThrow();
@@ -248,10 +246,9 @@ public interface LuaHelper {
      * @param period   间隔执行, 单位: tick
      * @return Future<Object>
      */
-    public static BukkitTask asyncTimer(ILuaCallable callable, long delay, long period) {
+    public static ScheduledTaskWrapper<?> asyncTimer(ILuaCallable callable, long delay, long period) {
         LuaInMinecraftBukkit plugin = LuaInMinecraftBukkit.instance();
-        return plugin.getServer()
-                .getScheduler()
+        return plugin.getScheduler()
                 .runTaskTimerAsynchronously(plugin, () -> callable.call(), delay, period);
     }
 
@@ -263,10 +260,9 @@ public interface LuaHelper {
      * @param params   传入闭包的参数
      * @return Future<Object>
      */
-    public static BukkitTask asyncTimer(ILuaCallable callable, long delay, long period, Object ... params) {
+    public static ScheduledTaskWrapper<?> asyncTimer(ILuaCallable callable, long delay, long period, Object ... params) {
         LuaInMinecraftBukkit plugin = LuaInMinecraftBukkit.instance();
-        return plugin.getServer()
-                .getScheduler()
+        return plugin.getScheduler()
                 .runTaskTimerAsynchronously(plugin, () -> callable.call(params), delay, period);
     }
 

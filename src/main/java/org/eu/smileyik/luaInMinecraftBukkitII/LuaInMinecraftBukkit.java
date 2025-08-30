@@ -8,6 +8,7 @@ import org.eu.smileyik.luaInMinecraftBukkitII.api.ILuaStateManager;
 import org.eu.smileyik.luaInMinecraftBukkitII.command.RootCommand;
 import org.eu.smileyik.luaInMinecraftBukkitII.config.Config;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.command.LuaCommandRegister;
+import org.eu.smileyik.luaInMinecraftBukkitII.scheduler.Scheduler;
 import org.eu.smileyik.luaInMinecraftBukkitII.util.ResourcesExtractor;
 import org.eu.smileyik.luajava.LuaState;
 import org.eu.smileyik.simplecommand.CommandService;
@@ -39,6 +40,8 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
 
     @Getter
     private ILuaStateManager luaStateManager = null;
+    @Getter
+    private final Scheduler scheduler = Scheduler.newInstance();
     private Metrics metrics;
 
     public LuaInMinecraftBukkit() {
@@ -101,9 +104,9 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
         }
 
         // load native library.
-        getServer().getScheduler().runTaskAsynchronously(this, () -> {
+        getScheduler().runTaskAsynchronously(this, () -> {
             CompletableFuture<Object> future = new CompletableFuture<>();
-            getServer().getScheduler().runTaskAsynchronously(this, () -> {
+            getScheduler().runTaskAsynchronously(this, () -> {
                 asyncInit(config);
                 future.complete(null);
             });
@@ -128,7 +131,7 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
                         "Failed to waiting 'asyncInit' method complete.");
                 DebugLogger.debug(e);
             }
-            getServer().getScheduler().runTask(this, () -> init(config));
+            getScheduler().runTask(this, () -> init(config));
         });
     }
 
