@@ -95,6 +95,7 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
         }
         if (!new File(getDataFolder(), "config.json").exists()) {
             saveResource("config.json", false);
+            ResourcesExtractor.extractResources(LUA_STATE_FOLDER, new File(getDataFolder(), LUA_STATE_FOLDER));
         }
 
         Config config;
