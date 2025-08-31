@@ -11,6 +11,7 @@ import org.eu.smileyik.luaInMinecraftBukkitII.luaState.command.LuaCommandRegiste
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.event.LuaEventListener;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.event.LuaEventListenerBuilder;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.pool.PooledLuaCallable;
+import org.eu.smileyik.luajava.LuaException;
 import org.eu.smileyik.luajava.exception.Result;
 import org.eu.smileyik.luajava.type.ILuaCallable;
 import org.eu.smileyik.simplecommand.CommandService;
@@ -126,5 +127,15 @@ public class SimpleLuaEnv implements ILuaEnv {
     @Override
     public File file(String... paths) {
         return new File(env.getRootDir(), String.join(File.pathSeparator, paths));
+    }
+
+    @Override
+    public void setJustUseFirstMethod(boolean flag) {
+        env.setJustUseFirstMethod(flag);
+    }
+
+    @Override
+    public Result<Object, LuaException> ignoreMultiResultRun(ILuaCallable callable) {
+        return env.ignoreMultiResultRun(callable);
     }
 }

@@ -18,6 +18,8 @@
       "rootDir": "/",
       // 是否忽略访问限制, 忽略访问限制时可以强制访问java中的私有方法.
       "ignoreAccessLimit": false,
+      // 当 lua 调用的方法拥有多种符合要求的结果时, 自动运行首个方法而不是抛出异常
+      "justUseFirstMethod": true,
       // 初始化脚本列表
       "initialization": [
         // 可以加载多个脚本文件

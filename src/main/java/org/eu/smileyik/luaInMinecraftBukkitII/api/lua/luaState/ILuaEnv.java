@@ -3,6 +3,7 @@ package org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState;
 import org.bukkit.event.Listener;
 import org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState.command.ILuaCommandClassBuilder;
 import org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState.event.ILuaEventListenerBuilder;
+import org.eu.smileyik.luajava.LuaException;
 import org.eu.smileyik.luajava.exception.Result;
 import org.eu.smileyik.luajava.type.ILuaCallable;
 
@@ -134,4 +135,16 @@ public interface ILuaEnv {
      * @return 对应文件实例
      */
     File file(String... paths);
+
+    /**
+     * 当 lua 检索到多个符合要求的方法时, 默认使用第一个方法而非抛出错误.
+     * @param flag 开关
+     */
+    void setJustUseFirstMethod(boolean flag);
+
+    /**
+     * 当 lua 检索到多个符合要求的方法时, 默认使用第一个方法而非抛出错误. 并且仅在该闭包内生效.
+     * @param callable 需要忽略多个结果进行运行的闭包
+     */
+    Result<Object, LuaException> ignoreMultiResultRun(ILuaCallable callable);
 }

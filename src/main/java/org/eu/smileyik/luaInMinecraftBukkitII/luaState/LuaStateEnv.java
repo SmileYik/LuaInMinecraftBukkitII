@@ -177,6 +177,7 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
                     DebugLogger.debug(DebugLogger.ERROR, err);
                 });
         lua.getLuaState().newGlobalTable();
+        lua.setJustUseFirstMethod(config.isJustUseFirstMethod());
         return lua;
     }
 
@@ -373,5 +374,22 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
                 DebugLogger.debug(DebugLogger.ERROR, err);
             }
         });
+    }
+
+    public void setJustUseFirstMethod(boolean flag) {
+        this.lua.setJustUseFirstMethod(flag);
+    }
+
+    public Result<Object, LuaException> ignoreMultiResultRun(ILuaCallable callable) {
+        this.lua.lock();
+        try {
+            boolean flag = this.lua.isJustUseFirstMethod();
+            this.lua.setJustUseFirstMethod(true);
+            Result<Object, LuaException> result = callable.call().justCast();
+            this.lua.setJustUseFirstMethod(flag);
+            return result;
+        } finally {
+            this.lua.unlock();
+        }
     }
 }

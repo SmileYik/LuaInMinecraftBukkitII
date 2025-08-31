@@ -15,6 +15,9 @@ public class LuaStateConfig implements ILuaStateConfig {
     /** force access java field and method or not */
     private boolean ignoreAccessLimit;
 
+    /** just use first method if found multi methods when index java object method by method name */
+    private boolean justUseFirstMethod = true;
+
     /** auto reload setting */
     private AutoReloadConfig autoReload;
 
