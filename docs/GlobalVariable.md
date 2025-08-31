@@ -17,9 +17,9 @@
 [Command 章节]: ./../Command.md
 [EventListener 章节]: ./../EventListener.md
 
-> 最后更新于2025年08月28日 | [历史记录]
+> 最后更新于2025年08月31日 | [历史记录]
 
-> 此页面内容对应于 LuaInMinecraftBukkit II 插件的最新版本 **1.0.8**, 历史文档可以插件此页面的历史记录
+> 此页面内容对应于 LuaInMinecraftBukkit II 插件的最新版本 **1.0.9**, 历史文档可以插件此页面的历史记录
 
 在 Lua 部分拥有一些全局变量, 以方便您让 Lua 与 Bukkit 服务器之间的交互更为简单.
 
@@ -333,6 +333,36 @@ local file = luaBukkit.env:file("readme.txt")
 if file:exists() then
     luaBukkit.log:info("Exists!")
 end
+```
+
+#### setJustUseFirstMethod - 设置 Lua 检测 Java 方法行为
+
+**方法说明**: 设置 Lua 检测方法的行为, 当设置为 `true` 时, 将会总是自动选择候选方法的第一个方法执行, 而非抛出异常.  
+**返回类型**: 无  
+**形参列表**: 
+| 形参 | 形参类型 | 说明 |
+| :-: | :-: | :-: |
+| `flag` | `Boolean` | 是否自动选择候选方法列表的第一个方法执行 |
+
+**例子**:
+```lua
+luaBukkit.env:setJustUseFirstMethod(true)
+```
+
+#### ignoreMultiResultRun - 自动选择第一个 Java 方法运行 
+
+**方法说明**: 与 `setJustUseFirstMethod` 类似. 设置 Lua 检测方法的行为, 当设置为 `true` 时, 将会总是自动选择候选方法的第一个方法执行, 而非抛出异常.  
+**返回类型**: `Result<Object, LuaException>`  
+**形参列表**: 
+| 形参 | 形参类型 | 说明 |
+| :-: | :-: | :-: |
+| `callable` | `LuaFunction` | 在 LuaFunction 方法执行时自动选择候选方法的第一个方法执行, 而非抛出异常 |
+
+**例子**:
+```lua
+luaBukkit.env:ignoreMultiResultRun(function() 
+    -- do something
+end)
 ```
 
 ### LuaHelper

@@ -17,9 +17,9 @@
 [Command Section]: ./../Command.md
 [EventListener Section]: ./../EventListener.md
 
-> Last updated on August 28, 2025 | [History][History]
+> Last updated on August 31, 2025 | [History][History]
 
-> The content of this page corresponds to the latest version of the LuaInMinecraftBukkit II plugin, **1.0.8**. For historical documentation, please check the historical records of this page.
+> The content of this page corresponds to the latest version of the LuaInMinecraftBukkit II plugin, **1.0.9**. For historical documentation, please check the historical records of this page.
 
 > **!! The content of this file has machine translation !!** | [Origin](./../GlobalVariable.md)
 
@@ -358,6 +358,36 @@ local file = luaBukkit.env:file("readme.txt")
 if file:exists() then
     luaBukkit.log:info("Exists!")
 end
+```
+
+#### setJustUseFirstMethod - Configure Lua's Java method detection behavior
+
+**Method Description**: Configures Lua's method detection behavior. When set to `true`, it will always automatically select and execute the first method in the candidate list instead of throwing an exception.  
+**Return Type**: None  
+**Parameter List**:  
+| Parameter | Parameter Type | Description |
+| :-: | :-: | :-: |
+| `flag` | `Boolean` | Whether to automatically execute the first method in the candidate list |
+
+**Example**:
+```lua
+luaBukkit.env:setJustUseFirstMethod(true)
+```
+
+#### ignoreMultiResultRun - Automatically Execute the First Java Method 
+
+**Method Description**: As same as `setJustUseFirstMethod`. Configures Lua method detection behavior. When set to `true`, the first method in the candidate list is always automatically selected for execution instead of throwing an exception.  
+**Return Type**: `Result<Object, LuaException>`  
+**Parameter List**: 
+| Parameter | Parameter Type | Description |
+| :-: | :-: | :-: |
+| `callable` | `LuaFunction` | Automatically selects the first method from candidates for execution when calling LuaFunction, instead of throwing an exception |
+
+**Example**:
+```lua
+luaBukkit.env:ignoreMultiResultRun(function() 
+    -- do something
+end)
 ```
 
 ### LuaHelper
