@@ -1,10 +1,10 @@
 [History]: https://github.com/SmileYik/LuaInMinecraftBukkitII/commits/gh-page/docs/Configuration.md
-[LatestVersion]: https://github.com/SmileYik/LuaInMinecraftBukkitII/tree/tags/1.0.8
+[LatestVersion]: https://github.com/SmileYik/LuaInMinecraftBukkitII/tree/tags/1.0.9
 [ResourceRepo]: https://github.com/SmileYik/LuaInMinecraftBukkitII/tree/gh-page
 
-> Last updated on August 28, 2025 | [History][History]
+> Last updated on August 31, 2025 | [History][History]
 
-> This page corresponds to version [**1.0.8**][LatestVersion] of the LuaInMinecraftBukkit II plugin. Historical documentation can be found in the history of this page.
+> This page corresponds to version [**1.0.9**][LatestVersion] of the LuaInMinecraftBukkit II plugin. Historical documentation can be found in the history of this page.
 
 This document provides the default plugin configuration settings and their descriptions.
 
@@ -19,7 +19,8 @@ At the same time, this configuration file is not a standard `json` type file; it
 | :-: | :-: | :-: |
 | projectUrl | Link Text | [Project Resource Address][ResourceRepo], which can be found in the repository. Since version **1.0.8**, project resource branches will have tags that match the plugin version. The tag naming format is `resources-[plugin version]`. For example, if the plugin version is 1.0.8, there will be a resource branch `resources-1.0.8`. In this case, the link `https://raw.githubusercontent.com/SmileYik/LuaInMinecraftBukkitII/refs/tags/resources-1.0.8` can be filled in the configuration.
 | luaVersion | `luajit` / `lua-5.2.4` / `lua-5.3.6` / `lua-5.4.8` | Sets the Lua version used by the plugin.
-| alwaysCheckHashes | `true` / `false` | Always fetch the latest dependencies from the resource repository.
+| alwaysCheckHashes  | `true` / `false` | Always fetch the latest dependencies from the resource repository.
+| justUseFirstMethod | `true` / `false` | When multiple optional methods are detected in Lua, does it always select the first candidate instead of throwing an exception |
 | debug | `true` / `false` | Enable Debug logs.
 | bStats | `true` / `false` | Enable bStats statistics.
 | luaState | Lua Environment Configuration | Configures the Lua environment.
@@ -48,6 +49,7 @@ The configuration items for the Lua environment are in the following table:
 | rootDir | Text | The root path of the Lua environment. `/abc` represents the path `.../mc_server/plugins/LuaInMinecraftBukkitII/luaState/abc` on the server host. Subsequently, when using the `require` method in Lua, dependency files will be searched for from the specified path. |
 | ignoreAccessLimit | `true` / `false` | Whether to ignore access restrictions for fields and methods in Java. If ignored, private methods of Java instances can be directly used in Lua. |
 | initialization | List of Lua Script File Configurations | Will load the specified script files when the Lua environment is initialized. |
+| autoReload | Auto Reload Configuration | Automatically reload the Lua environment to which the script belongs when changes occur in the Lua script. |
 | pool | Lua Pool Configuration | Used to set Lua pool-related configurations. |
 
 ##### initialization
@@ -94,6 +96,16 @@ Lua pool configuration is used to configure whether to enable the Lua pool and s
 | idleSize | Integer, less than `maxSize` | The maximum number of idle Lua state machines allowed in the Lua pool. |
 | idleTimeout | Integer, **milliseconds** | After how long an idle state machine in the Lua pool will be removed. This only works when the number of idle state machines is greater than `idleSize`. |
 
+##### autoReload
+
+The `autoReload` configuration option sets whether to reload the Lua environment associated with a Lua script when modifications are detected.
+
+| Configuration Name | Type | Description |
+| :-: | :-: | :-: |
+| enable       | `true` / `false`     | Enable auto-reload |
+| blacklist    | Text list            | Add script files to blacklist; no reload even if modified |
+| frequency    | Integer, **milliseconds**  | Detection interval |
+
 -----
 
 ### Configuration Template
@@ -121,6 +133,8 @@ Lua pool configuration is used to configure whether to enable the Lua pool and s
       "rootDir": "/",
       // Whether to ignore access restrictions. When ignored, you can forcefully access private methods in Java.
       "ignoreAccessLimit": false,
+      // When a method called by Lua has multiple valid results, it automatically executes the first method instead of throwing an exception.
+      "justUseFirstMethod": true,
       // List of initialization scripts
       "initialization": [
         // Multiple script files can be loaded
@@ -134,6 +148,16 @@ Lua pool configuration is used to configure whether to enable the Lua pool and s
           "depends": []
         }
       ],
+      // Automatic reload settings: Automatically reload the Lua environment when changes are sent from script files included in the initialization script list.
+      // Note that when reloading scripts, the reload method is a hard reload.
+      "autoReload": {
+        "enable": true,
+        "blacklist": [
+          "block-reload.lua"
+        ],
+        // Detection frequency, milliseconds
+        "frequency": 60000
+      },
       // Lua pool settings
       // The Lua pool can break the single-threaded limitation of Lua by transferring Lua closures to the state machine in the Lua pool to run, and then returning the result of the closure back to the main state machine after the run is complete.
       "pool": {

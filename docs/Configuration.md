@@ -1,10 +1,10 @@
 [History]: https://github.com/SmileYik/LuaInMinecraftBukkitII/commits/gh-page/docs/Configuration.md
-[LatestVersion]: https://github.com/SmileYik/LuaInMinecraftBukkitII/tree/tags/1.0.8
+[LatestVersion]: https://github.com/SmileYik/LuaInMinecraftBukkitII/tree/tags/1.0.9
 [ResourceRepo]: https://github.com/SmileYik/LuaInMinecraftBukkitII/tree/gh-page
 
-> 最后更新于2025年08月28日 | [历史记录][History]
+> 最后更新于2025年08月31日 | [历史记录][History]
 
-> 此页面内容对应于 LuaInMinecraftBukkit II 插件的 [**1.0.8**][LatestVersion] 版本, 历史文档可以插件此页面的历史记录
+> 此页面内容对应于 LuaInMinecraftBukkit II 插件的 [**1.0.9**][LatestVersion] 版本, 历史文档可以插件此页面的历史记录
 
 这个文档将给出默认的插件配置设定及其说明.
 
@@ -16,12 +16,13 @@
 | 配置名 | 类型 | 说明 |
 | :-: | :-: | :-: |
 | projectUrl        | 链接文本 | [项目资源地址][ResourceRepo], 可以去仓库中寻找. 自 **1.0.8** 版本以后, 项目资源分支都会将与插件版本相匹配的资源标记tag, tag命名格式为 `resources-[插件版本]`, 例如插件版本为 1.0.8, 则会有资源分支 `resources-1.0.8`, 此时, 链接 `https://raw.githubusercontent.com/SmileYik/LuaInMinecraftBukkitII/refs/tags/resources-1.0.8` 即可填入配置中.
-| luaVersion        | `luajit` / `lua-5.2.4` / `lua-5.3.6` / `lua-5.4.8` | 设置插件所使用的 lua 版本. |
-| alwaysCheckHashes | `true` / `false` | 是否总是从资源仓库中获取最新依赖 |
-| debug             | `true` / `false` | 是否启用 Debug 日志 |
-| bStats            | `true` / `false` | 是否启用 bStats 统计信息 |
-| luaState          | Lua 环境配置      | 配置 Lua 环境. |
-| enableModules     | 文本列表          | 启用模组, 现可用模组有 `cffi` |
+| luaVersion         | `luajit` / `lua-5.2.4` / `lua-5.3.6` / `lua-5.4.8` | 设置插件所使用的 lua 版本. |
+| alwaysCheckHashes  | `true` / `false` | 是否总是从资源仓库中获取最新依赖 |
+| justUseFirstMethod | `true` / `false` | 是否在 lua 检测到多个可选方法时, 总是选择第一个候选项而不是抛出异常 |
+| debug              | `true` / `false` | 是否启用 Debug 日志 |
+| bStats             | `true` / `false` | 是否启用 bStats 统计信息 |
+| luaState           | Lua 环境配置      | 配置 Lua 环境. |
+| enableModules      | 文本列表          | 启用模组, 现可用模组有 `cffi` |
 
 #### Lua 环境配置
 
@@ -46,6 +47,7 @@ Lua 环境的配置项如下表格:
 | rootDir           | 文本               | Lua 环境的根路径, `/abc` 代表路径为服务器主机的 `.../mc_server/plugins/LuaInMinecraftBukkitII/luaState/abc`, 之后, 在 Lua 中使用 `require` 方法时, 将会从指定的路径中寻找依赖文件. |
 | ignoreAccessLimit | `true` / `false`   | 是否忽略Java中的字段与方法的访问限制. 若忽略该限制, 则能够直接在 lua 中使用 Java 实例的私有方法. |
 | initialization    | Lua 脚本文件配置列表 | 将在 Lua 环境初始化时加载所设定好的脚本文件. |
+| autoReload        | 自动重载脚本文件配置列表 | 当 Lua 脚本发生变更时自动重载脚本所属 Lua 环境 |
 | pool              | Lua 池配置          | 用于设置 Lua 池相关配置. |
 
 ##### initialization
@@ -93,6 +95,16 @@ Lua 池配置用于配置是否启用 Lua 池以及 Lua 池的一些参数.
 | idleTimeout  | 整数, **毫秒**        | 当 Lua 池中的状态机闲置多长时间后将其移除; 仅当闲置的状态机数量大于 `idleSize` 时工作. |
 
 
+##### autoReload
+
+`autoReload` 配置项用于配置在检测到 Lua 脚本经过修改后, 重载 Lua 脚本所属的 Lua 环境相关的选项.
+
+| 配置名 | 类型 | 说明 |
+| :-: | :-: | :-: |
+| enable       | `true` / `false`     | 是否启用自动重载 |
+| blacklist    | 文本列表              | 将脚本文件拉入黑名单, 即使发生修改也不重载 |
+| frequency    | 整数, **毫秒**        | 检测频率 |
+
 ### 配置模板
 
 #### config.json
@@ -118,6 +130,8 @@ Lua 池配置用于配置是否启用 Lua 池以及 Lua 池的一些参数.
       "rootDir": "/",
       // 是否忽略访问限制, 忽略访问限制时可以强制访问java中的私有方法.
       "ignoreAccessLimit": false,
+      // 当 lua 调用的方法拥有多种符合要求的结果时, 自动运行首个方法而不是抛出异常
+      "justUseFirstMethod": true,
       // 初始化脚本列表
       "initialization": [
         // 可以加载多个脚本文件
@@ -131,6 +145,16 @@ Lua 池配置用于配置是否启用 Lua 池以及 Lua 池的一些参数.
           "depends": []
         }
       ],
+      // 自动重载设置, 当初始化脚本列表中包含的脚本文件发送更改时自动重载 Lua 环境
+      // 需要注意的是, 重载脚本时, 重载方式为硬重载.
+      "autoReload": {
+        "enable": true,
+        "blacklist": [
+          "block-reload.lua"
+        ],
+        // 检测频率, 毫秒
+        "frequency": 60000
+      },
       // Lua 池设置
       // Lua 池可以突破 Lua 的单线程限制, 将 Lua 闭包转移至 Lua 池中的状态机中运行, 并在运行完闭后, 将闭包返回的结果返回至主状态机中.
       "pool": {
