@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Logger;
 
 public final class LuaInMinecraftBukkit extends JavaPlugin {
     public static final String NATIVES_FOLDER = "natives";
@@ -176,6 +177,10 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
 
     public static LuaInMinecraftBukkit instance() {
         return plugin;
+    }
+
+    public static Logger logger() {
+        return plugin.getLogger();
     }
 
     public File getLuaStateFolder() {

@@ -15,8 +15,14 @@ public class LuaStateConfig implements ILuaStateConfig {
     /** force access java field and method or not */
     private boolean ignoreAccessLimit;
 
+    /** auto reload setting */
+    private AutoReloadConfig autoReload;
+
     /** lua pool config */
     private LuaPoolConfig pool;
+
+    /** initialize lua script files */
     private LuaInitConfig[] initialization;
+
     private Map<String, Object> attributes;
 }

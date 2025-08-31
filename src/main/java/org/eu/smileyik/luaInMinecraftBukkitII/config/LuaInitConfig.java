@@ -12,11 +12,6 @@ public class LuaInitConfig {
     private String file;
 
     /**
-     * auto reload lua script file when it changed
-     */
-    private boolean autoReload = false;
-
-    /**
      * load lua script in async thread.
      */
     private boolean asyncLoad = false;

@@ -14,6 +14,7 @@ import org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState.LuaIOHelper;
 import org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.ILuaStateEnv;
 import org.eu.smileyik.luaInMinecraftBukkitII.config.LuaInitConfig;
 import org.eu.smileyik.luaInMinecraftBukkitII.config.LuaStateConfig;
+import org.eu.smileyik.luaInMinecraftBukkitII.luaState.autoReload.AutoReloadManager;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.event.LuaEventListener;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.pool.LuaPool;
 import org.eu.smileyik.luajava.LuaException;
@@ -48,6 +49,8 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
     private final File rootDir;
 
     @Getter(AccessLevel.PROTECTED)
+    private final AutoReloadManager autoReloadManager;
+    @Getter(AccessLevel.PROTECTED)
     private final Map<String, Listener> listeners = new HashMap<>();
     @Getter(AccessLevel.PROTECTED)
     private final Map<String, CommandService> commandServices = new HashMap<>();
@@ -71,8 +74,16 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
         if (!rootDir.exists() && !rootDir.mkdirs()) {
             DebugLogger.debug("Cannot create new directory: %s", rootDir);
         }
+        this.autoReloadManager = createAutoReloadManager();
 
         DebugLogger.debug("Create Lua environment '%s' from config: %s", id, config);
+    }
+
+    private AutoReloadManager createAutoReloadManager() {
+        if (this.config.getAutoReload() != null && this.config.getAutoReload().isEnable()) {
+            return new AutoReloadManager(id, rootDir, this.config);
+        }
+        return null;
     }
 
     @Override
@@ -283,6 +294,15 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
 
     @Override
     public synchronized void close() {
+        close(false);
+    }
+
+    private synchronized void close(boolean isReload) {
+        // clean auto reload manager
+        if (!isReload && autoReloadManager != null) {
+            this.autoReloadManager.shutdown();
+        }
+
         // clean soft reloads
         softReloadCallables.clear();
 
@@ -326,7 +346,7 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
 
     @Override
     public synchronized void reload() {
-        close();
+        close(true);
         createEnv();
         initialization();
     }
