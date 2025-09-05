@@ -11,6 +11,10 @@
   // 是否启用 bStats 统计信息
   "bStats": true,
   // lua 环境设置, 可以同时设置多个 Lua 环境
+  "luaReflection": {
+    "type": "default",
+    "cacheCapacity": 1024
+  },
   "luaState": {
     // lua 环境 id
     "default": {

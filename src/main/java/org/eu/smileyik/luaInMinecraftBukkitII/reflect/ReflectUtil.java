@@ -1,7 +1,13 @@
 package org.eu.smileyik.luaInMinecraftBukkitII.reflect;
 
+import org.eu.smileyik.luaInMinecraftBukkitII.reflect.fastReflection.Lookup;
+import org.eu.smileyik.luajava.LuaJavaAPI;
+import org.eu.smileyik.luajava.reflect.IExecutable;
+import org.eu.smileyik.luajava.reflect.IFieldAccessor;
 import org.eu.smileyik.luajava.reflect.LuaInvokedMethod;
+import org.eu.smileyik.simpledebug.DebugLogger;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -18,6 +24,7 @@ public class ReflectUtil {
     public static final Pattern FULL_CLASS_ARRAY_NAME_PATTERN_2 = Pattern.compile(String.format("^%s(\\[\\])+$", FULL_CLASS_NAME_PATTERN_STR));
 
     private static final Map<String, Class<?>> PRIMITIVE_NAME_2_TYPE_MAP;
+    private static final MethodHandle getReflectUtil;
 
     static {
         Map<String, Class<?>> primitiveName2TypeMap = new HashMap<String, Class<?>>();
@@ -40,6 +47,24 @@ public class ReflectUtil {
         primitiveName2TypeMap.put("Z", boolean.class);
         primitiveName2TypeMap.put("V", void.class);
         PRIMITIVE_NAME_2_TYPE_MAP = Collections.unmodifiableMap(primitiveName2TypeMap);
+
+        MethodHandle handle = null;
+        try {
+            handle = Lookup.getFieldGetter(LuaJavaAPI.class.getDeclaredField("reflectUtil"));
+        } catch (Exception e) {
+            DebugLogger.debug("Failed to initialize reflect util: %s", e.getMessage());
+            DebugLogger.debug(e);
+        } finally {
+            getReflectUtil = handle;
+        }
+    }
+
+    private static org.eu.smileyik.luajava.reflect.ReflectUtil getReflectUtil() {
+        try {
+            return (org.eu.smileyik.luajava.reflect.ReflectUtil) getReflectUtil.invoke();
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static Field findFieldByType(Class<?> clazz, Class<?> targetType) {
@@ -63,20 +88,18 @@ public class ReflectUtil {
             _args = new Object[0];
         }
         Object[] args = _args;
-        LuaInvokedMethod<Constructor<?>> constructor = org.eu.smileyik.luajava.reflect.ReflectUtil
+        LuaInvokedMethod<IExecutable<Constructor<?>>> constructor = getReflectUtil()
                 .findConstructorByParams(clazz, args, false, false, false);
         if (constructor == null) {
             throw new NullPointerException("No constructor found in " + clazz + " by params: " + Arrays.toString(args));
         }
 
         constructor.getOverwriteParams().forEach((idx, value) -> args[idx] = value);
-        Constructor<?> executable = constructor.getExecutable();
-        executable.setAccessible(true);
-        return executable.newInstance(args);
+        return constructor.getExecutable().invoke(null, args);
     }
 
     public static Object callMethod(Object object, String methodName, Object... _args)
-            throws InvocationTargetException, IllegalAccessException {
+            throws InvocationTargetException, IllegalAccessException, InstantiationException {
         if (object == null) {
             throw new NullPointerException("object is null");
         }
@@ -84,21 +107,18 @@ public class ReflectUtil {
             _args = new Object[0];
         }
         Object[] args = _args;
-        LinkedList<LuaInvokedMethod<Method>> methodByParams =
-                org.eu.smileyik.luajava.reflect.ReflectUtil.findMethodByParams(
-                        object.getClass(), methodName, args, false, false, false, false);
+        LinkedList<LuaInvokedMethod<IExecutable<Method>>> methodByParams = getReflectUtil()
+                .findMethodByParams(object.getClass(), methodName, args, false, false, false, false);
         if (methodByParams.isEmpty()) {
             throw new NullPointerException("No method found for " + methodName + " in " + object.getClass() + " by params: " + Arrays.toString(args));
         }
         if (methodByParams.size() != 1) {
             throw new NullPointerException("Multi-target method found for " + methodName + " in " + object.getClass() + " by params: " + Arrays.toString(args));
         }
-        LuaInvokedMethod<Method> invokedMethod = methodByParams.removeFirst();
+        LuaInvokedMethod<IExecutable<Method>> invokedMethod = methodByParams.removeFirst();
         invokedMethod.getOverwriteParams().forEach((idx, value) -> args[idx] = value);
-        Method executable = invokedMethod.getExecutable();
-        executable.setAccessible(true);
-        boolean isStaticMethod = Modifier.isStatic(executable.getModifiers());
-        return executable.invoke(isStaticMethod ? null : object, args);
+        boolean isStaticMethod = Modifier.isStatic(invokedMethod.getExecutable().getExecutable().getModifiers());
+        return invokedMethod.getExecutable().invoke(isStaticMethod ? null : object, args);
     }
 
     public static boolean hasMethod(Object object, String methodName) {
@@ -108,7 +128,7 @@ public class ReflectUtil {
         if (methodName == null || methodName.isEmpty()) {
             throw new NullPointerException("methodName is null or empty");
         }
-        return org.eu.smileyik.luajava.reflect.ReflectUtil.existsMethodByName(
+        return getReflectUtil().existsMethodByName(
                 object.getClass(), methodName, false, false, false);
     }
 
@@ -119,7 +139,7 @@ public class ReflectUtil {
         if (fieldName == null || fieldName.isEmpty()) {
             throw new NullPointerException("fieldName is null or empty");
         }
-        return org.eu.smileyik.luajava.reflect.ReflectUtil.findFieldByName(
+        return getReflectUtil().findFieldByName(
                 object.getClass(), fieldName, false, false, false, false) != null;
     }
 
@@ -130,15 +150,13 @@ public class ReflectUtil {
         if (fieldName == null || fieldName.isEmpty()) {
             throw new NullPointerException("fieldName is null or empty");
         }
-        Field field = org.eu.smileyik.luajava.reflect.ReflectUtil.findFieldByName(
+        IFieldAccessor field = getReflectUtil().findFieldByName(
                 object.getClass(), fieldName, false, false, false, false
         );
         if  (field == null) {
             throw new NullPointerException("No field found for " + fieldName + " in " + object.getClass());
         }
-        field.setAccessible(true);
-        boolean isStaticField = Modifier.isStatic(field.getModifiers());
-        field.set(isStaticField ? null : object, value);
+        field.set(object, value);
     }
 
     public static Object getField(Object object, String fieldName) throws IllegalAccessException {
@@ -148,15 +166,13 @@ public class ReflectUtil {
         if (fieldName == null || fieldName.isEmpty()) {
             throw new NullPointerException("fieldName is null or empty");
         }
-        Field field = org.eu.smileyik.luajava.reflect.ReflectUtil.findFieldByName(
+        IFieldAccessor field = getReflectUtil().findFieldByName(
                 object.getClass(), fieldName, false, false, false, false
         );
         if  (field == null) {
             throw new NullPointerException("No field found for " + fieldName + " in " + object.getClass());
         }
-        field.setAccessible(true);
-        boolean isStaticField = Modifier.isStatic(field.getModifiers());
-        return field.get(isStaticField ? null : object);
+        return field.get(object);
     }
 
     /**
@@ -252,5 +268,28 @@ public class ReflectUtil {
         int idx = className.indexOf('[');
         int d = (className.length() - idx) >> 1;
         return Class.forName(fastRepeat("[", d) + "L" + className.substring(0, idx) + ";");
+    }
+
+    public static boolean isLambdaInstance(Object instance) {
+        return instance != null && instance.getClass().getSimpleName().contains("$$Lambda/");
+    }
+
+    public static Method getLambdaRealMethod(Method targetMethod) {
+        Class<?> declaringClass = targetMethod.getDeclaringClass();
+        if (declaringClass.getSimpleName().contains("$$Lambda/")) {
+            Method found = org.eu.smileyik.luajava.reflect.ReflectUtil.foreachClass(declaringClass, true, it -> {
+                if (declaringClass == it) return null;
+                Method[] methods = it.getDeclaredMethods();
+                for (Method method : methods) {
+                    if (method.getName().equals(targetMethod.getName())
+                            && Arrays.equals(method.getParameterTypes(), targetMethod.getParameterTypes())) {
+                        return method;
+                    }
+                }
+                return null;
+            });
+            return found;
+        }
+        return null;
     }
 }

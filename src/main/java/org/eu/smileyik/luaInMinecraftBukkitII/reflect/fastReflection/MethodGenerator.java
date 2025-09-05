@@ -10,6 +10,7 @@ import net.bytebuddy.dynamic.scaffold.InstrumentedType;
 import net.bytebuddy.implementation.Implementation;
 import net.bytebuddy.implementation.bytecode.ByteCodeAppender;
 import net.bytebuddy.jar.asm.Opcodes;
+import org.eu.smileyik.luaInMinecraftBukkitII.reflect.ReflectUtil;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
@@ -28,6 +29,15 @@ public class MethodGenerator extends MemberGenerator {
     }
 
     public ExecutorAccessor generate(Method method) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, IOException {
+        Method method2 = method;
+        if (ReflectUtil.isLambdaInstance(method2)) {
+            method2 = ReflectUtil.getLambdaRealMethod(method2);
+            if (method2 != null) {
+                method = method2;
+            }
+        }
+
+        Method finalMethod = method;
         Class<?> declaringClass = method.getDeclaringClass();
         Class<?>[] parameterTypes = method.getParameterTypes();
 
@@ -38,7 +48,7 @@ public class MethodGenerator extends MemberGenerator {
                     @Override
                     public ByteCodeAppender appender(Target implementationTarget) {
                         return (methodVisitor, implementationContext, instrumentedMethod) -> {
-                            getTargetMethod(method, implementationTarget, methodVisitor, implementationContext);
+                            getTargetMethod(finalMethod, implementationTarget, methodVisitor, implementationContext);
                             try {
                                 getAndSetMethodHandle(Method.class, implementationTarget, methodVisitor, implementationContext);
                             } catch (NoSuchMethodException e) {
@@ -60,7 +70,7 @@ public class MethodGenerator extends MemberGenerator {
                     @Override
                     public ByteCodeAppender appender(Target implementationTarget) {
                         return (methodVisitor, implementationContext, instrumentedMethod) ->
-                                generateInvoke(method, implementationTarget, methodVisitor, implementationContext, instrumentedMethod);
+                                generateInvoke(finalMethod, implementationTarget, methodVisitor, implementationContext, instrumentedMethod);
                     }
 
                     @Override

@@ -10,7 +10,9 @@ import org.eu.smileyik.luaInMinecraftBukkitII.config.Config;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.command.LuaCommandRegister;
 import org.eu.smileyik.luaInMinecraftBukkitII.scheduler.Scheduler;
 import org.eu.smileyik.luaInMinecraftBukkitII.util.ResourcesExtractor;
+import org.eu.smileyik.luajava.LuaJavaAPI;
 import org.eu.smileyik.luajava.LuaState;
+import org.eu.smileyik.luajava.reflect.ReflectUtil;
 import org.eu.smileyik.simplecommand.CommandService;
 import org.eu.smileyik.simpledebug.DebugLogger;
 
@@ -141,6 +143,15 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
      * ahead of init().
      */
     private void asyncInit(Config config) {
+        // set reflection util for luajava
+        if (config.getLuaReflection() != null) {
+            ReflectUtil reflectUtil = config.getLuaReflection().toReflectUtil();
+            if (reflectUtil != null) {
+                LuaJavaAPI.setReflectUtil(reflectUtil);
+                DebugLogger.debug("Current using reflection util is %s", reflectUtil);
+            }
+        }
+
         // extract resources
         getLogger().info("Extract resources: " + LUA_LIB_FOLDER);
         ResourcesExtractor.extractResources(LUA_LIB_FOLDER, new File(getDataFolder(), LUA_LIB_FOLDER));
