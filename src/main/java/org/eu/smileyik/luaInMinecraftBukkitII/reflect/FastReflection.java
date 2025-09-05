@@ -6,6 +6,7 @@ import org.eu.smileyik.luajava.reflect.IFieldAccessor;
 import org.eu.smileyik.luajava.reflect.LuaInvokedMethod;
 import org.eu.smileyik.luajava.reflect.SimpleReflectUtil;
 import org.eu.smileyik.luajava.util.LRUCache;
+import org.eu.smileyik.simpledebug.DebugLogger;
 
 import java.io.IOException;
 import java.lang.reflect.*;
@@ -13,9 +14,9 @@ import java.util.LinkedList;
 
 public class FastReflection extends SimpleReflectUtil {
 
-    private final LRUCache<IFieldAccessor, IFieldAccessor> fieldAccessors;
-    private final LRUCache<IExecutable<Constructor<?>>, IExecutable<Constructor<?>>> constructAccessors;
-    private final LRUCache<IExecutable<Method>, IExecutable<Method>> methodAccessors;
+    private final LRUCache<Field, IFieldAccessor> fieldAccessors;
+    private final LRUCache<Constructor<?>, IExecutable<Constructor<?>>> constructAccessors;
+    private final LRUCache<Method, IExecutable<Method>> methodAccessors;
     private final LRUCache<Method, IExecutable<Method>> lambdaMethodAccessors;
 
     public FastReflection(int cacheCapacity) {
@@ -32,10 +33,13 @@ public class FastReflection extends SimpleReflectUtil {
         if (accessor == null) {
             return null;
         }
-        return fieldAccessors.computeIfAbsent(accessor, field -> {
+        return fieldAccessors.computeIfAbsent(accessor.getField(), field -> {
+            DebugLogger.debug("Generating field accessor for %s", field);
             try {
-                return new FastFieldAccessor(field);
+                return new FastFieldAccessor(accessor);
             } catch (Exception e) {
+                DebugLogger.debug("Failed to init field accessors for field %s: %s", field, e.getMessage());
+                DebugLogger.debug(e);
                 return accessor;
             }
         });
@@ -48,12 +52,14 @@ public class FastReflection extends SimpleReflectUtil {
             return null;
         }
         IExecutable<Constructor<?>> executable = result.getExecutable();
-
-        IExecutable<Constructor<?>> wrapper = constructAccessors.computeIfAbsent(executable, constructor -> {
+        IExecutable<Constructor<?>> wrapper = constructAccessors.computeIfAbsent(executable.getExecutable(), constructor -> {
+            DebugLogger.debug("Generating constructor accessor for %s", constructor);
             try {
-                return new FastExecutorAccessor<Constructor<?>>(constructor);
+                return new FastExecutorAccessor<Constructor<?>>(executable);
             } catch (Exception e) {
-                return constructor;
+                DebugLogger.debug("Failed to init constructor accessors for constructor %s: %s", constructor, e.getMessage());
+                DebugLogger.debug(e);
+                return executable;
             }
         });
         return new LuaInvokedMethod<>(wrapper, result);
@@ -65,25 +71,29 @@ public class FastReflection extends SimpleReflectUtil {
         if (list != null && list.size() == 1) {
             LuaInvokedMethod<IExecutable<Method>> result = list.removeFirst();
             IExecutable<Method> executable = result.getExecutable();
-            Method targetMethod = executable.getExecutable();
             IExecutable<Method> wrapper = null;
-            if (ReflectUtil.isLambdaInstance(targetMethod.getDeclaringClass())) {
-                targetMethod = ReflectUtil.getLambdaRealMethod(targetMethod);
-                if (targetMethod != null) {
-                    wrapper = lambdaMethodAccessors.computeIfAbsent(targetMethod, method -> {
-                        try {
-                            return new FastExecutorAccessor<Method>(executable);
-                        } catch (Exception e) {
-                            return executable;
-                        }
-                    });
-                }
-            } else {
-                wrapper = methodAccessors.computeIfAbsent(executable, method -> {
+            Method targetMethod = executable.getExecutable();
+            Method realMethod = ReflectUtil.getLambdaRealMethod(targetMethod);
+            if (realMethod != null) {
+                wrapper = lambdaMethodAccessors.computeIfAbsent(realMethod, method -> {
+                    DebugLogger.debug("Generating lambda method accessor for %s", method);
                     try {
-                        return new FastExecutorAccessor<Method>(method);
+                        return new FastExecutorAccessor<Method>(executable);
                     } catch (Exception e) {
-                        return method;
+                        DebugLogger.debug("Failed to init lambda method accessors for method %s: %s", realMethod, e.getMessage());
+                        DebugLogger.debug(e);
+                        return executable;
+                    }
+                });
+            } else {
+                wrapper = methodAccessors.computeIfAbsent(targetMethod, method -> {
+                    DebugLogger.debug("Generating method accessor for %s", targetMethod);
+                    try {
+                        return new FastExecutorAccessor<Method>(executable);
+                    } catch (Exception e) {
+                        DebugLogger.debug("Failed to init method accessors for method %s: %s", targetMethod, e.getMessage());
+                        DebugLogger.debug(e);
+                        return executable;
                     }
                 });
             }

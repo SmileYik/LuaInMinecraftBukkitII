@@ -29,12 +29,9 @@ public class MethodGenerator extends MemberGenerator {
     }
 
     public ExecutorAccessor generate(Method method) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, IOException {
-        Method method2 = method;
-        if (ReflectUtil.isLambdaInstance(method2)) {
-            method2 = ReflectUtil.getLambdaRealMethod(method2);
-            if (method2 != null) {
-                method = method2;
-            }
+        Method superMethod = ReflectUtil.getLambdaRealMethod(method);;
+        if (superMethod != null) {
+            method = superMethod;
         }
 
         Method finalMethod = method;

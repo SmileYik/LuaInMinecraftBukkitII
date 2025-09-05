@@ -277,7 +277,7 @@ public class ReflectUtil {
     public static Method getLambdaRealMethod(Method targetMethod) {
         Class<?> declaringClass = targetMethod.getDeclaringClass();
         if (declaringClass.getSimpleName().contains("$$Lambda/")) {
-            Method found = org.eu.smileyik.luajava.reflect.ReflectUtil.foreachClass(declaringClass, true, it -> {
+            return org.eu.smileyik.luajava.reflect.ReflectUtil.foreachClass(declaringClass, true, it -> {
                 if (declaringClass == it) return null;
                 Method[] methods = it.getDeclaredMethods();
                 for (Method method : methods) {
@@ -288,7 +288,6 @@ public class ReflectUtil {
                 }
                 return null;
             });
-            return found;
         }
         return null;
     }
