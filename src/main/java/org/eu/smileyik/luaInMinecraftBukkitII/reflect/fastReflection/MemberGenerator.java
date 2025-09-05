@@ -12,6 +12,7 @@ import net.bytebuddy.implementation.bytecode.constant.TextConstant;
 import net.bytebuddy.jar.asm.MethodVisitor;
 import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.jar.asm.Type;
+import org.eu.smileyik.luajava.reflect.ReflectUtil;
 
 import java.lang.reflect.*;
 
@@ -29,14 +30,33 @@ public abstract class MemberGenerator {
                 .visit(new MyAsmVisitorWrapper());
     }
 
+    protected Class<?> getLambdaRealClass(Method targetMethod) {
+        Class<?> declaringClass = targetMethod.getDeclaringClass();
+        if (declaringClass.getSimpleName().contains("$$Lambda/")) {
+            Class<?> found = ReflectUtil.foreachClass(declaringClass, true, it -> {
+                if (declaringClass == it) return null;
+
+                try {
+                    Method declaredMethod = it.getDeclaredMethod(targetMethod.getName(), targetMethod.getParameterTypes());
+                    return it;
+                } catch (NoSuchMethodException ignore) {
+
+                }
+                return null;
+            });
+            return found == null ? declaringClass : found;
+        }
+        return declaringClass;
+    }
 
     protected void getTargetMethod(Method targetMethod,
                                    Implementation.Target implementationTarget,
                                    MethodVisitor methodVisitor,
                                    Implementation.Context implementationContext) {
+        Class<?> declaringClass = getLambdaRealClass(targetMethod);
         Class<?>[] parameterTypes = targetMethod.getParameterTypes();
 
-        ClassConstant.of(TypeDescription.ForLoadedType.of(targetMethod.getDeclaringClass())).apply(methodVisitor, implementationContext);
+        ClassConstant.of(TypeDescription.ForLoadedType.of(declaringClass)).apply(methodVisitor, implementationContext);
         new TextConstant(targetMethod.getName()).apply(methodVisitor, implementationContext);
         generateClassArray(methodVisitor, implementationContext, parameterTypes);
 
@@ -91,6 +111,9 @@ public abstract class MemberGenerator {
                                                    Implementation.Context implementationContext,
                                                    MethodDescription methodDescription) {
         Class<?> declaringClass = executable.getDeclaringClass();
+        if (executable instanceof Method) {
+            declaringClass = getLambdaRealClass((Method) executable);
+        }
         Class<?>[] parameterTypes = executable.getParameterTypes();
         boolean isStatic = Modifier.isStatic(executable.getModifiers());
         Class<?> returnType = executable instanceof Method ? ((Method) executable).getReturnType() : null;
@@ -129,7 +152,11 @@ public abstract class MemberGenerator {
                 generateInvokeDescription(executable),
                 false);
         if (returnType != null && returnType.isPrimitive()) {
-            generateBoxedTypeFrom(methodVisitor, returnType);
+            if (returnType == void.class) {
+                methodVisitor.visitInsn(Opcodes.ACONST_NULL);
+            } else {
+                generateBoxedTypeFrom(methodVisitor, returnType);
+            }
         }
         // methodVisitor.visitTypeInsn(Opcodes.CHECKCAST, targetMethod.getReturnType().getName().replace('.', '/'));
         methodVisitor.visitInsn(Opcodes.ARETURN);
@@ -159,7 +186,7 @@ public abstract class MemberGenerator {
         if (Modifier.isStatic(targetMethod.getModifiers())) {
             return methodDescriptor;
         }
-        return "(L" + targetMethod.getDeclaringClass().getName().replace('.', '/') + ";" + methodDescriptor.substring(1);
+        return "(L" + getLambdaRealClass(targetMethod).getName().replace('.', '/') + ";" + methodDescriptor.substring(1);
     }
 
     protected String generateGetterInvokeDescription(Field targetField) {
