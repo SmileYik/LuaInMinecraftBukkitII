@@ -6,21 +6,22 @@ import org.eu.smileyik.luajava.LuaStateFacade;
 @Getter
 public class LuaPoolEntity {
     private final LuaStateFacade luaStateFacade;
-    private final LuaPoolEntityMonitor monitor;
+    private long totalMilliseconds = 0;
     private long latestRun = 0;
     private int runCount = 0;
 
     public LuaPoolEntity(LuaStateFacade luaStateFacade) {
         this.luaStateFacade = luaStateFacade;
-        this.monitor = new LuaPoolEntityMonitor();
-        this.monitor.initialization(luaStateFacade);
     }
 
     public LuaStateFacade getLuaStateFacade() {
         latestRun = System.currentTimeMillis();
         runCount += 1;
-        monitor.reset();
         return luaStateFacade;
+    }
+
+    public void returned() {
+        totalMilliseconds += System.currentTimeMillis() - latestRun;
     }
 
     public void close() {

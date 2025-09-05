@@ -14,9 +14,7 @@ import org.eu.smileyik.luajava.type.ILuaObject;
 import org.eu.smileyik.simpledebug.DebugLogger;
 
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -32,6 +30,7 @@ public class SimpleLuaPool implements LuaPool, AutoCloseable {
     private int currentPoolSize = 0;
     private final PriorityQueue<LuaPoolEntity> queue;
     private final Set<LuaPoolEntity> running;
+    private final ExecutorService executor;
 
     private final Lock poolLock = new ReentrantLock();
     private final Condition freeCondition = poolLock.newCondition();
@@ -41,6 +40,7 @@ public class SimpleLuaPool implements LuaPool, AutoCloseable {
         this.config = config;
         this.queue = new PriorityQueue<>(this.config.getMaxSize(),
                 Comparator.comparingLong(LuaPoolEntity::getLatestRun));
+        this.executor = Executors.newFixedThreadPool(config.getMaxSize());
         this.running = new HashSet<>(this.config.getMaxSize());
         this.scheduled.scheduleAtFixedRate(() -> {
             long time = System.currentTimeMillis();
@@ -138,6 +138,19 @@ public class SimpleLuaPool implements LuaPool, AutoCloseable {
 
     @Override
     public Result<Object[], LuaException> submit(ILuaCallable luaCallable, int _nres, Object... params) {
+        try {
+            return executor.submit(() -> doSubmit(luaCallable, _nres, params)).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void execute(ILuaCallable luaCallable, Object... params) {
+        executor.execute(() -> doSubmit(luaCallable, 0, params));
+    }
+
+    protected Result<Object[], LuaException> doSubmit(ILuaCallable luaCallable, int _nres, Object... params) {
         LuaPoolEntity poolEntity = getLuaState();
         LuaStateFacade srcF = luaCallable.getLuaState();
         LuaStateFacade destF = poolEntity.getLuaStateFacade();
@@ -153,6 +166,7 @@ public class SimpleLuaPool implements LuaPool, AutoCloseable {
             if (callable) {
                 return destF.doPcall(params.length, _nres, 0)
                         .mapResultValue(v -> {
+                            if (_nres == 0) return Result.success();
                             int nres = _nres;
                             int currentTop = destL.getTop();
                             if (nres == LuaState.LUA_MULTRET) {
@@ -234,6 +248,7 @@ public class SimpleLuaPool implements LuaPool, AutoCloseable {
                 freeCondition.signal();
             }
         } finally {
+            poolEntity.returned();
             poolLock.unlock();
         }
     }
@@ -243,13 +258,20 @@ public class SimpleLuaPool implements LuaPool, AutoCloseable {
         scheduled.shutdown();
         poolLock.lock();
         try {
-            running.forEach(it -> it.getMonitor().interrupt("LuaPool is closed!"));
+            try {
+                executor.shutdownNow();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             running.forEach(it -> {
                 try {
-                    LuaInMinecraftBukkit.instance().getLogger().info("Waiting for LuaPool to close: " + it.getStateId());
-                    it.close();
-                    DebugLogger.debug("Closed lua state %d, this lua state be called %d times, latest run at %d",
-                            it.getStateId(), it.getRunCount(), it.getLatestRun());
+                    new Thread(() -> {
+                        LuaInMinecraftBukkit.instance().getLogger().warning("Waiting for LuaPool state to close: " + it.getStateId());
+                        LuaInMinecraftBukkit.instance().getLogger().warning("This process will running on another thread until LuaPool state closed! Please make sure your task is not infinity task!");
+                        it.close();
+                        DebugLogger.debug("Closed lua state %d, this lua state be called %d times, %d milliseconds, latest run at %d",
+                                it.getStateId(), it.getRunCount(), it.getTotalMilliseconds(), it.getLatestRun());
+                    }).start();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -260,6 +282,8 @@ public class SimpleLuaPool implements LuaPool, AutoCloseable {
                 LuaPoolEntity poll = queue.poll();
                 try {
                     poll.getLuaStateFacade().close();
+                    DebugLogger.debug("Closed lua state %d, this lua state be called %d times, %d milliseconds, latest run at %d",
+                            poll.getStateId(), poll.getRunCount(), poll.getTotalMilliseconds(), poll.getLatestRun());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

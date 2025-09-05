@@ -40,5 +40,12 @@ public interface LuaPool extends AutoCloseable {
      */
     public Result<Object[], LuaException> submit(ILuaCallable luaCallable, int nres, Object... params);
 
+    /**
+     * 将当前闭包提交至Lua池中的状态机进行运行, 将丢入新的线程中执行并且无返回值
+     * @param luaCallable 原闭包(需要与有效的Lua状态机绑定)
+     * @param params lua 闭包形参
+     */
+    void execute(ILuaCallable luaCallable, Object... params);
+
     void close();
 }
