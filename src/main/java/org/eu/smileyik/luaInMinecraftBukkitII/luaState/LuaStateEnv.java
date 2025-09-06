@@ -176,7 +176,6 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
                             "Error initializing global variable 'luaBukkit': %s", err.getMessage());
                     DebugLogger.debug(DebugLogger.ERROR, err);
                 });
-        lua.getLuaState().newGlobalTable();
         lua.setJustUseFirstMethod(config.isJustUseFirstMethod());
         return lua;
     }

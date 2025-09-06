@@ -76,8 +76,6 @@ public class SimpleLuaPool implements LuaPool, AutoCloseable {
         // copy lua closure
         srcF.lock();
         try {
-            destL.newGlobalTable();
-
             callable.push();
             if (srcL.copyValue(-1, destL)) {
                 // copy global value
