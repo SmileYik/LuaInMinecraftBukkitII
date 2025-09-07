@@ -77,56 +77,60 @@ public class SimpleLuaPool implements LuaPool, AutoCloseable {
         srcF.lock();
         try {
             callable.push();
-            if (srcL.copyValue(-1, destL)) {
-                // copy global value
-                String firstUpValue = srcL.getUpValue(-1, 1);
-                if (Objects.equals("_ENV", firstUpValue)) {
-                    // copy _ENV for lua52+
-                    destL.getUpValue(-1, 1);
-                    srcL.copyTableIfNotExists(-1, destL);
-                    srcL.pop(1);
-                    destL.pop(1);
-                } else {
-                    if (firstUpValue != null) {
-                        srcL.pop(1);
-                    }
-                    // copy _G for luajit
-                    srcL.getGlobal("_G");
-                    destL.getGlobal("_G");
-                    srcL.copyTableIfNotExists(-1, destL);
-
-                    // copy real _G
-                    srcL.pushString("_LUAJAVA_G_REF");
-                    srcL.getTable(-2);
-                    destL.pushString("_LUAJAVA_G_REF");
-                    destL.getTable(-2);
-                    if (!srcL.isNil(-1) && !destL.isNil(-1)) {
-                        int srcRef = srcL.toInteger(-1);
-                        int destRef = destL.toInteger(-1);
-                        srcL.rawGetI(LuaState.LUA_REGISTRYINDEX, srcRef);
-                        destL.rawGetI(LuaState.LUA_REGISTRYINDEX, destRef);
+            try {
+                if (srcL.copyValue(-1, destL)) {
+                    // copy global value
+                    String firstUpValue = srcL.getUpValue(-1, 1);
+                    if (Objects.equals("_ENV", firstUpValue)) {
+                        // copy _ENV for lua52+
+                        destL.getUpValue(-1, 1);
                         srcL.copyTableIfNotExists(-1, destL);
                         srcL.pop(1);
                         destL.pop(1);
-                    }
-
-                    srcL.pop(2);
-                    destL.pop(2);
-                }
-
-                // copy params
-                for (Object param : params) {
-                    if (param instanceof LuaObject) {
-                        ((LuaObject) param).rawPush();
-                        if (!srcL.copyValue(-1, destL)) {
-                            destL.pushNil();
-                        }
                     } else {
-                        destF.rawPushObjectValue(param)
-                                .ifFailureThen(e -> destL.pushNil());
+                        if (firstUpValue != null) {
+                            srcL.pop(1);
+                        }
+                        // copy _G for luajit
+                        srcL.getGlobal("_G");
+                        destL.getGlobal("_G");
+                        srcL.copyTableIfNotExists(-1, destL);
+
+                        // copy real _G
+                        srcL.pushString("_LUAJAVA_G_REF");
+                        srcL.getTable(-2);
+                        destL.pushString("_LUAJAVA_G_REF");
+                        destL.getTable(-2);
+                        if (!srcL.isNil(-1) && !destL.isNil(-1)) {
+                            int srcRef = srcL.toInteger(-1);
+                            int destRef = destL.toInteger(-1);
+                            srcL.rawGetI(LuaState.LUA_REGISTRYINDEX, srcRef);
+                            destL.rawGetI(LuaState.LUA_REGISTRYINDEX, destRef);
+                            srcL.copyTableIfNotExists(-1, destL);
+                            srcL.pop(1);
+                            destL.pop(1);
+                        }
+
+                        srcL.pop(2);
+                        destL.pop(2);
                     }
+
+                    // copy params
+                    for (Object param : params) {
+                        if (param instanceof LuaObject) {
+                            ((LuaObject) param).rawPush();
+                            if (!srcL.copyValue(-1, destL)) {
+                                destL.pushNil();
+                            }
+                        } else {
+                            destF.rawPushObjectValue(param)
+                                    .ifFailureThen(e -> destL.pushNil());
+                        }
+                    }
+                    return true;
                 }
-                return true;
+            } finally {
+                srcL.pop(1);
             }
         } finally {
             srcF.unlock();
@@ -155,13 +159,13 @@ public class SimpleLuaPool implements LuaPool, AutoCloseable {
         LuaState srcL = srcF.getLuaState();
         LuaState destL = destF.getLuaState();
 
-        int top = destL.getTop();
-        boolean callable = transferClosure(srcF, destF, luaCallable, params);
 
         // call closure
         destF.lock();
+        int top;
         try {
-            if (callable) {
+            top = destL.getTop();
+            if (transferClosure(srcF, destF, luaCallable, params)) {
                 return destF.doPcall(params.length, _nres, 0)
                         .mapResultValue(v -> {
                             if (_nres == 0) return Result.success();
@@ -183,11 +187,13 @@ public class SimpleLuaPool implements LuaPool, AutoCloseable {
                                     if (ret.isError()) return ret.justCast();
                                     res[i] = ret.getValue();
                                     if (res[i] instanceof ILuaObject) {
-                                        if (destL.copyValue(-1, srcL)) {
-                                            res[i] = srcF.rawToJavaObject(-1).getOrSneakyThrow();
-                                            srcL.pop(1);
-                                        } else {
-                                            res[i] = null;
+                                        try (LuaObject obj = (LuaObject) res[i]) {
+                                            if (destL.copyValue(-1, srcL)) {
+                                                res[i] = srcF.rawToJavaObject(-1).getOrSneakyThrow();
+                                                srcL.pop(1);
+                                            } else {
+                                                res[i] = null;
+                                            }
                                         }
                                     }
                                     destL.pop(1);
