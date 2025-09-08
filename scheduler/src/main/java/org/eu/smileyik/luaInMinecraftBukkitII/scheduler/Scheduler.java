@@ -62,4 +62,8 @@ public interface Scheduler {
                 Bukkit.getScheduler().runTaskTimer(plugin, task, delay, period)
         );
     }
+
+    public default void cancel(Plugin plugin) {
+        Bukkit.getScheduler().cancelTasks(plugin);
+    }
 }
