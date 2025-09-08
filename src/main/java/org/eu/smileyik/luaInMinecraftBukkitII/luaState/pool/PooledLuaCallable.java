@@ -4,12 +4,13 @@ import org.eu.smileyik.luajava.LuaException;
 import org.eu.smileyik.luajava.LuaObject;
 import org.eu.smileyik.luajava.LuaStateFacade;
 import org.eu.smileyik.luajava.exception.Result;
+import org.eu.smileyik.luajava.type.IInnerLuaObject;
 import org.eu.smileyik.luajava.type.ILuaCallable;
 
 /**
  * 池化闭包. 该闭包在实际运行时, 会被提交到 Lua 池中的状态机进行运行.
  */
-public class PooledLuaCallable implements ILuaCallable {
+public class PooledLuaCallable implements ILuaCallable, IInnerLuaObject {
 
     private final ILuaCallable callable;
     private final LuaPool pool;
@@ -26,7 +27,7 @@ public class PooledLuaCallable implements ILuaCallable {
     @Override
     public Result<Object, ? extends LuaException> call(Object... args) {
         return pool.submit(callable, 1, args)
-                .mapResultValue(objs -> Result.success(objs.length > 0 ? objs[0] : null));
+                .mapResultValue(objs -> Result.success(objs != null && objs.length > 0 ? objs[0] : null));
     }
 
     @Override
@@ -62,5 +63,10 @@ public class PooledLuaCallable implements ILuaCallable {
     @Override
     public boolean isRawEqualInLua(LuaObject obj) {
         return callable.isRawEqualInLua(obj);
+    }
+
+    @Override
+    public void rawPush() {
+        ((IInnerLuaObject) callable).rawPush();
     }
 }
