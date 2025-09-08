@@ -14,7 +14,9 @@ import org.eu.smileyik.luajava.type.ILuaObject;
 import org.eu.smileyik.simpledebug.DebugLogger;
 
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -30,7 +32,6 @@ public class SimpleLuaPool implements LuaPool, AutoCloseable {
     private int currentPoolSize = 0;
     private final PriorityQueue<LuaPoolEntity> queue;
     private final Set<LuaPoolEntity> running;
-    private final ExecutorService executor;
 
     private final Lock poolLock = new ReentrantLock();
     private final Condition freeCondition = poolLock.newCondition();
@@ -40,7 +41,6 @@ public class SimpleLuaPool implements LuaPool, AutoCloseable {
         this.config = config;
         this.queue = new PriorityQueue<>(this.config.getMaxSize(),
                 Comparator.comparingLong(LuaPoolEntity::getLatestRun));
-        this.executor = Executors.newFixedThreadPool(config.getMaxSize());
         this.running = new HashSet<>(this.config.getMaxSize());
         this.scheduled.scheduleAtFixedRate(() -> {
             long time = System.currentTimeMillis();
@@ -140,16 +140,12 @@ public class SimpleLuaPool implements LuaPool, AutoCloseable {
 
     @Override
     public Result<Object[], LuaException> submit(ILuaCallable luaCallable, int _nres, Object... params) {
-        try {
-            return executor.submit(() -> doSubmit(luaCallable, _nres, params)).get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
-        }
+        return doSubmit(luaCallable, _nres, params);
     }
 
     @Override
     public void execute(ILuaCallable luaCallable, Object... params) {
-        executor.execute(() -> doSubmit(luaCallable, 0, params));
+        doSubmit(luaCallable, 0, params);
     }
 
     protected Result<Object[], LuaException> doSubmit(ILuaCallable luaCallable, int _nres, Object... params) {
@@ -262,11 +258,6 @@ public class SimpleLuaPool implements LuaPool, AutoCloseable {
         scheduled.shutdown();
         poolLock.lock();
         try {
-            try {
-                executor.shutdownNow();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
             running.forEach(it -> {
                 try {
                     new Thread(() -> {
