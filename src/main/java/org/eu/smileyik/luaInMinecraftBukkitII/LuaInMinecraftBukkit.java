@@ -3,6 +3,7 @@ package org.eu.smileyik.luaInMinecraftBukkitII;
 import com.google.gson.Gson;
 import lombok.Getter;
 import org.bstats.bukkit.Metrics;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.eu.smileyik.luaInMinecraftBukkitII.api.ILuaStateManager;
 import org.eu.smileyik.luaInMinecraftBukkitII.command.RootCommand;
@@ -71,6 +72,8 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
     public void onDisable() {
         // Plugin shutdown logic
         close();
+        HandlerList.unregisterAll(this);
+        scheduler.cancel(this);
     }
 
     private void close() {
