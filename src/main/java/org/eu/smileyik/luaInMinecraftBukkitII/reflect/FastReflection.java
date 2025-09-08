@@ -10,21 +10,23 @@ import org.eu.smileyik.simpledebug.DebugLogger;
 
 import java.io.IOException;
 import java.lang.reflect.*;
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.Map;
 
 public class FastReflection extends SimpleReflectUtil {
 
-    private final LRUCache<Field, IFieldAccessor> fieldAccessors;
-    private final LRUCache<Constructor<?>, IExecutable<Constructor<?>>> constructAccessors;
-    private final LRUCache<Method, IExecutable<Method>> methodAccessors;
-    private final LRUCache<Method, IExecutable<Method>> lambdaMethodAccessors;
+    private final Map<Field, IFieldAccessor> fieldAccessors;
+    private final Map<Constructor<?>, IExecutable<Constructor<?>>> constructAccessors;
+    private final Map<Method, IExecutable<Method>> methodAccessors;
+    private final Map<Method, IExecutable<Method>> lambdaMethodAccessors;
 
     public FastReflection(int cacheCapacity) {
         super(cacheCapacity);
-        this.fieldAccessors = new LRUCache<>(cacheCapacity);
-        this.constructAccessors = new LRUCache<>(cacheCapacity);
-        this.methodAccessors = new LRUCache<>(cacheCapacity);
-        this.lambdaMethodAccessors = new LRUCache<>(cacheCapacity);
+        this.fieldAccessors = Collections.synchronizedMap(new LRUCache<>(cacheCapacity));
+        this.constructAccessors = Collections.synchronizedMap(new LRUCache<>(cacheCapacity));
+        this.methodAccessors = Collections.synchronizedMap(new LRUCache<>(cacheCapacity));
+        this.lambdaMethodAccessors = Collections.synchronizedMap(new LRUCache<>(cacheCapacity));
     }
 
     @Override
