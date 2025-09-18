@@ -20,8 +20,8 @@
                     "luajava4Lua54.dll"
                 ],
                 "luajit": [
-                    "lua.dll",
-                    "luajava4Lua54.dll"
+                    "lua51.dll",
+                    "luajava4Luajit.dll"
                 ]
             }
         },
