@@ -2,7 +2,7 @@
 [LatestVersion]: https://github.com/SmileYik/LuaInMinecraftBukkitII/tree/tags/1.0.9
 [ResourceRepo]: https://github.com/SmileYik/LuaInMinecraftBukkitII/tree/gh-page
 
-> Last updated on August 31, 2025 | [History][History]
+> Last updated on September 18, 2025 | [History][History]
 
 > This page corresponds to version [**1.0.9**][LatestVersion] of the LuaInMinecraftBukkit II plugin. Historical documentation can be found in the history of this page.
 
@@ -23,8 +23,33 @@ At the same time, this configuration file is not a standard `json` type file; it
 | justUseFirstMethod | `true` / `false` | When multiple optional methods are detected in Lua, does it always select the first candidate instead of throwing an exception |
 | debug | `true` / `false` | Enable Debug logs.
 | bStats | `true` / `false` | Enable bStats statistics.
+| luaReflection | Lua Reflection Configuration | Configures the reflection for Lua.
 | luaState | Lua Environment Configuration | Configures the Lua environment.
 | enableModules | List of Texts | Enable modules. Currently available modules include `cffi`.
+
+#### Lua Reflection - Lua Reflection Configuration
+
+The main configuration snippet for Lua reflection is as follows:
+
+```json
+  "luaReflection": {
+    "type": "default",
+    "cacheCapacity": 1024
+  },
+```
+
+The description for each configuration item is in the following table:
+
+| Configuration Name | Type | Description |
+| :-: | :-: | :-: |
+| type | Text value, optional values are listed at the end of the table | The Java reflection type used in Lua |
+| cacheCapacity | Integer | The maximum number of entries to store in the reflection cache. Different types, such as methods, fields, and constructors, use different cache pools. |
+
+The optional values for the `type` configuration are as follows:
+
+  + `default`: Use standard Java reflection globally for Lua.
+  + `org.eu.smileyik.luaInMinecraftBukkitII.reflect.FastReflection`: Use fast reflection globally for Lua. Fast reflection is based on bytecode generation and is the fastest, but may have issues in certain use cases.
+  + `org.eu.smileyik.luaInMinecraftBukkitII.reflect.MixedFastReflection`: This reflection type is essentially the same as `FastReflection`, but it falls back to standard Java reflection if a method call fails. Generally, this type is not used as the global reflection for Lua.
 
 #### Lua Environment Configuration
 
@@ -125,6 +150,19 @@ The `autoReload` configuration option sets whether to reload the Lua environment
   "debug": false,
   // Whether to enable bStats statistics
   "bStats": true,
+  // Lua reflection settings
+  "luaReflection": {
+    // The type of reflection used by Lua. The available reflection types are as follows:
+    // org.eu.smileyik.luaInMinecraftBukkitII.reflect.FastReflection:
+    //    Fast reflection based on bytecode generation. It is the fastest, but may cause issues in certain use cases.
+    // org.eu.smileyik.luaInMinecraftBukkitII.reflect.MixedFastReflection:
+    //    Same as FastReflection, but falls back to standard Java reflection in case of a failed call.
+    // default:
+    //    Standard Java reflection.
+    "type": "default",
+    // Reflection cache capacity, which refers to the maximum number of cache entries. The cache entries for fields, methods, and constructors are independent of each other.
+    "cacheCapacity": 1024
+  },
   // Lua environment settings, multiple Lua environments can be set at the same time
   "luaState": {
     // Lua environment id

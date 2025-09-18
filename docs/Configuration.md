@@ -2,7 +2,7 @@
 [LatestVersion]: https://github.com/SmileYik/LuaInMinecraftBukkitII/tree/tags/1.0.9
 [ResourceRepo]: https://github.com/SmileYik/LuaInMinecraftBukkitII/tree/gh-page
 
-> 最后更新于2025年08月31日 | [历史记录][History]
+> 最后更新于2025年09月18日 | [历史记录][History]
 
 > 此页面内容对应于 LuaInMinecraftBukkit II 插件的 [**1.0.9**][LatestVersion] 版本, 历史文档可以插件此页面的历史记录
 
@@ -21,8 +21,32 @@
 | justUseFirstMethod | `true` / `false` | 是否在 lua 检测到多个可选方法时, 总是选择第一个候选项而不是抛出异常 |
 | debug              | `true` / `false` | 是否启用 Debug 日志 |
 | bStats             | `true` / `false` | 是否启用 bStats 统计信息 |
+| luaReflection      | Lua 反射配置      | 配置 Lua 使用的反射类型 |
 | luaState           | Lua 环境配置      | 配置 Lua 环境. |
 | enableModules      | 文本列表          | 启用模组, 现可用模组有 `cffi` |
+
+#### Lua Reflection - Lua 反射配置
+
+Lua 反射配置主体配置片段如下:
+
+```json
+  "luaReflection": {
+    "type": "default",
+    "cacheCapacity": 1024
+  },
+```
+
+各个配置项说明如下表格:
+
+| 配置名 | 类型 | 说明 |
+| :-: | :-: | :-: |
+| type          | 文本值, 可选值在表格末尾列出 | Lua 中使用的 Java 反射类型 |
+| cacheCapacity | 整数                       | 最多存储多少条目的反射缓存, 不同种类如方法, 字段和构造器都使用不同的缓存池 |
+
+`type` 配置可选内容如下:  
++ `default`: 为 Lua 全局使用 Java 标准反射
++ `org.eu.smileyik.luaInMinecraftBukkitII.reflect.FastReflection`: 为 Lua 全局使用快速反射, 快速反射基于字节码生成, 速度最快, 但是对于某些使用情况下可能会出现问题.
++ `org.eu.smileyik.luaInMinecraftBukkitII.reflect.MixedFastReflection`: 该反射类型与 `FastReflection` 基本相同, 但是在方法调用失败时会调用 Java 标准反射. 一般来说不使用该类型作为 Lua 全局用反射.
 
 #### Lua 环境配置
 
@@ -122,6 +146,19 @@ Lua 池配置用于配置是否启用 Lua 池以及 Lua 池的一些参数.
   "debug": false,
   // 是否启用 bStats 统计信息
   "bStats": true,
+  // lua 反射设置
+  "luaReflection": {
+    // lua 所使用的反射类型, 目前可用反射类型如下:
+    // org.eu.smileyik.luaInMinecraftBukkitII.reflect.FastReflection:
+    //     基于字节码生成的快速反射, 速度最快, 但是对于某些使用情况下可能会出现问题
+    // org.eu.smileyik.luaInMinecraftBukkitII.reflect.MixedFastReflection:
+    //     与 FastReflection 相同, 但在调用失败的情况下会回退到 Java 自带的标准反射
+    // default:
+    //     Java 自带的标准反射.
+    "type": "default",
+    // 反射缓存容量, 具体指最多缓存多少条缓存记录, 字段, 方法, 构造器的缓存记录都相互独立.
+    "cacheCapacity": 1024
+  },
   // lua 环境设置, 可以同时设置多个 Lua 环境
   "luaState": {
     // lua 环境 id
