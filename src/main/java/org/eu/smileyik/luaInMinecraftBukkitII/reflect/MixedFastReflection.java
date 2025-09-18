@@ -3,13 +3,14 @@ package org.eu.smileyik.luaInMinecraftBukkitII.reflect;
 import org.eu.smileyik.luaInMinecraftBukkitII.reflect.fastReflection.*;
 import org.eu.smileyik.luajava.reflect.IExecutable;
 import org.eu.smileyik.luajava.reflect.IFieldAccessor;
+import org.eu.smileyik.simpledebug.DebugLogger;
 
 import java.io.IOException;
 import java.lang.reflect.*;
 
-public class FastReflection extends AbstractFastReflection {
+public class MixedFastReflection extends AbstractFastReflection {
 
-    public FastReflection(int cacheCapacity) {
+    public MixedFastReflection(int cacheCapacity) {
         super(cacheCapacity);
     }
 
@@ -24,49 +25,78 @@ public class FastReflection extends AbstractFastReflection {
     }
 
     private static class FastFieldAccessor implements IFieldAccessor {
-        private final Field field;
+        private final IFieldAccessor fallback;
         private final FieldAccessor accessor;
         public FastFieldAccessor(IFieldAccessor fallback) throws IOException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-            this.field = fallback.getField();
+            this.fallback = fallback;
             this.accessor = FieldGenerator.INSTANCE.generate(fallback.getField());
         }
 
         @Override
         public Object get(Object instance) {
-            return accessor.get(instance);
+            try {
+                return accessor.get(instance);
+            } catch (Exception e) {
+                DebugLogger.debug(e);
+                try {
+                    return fallback.get(instance);
+                } catch (IllegalAccessException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
         }
 
         @Override
         public void set(Object instance, Object value) {
-            accessor.set(instance, value);
+            try {
+                accessor.set(instance, value);
+            } catch (Exception e) {
+                DebugLogger.debug(e);
+                try {
+                    fallback.set(instance, value);
+                } catch (IllegalAccessException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
         }
 
         @Override
         public Field getField() {
-            return field;
+            return fallback.getField();
         }
     }
 
     private static class FastExecutorAccessor<T extends Executable> implements IExecutable<T> {
-        private final T executable;
+        private final IExecutable<T> fallback;
         private final ExecutorAccessor accessor;
         public FastExecutorAccessor(IExecutable<T> executable) throws IOException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-            this.executable = executable.getExecutable();
-            if (this.executable instanceof Method) {
-                this.accessor = MethodGenerator.INSTANCE.generate((Method) this.executable);
+            this.fallback = executable;
+            T t = executable.getExecutable();
+            if (t instanceof Method) {
+                this.accessor = MethodGenerator.INSTANCE.generate((Method) t);
             } else {
-                this.accessor = ConstructorGenerator.INSTANCE.generate((Constructor<?>) this.executable);
+                this.accessor = ConstructorGenerator.INSTANCE.generate((Constructor<?>) t);
             }
         }
 
         @Override
         public Object invoke(Object instance, Object[] params) {
-            return accessor.invoke(instance, params);
+            try {
+                return accessor.invoke(instance, params);
+            } catch (Exception e) {
+                DebugLogger.debug("Failed to invoke method %s", fallback.getExecutable().getName());
+                DebugLogger.debug(e);
+                try {
+                    return fallback.invoke(instance, params);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
         }
 
         @Override
         public T getExecutable() {
-            return executable;
+            return fallback.getExecutable();
         }
     }
 }

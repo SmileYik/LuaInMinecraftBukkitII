@@ -1,17 +1,15 @@
 package org.eu.smileyik.luaInMinecraftBukkitII.reflect;
 
-import org.eu.smileyik.luaInMinecraftBukkitII.reflect.fastReflection.Lookup;
-import org.eu.smileyik.luajava.LuaJavaAPI;
 import org.eu.smileyik.luajava.reflect.IExecutable;
 import org.eu.smileyik.luajava.reflect.IFieldAccessor;
 import org.eu.smileyik.luajava.reflect.LuaInvokedMethod;
-import org.eu.smileyik.simpledebug.DebugLogger;
 
-import java.lang.invoke.MethodHandle;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.eu.smileyik.luajava.LuaJavaAPI.getReflectUtil;
 
 public class ReflectUtil {
     public static final String PRIMITIVE_TYPE_PATTERN_STR = "(byte|short|int|long|float|double|char|boolean)";
@@ -24,7 +22,6 @@ public class ReflectUtil {
     public static final Pattern FULL_CLASS_ARRAY_NAME_PATTERN_2 = Pattern.compile(String.format("^%s(\\[\\])+$", FULL_CLASS_NAME_PATTERN_STR));
 
     private static final Map<String, Class<?>> PRIMITIVE_NAME_2_TYPE_MAP;
-    private static final MethodHandle getReflectUtil;
 
     static {
         Map<String, Class<?>> primitiveName2TypeMap = new HashMap<String, Class<?>>();
@@ -47,24 +44,6 @@ public class ReflectUtil {
         primitiveName2TypeMap.put("Z", boolean.class);
         primitiveName2TypeMap.put("V", void.class);
         PRIMITIVE_NAME_2_TYPE_MAP = Collections.unmodifiableMap(primitiveName2TypeMap);
-
-        MethodHandle handle = null;
-        try {
-            handle = Lookup.getFieldGetter(LuaJavaAPI.class.getDeclaredField("reflectUtil"));
-        } catch (Exception e) {
-            DebugLogger.debug("Failed to initialize reflect util: %s", e.getMessage());
-            DebugLogger.debug(e);
-        } finally {
-            getReflectUtil = handle;
-        }
-    }
-
-    private static org.eu.smileyik.luajava.reflect.ReflectUtil getReflectUtil() {
-        try {
-            return (org.eu.smileyik.luajava.reflect.ReflectUtil) getReflectUtil.invoke();
-        } catch (Throwable e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public static Field findFieldByType(Class<?> clazz, Class<?> targetType) {

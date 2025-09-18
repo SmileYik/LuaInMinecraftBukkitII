@@ -10,9 +10,17 @@
   "debug": false,
   // 是否启用 bStats 统计信息
   "bStats": true,
-  // lua 环境设置, 可以同时设置多个 Lua 环境
+  // lua 反射设置
   "luaReflection": {
+    // lua 所使用的反射类型, 目前可用反射类型如下:
+    // org.eu.smileyik.luaInMinecraftBukkitII.reflect.FastReflection:
+    //     基于字节码生成的快速反射, 速度最快, 但是对于某些使用情况下可能会出现问题
+    // org.eu.smileyik.luaInMinecraftBukkitII.reflect.MixedFastReflection:
+    //     与 FastReflection 相同, 但在调用失败的情况下会回退到 Java 自带的标准反射
+    // default:
+    //     Java 自带的标准反射.
     "type": "default",
+    // 反射缓存容量, 具体指最多缓存多少条缓存记录, 字段, 方法, 构造器的缓存记录都相互独立.
     "cacheCapacity": 1024
   },
   "luaState": {
