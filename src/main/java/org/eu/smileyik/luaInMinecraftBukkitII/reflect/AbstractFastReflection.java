@@ -38,7 +38,7 @@ public abstract class AbstractFastReflection extends SimpleReflectUtil {
             DebugLogger.debug("Generating field accessor for %s", field);
             try {
                 return newFieldAccessorWrapper(accessor);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 DebugLogger.debug("Failed to init field accessors for field %s: %s", field, e.getMessage());
                 DebugLogger.debug(e);
                 return accessor;
@@ -57,7 +57,7 @@ public abstract class AbstractFastReflection extends SimpleReflectUtil {
             DebugLogger.debug("Generating constructor accessor for %s", constructor);
             try {
                 return newExecutableAccessorWrapper(executable);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 DebugLogger.debug("Failed to init constructor accessors for constructor %s: %s", constructor, e.getMessage());
                 DebugLogger.debug(e);
                 return executable;
@@ -80,7 +80,7 @@ public abstract class AbstractFastReflection extends SimpleReflectUtil {
                     DebugLogger.debug("Generating lambda method accessor for %s", method);
                     try {
                         return newExecutableAccessorWrapper(executable);
-                    } catch (Exception e) {
+                    } catch (Throwable e) {
                         DebugLogger.debug("Failed to init lambda method accessors for method %s: %s", realMethod, e.getMessage());
                         DebugLogger.debug(e);
                         return executable;
@@ -91,7 +91,7 @@ public abstract class AbstractFastReflection extends SimpleReflectUtil {
                     DebugLogger.debug("Generating method accessor for %s", targetMethod);
                     try {
                         return newExecutableAccessorWrapper(executable);
-                    } catch (Exception e) {
+                    } catch (Throwable e) {
                         DebugLogger.debug("Failed to init method accessors for method %s: %s", targetMethod, e.getMessage());
                         DebugLogger.debug(e);
                         return executable;
