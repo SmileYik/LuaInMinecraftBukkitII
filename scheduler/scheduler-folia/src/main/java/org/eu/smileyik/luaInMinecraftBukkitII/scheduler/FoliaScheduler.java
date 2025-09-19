@@ -70,7 +70,7 @@ public class FoliaScheduler implements Scheduler {
 
     @Override
     public void cancel(Plugin plugin) {
-        Bukkit.getGlobalRegionScheduler().cancelTasks(this);
-        Bukkit.getAsyncScheduler().cancelTasks(this);
+        Bukkit.getGlobalRegionScheduler().cancelTasks(plugin);
+        Bukkit.getAsyncScheduler().cancelTasks(plugin);
     }
 }
