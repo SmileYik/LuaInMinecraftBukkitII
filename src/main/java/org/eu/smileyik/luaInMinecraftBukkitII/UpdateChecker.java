@@ -63,7 +63,8 @@ public class UpdateChecker {
             return;
         }
         Node target = null;
-        try (ExecutorService executor = Executors.newSingleThreadExecutor()) {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
             Future<List<Node>> submit = executor.submit(this::getReleases);
             List<Node> releases = submit.get(60, TimeUnit.SECONDS);
             for (Node node : releases) {
@@ -77,10 +78,12 @@ public class UpdateChecker {
             logger.warning("Error checking for updates. " + e);
             DebugLogger.debug(e);
             return;
+        } finally {
+            executor.shutdownNow();
         }
         String msg;
         if (target == null) {
-            msg = "No newer version available.";
+            msg = "This is the newest version";
         } else {
             msg = "Found new release tag `" + target.getTag_name() +
                     "`, published at " + target.getPublished_at() +
