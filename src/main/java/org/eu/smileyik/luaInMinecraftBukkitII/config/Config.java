@@ -17,6 +17,7 @@ public class Config {
     private boolean alwaysCheckHashes = false;
     private boolean debug = false;
     private boolean bStats = true;
+    private boolean checkUpdates = true;
     private LuaReflectionConfig luaReflection = new LuaReflectionConfig();
     private List<String> enableModules = new ArrayList<>();
 }

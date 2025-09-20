@@ -152,6 +152,10 @@ shadowJar {
     relocate 'org.eu.smileyik.simplecommand', 'org.eu.smileyik.luaInMinecraftBukkitII.simplecommand'
     relocate 'net.bytebuddy', 'org.eu.smileyik.luaInMinecraftBukkitII.bytebuddy'
     relocate 'org.bstats', 'org.eu.smileyik.luaInMinecraftBukkitII.bstats'
+
+    manifest {
+        attributes 'Build-Timestamp': System.currentTimeMillis()
+    }
 }
 
 javadoc {

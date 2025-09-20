@@ -174,6 +174,11 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
         if (config.isBStats()) {
             metrics = new Metrics(this, BSTATS_CODE);
         }
+
+        // update checker
+        if (config.isCheckUpdates()) {
+            getScheduler().runTaskAsynchronously(this, () -> new UpdateChecker().checkForUpdates(logger()));
+        }
     }
 
     /**
