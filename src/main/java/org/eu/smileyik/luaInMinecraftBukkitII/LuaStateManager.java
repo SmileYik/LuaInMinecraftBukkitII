@@ -17,6 +17,8 @@ import org.eu.smileyik.simpledebug.DebugLogger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,6 +28,11 @@ public class LuaStateManager implements ILuaStateManager, Listener {
 
     public LuaStateManager(Config config) {
         reload(config);
+    }
+
+    @Override
+    public Collection<ILuaStateEnv> getScriptEnvs() {
+        return Collections.unmodifiableCollection(envs.values());
     }
 
     @Override

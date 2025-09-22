@@ -7,6 +7,8 @@ import org.eu.smileyik.luaInMinecraftBukkitII.config.Config;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
+
 public interface ILuaStateManager extends AutoCloseable {
     /**
      * 创建插件用Lua环境. <br/>
@@ -46,6 +48,11 @@ public interface ILuaStateManager extends AutoCloseable {
      */
     @Nullable
     ILuaStateEnv getEnv(String id);
+
+    /**
+     * 获取仅允许脚本的 Lua 环境.
+     */
+    Collection<ILuaStateEnv> getScriptEnvs();
 
     /**
      * 关闭并释放资源

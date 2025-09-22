@@ -10,6 +10,7 @@ import org.eu.smileyik.luaInMinecraftBukkitII.command.RootCommand;
 import org.eu.smileyik.luaInMinecraftBukkitII.config.Config;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.command.LuaCommandRegister;
 import org.eu.smileyik.luaInMinecraftBukkitII.scheduler.Scheduler;
+import org.eu.smileyik.luaInMinecraftBukkitII.util.BStatsMetrics;
 import org.eu.smileyik.luaInMinecraftBukkitII.util.ResourcesExtractor;
 import org.eu.smileyik.luajava.LuaJavaAPI;
 import org.eu.smileyik.luajava.LuaState;
@@ -172,7 +173,7 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
 
         // bState
         if (config.isBStats()) {
-            metrics = new Metrics(this, BSTATS_CODE);
+            metrics = BStatsMetrics.newInstance(BSTATS_CODE);
         }
 
         // update checker
