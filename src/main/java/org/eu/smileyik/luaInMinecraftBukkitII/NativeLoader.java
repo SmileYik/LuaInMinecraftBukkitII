@@ -34,6 +34,7 @@ public class NativeLoader {
 
     private static final int BUFFER_SIZE = 4096;
     private static final String VERSION_FILE = "VERSION";
+    private static final String FALLBACK_BASE_URL = "https://raw.githubusercontent.com/SmileYik/LuaInMinecraftBukkitII/refs/heads/gh-page";
 
     static {
         String osName = System.getProperty("os.name").toLowerCase();
@@ -58,7 +59,42 @@ public class NativeLoader {
         ARCH = arch;
     }
 
+    /**
+     * check plugin version. if version not match then will delete natives folder
+     */
+    private static void pluginVersionCheck() {
+        LuaInMinecraftBukkit instance = LuaInMinecraftBukkit.instance();
+        String version = instance.version();
+        File file = new File(instance.getDataFolder(), VERSION_FILE);
+        boolean needUpdateNatives = true;
+        try {
+            if (file.exists()) {
+                String prevVersion = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+                needUpdateNatives = !Objects.equals(prevVersion, version);
+            }
+            if (needUpdateNatives) {
+                File nativeFolder = new File(instance.getDataFolder(), LuaInMinecraftBukkit.NATIVES_FOLDER);
+                File[] files = nativeFolder.listFiles();
+                if (files != null) {
+                    for (File f : files) {
+                        if (f.isFile()) {
+                            f.delete();
+                        }
+                    }
+                }
+                Files.write(file.toPath(), version.getBytes(StandardCharsets.UTF_8),
+                        StandardOpenOption.TRUNCATE_EXISTING,
+                        StandardOpenOption.CREATE,
+                        StandardOpenOption.WRITE);
+                LuaInMinecraftBukkit.logger().info("Native library version need updated, currently: " + version);
+            }
+        } catch (Exception e) {
+            LuaInMinecraftBukkit.logger().warning("Failed to check plugin native version: " + e);
+        }
+    }
+
     public static void load(Config config) throws IOException {
+        pluginVersionCheck();
         String baseUrl = config.getProjectUrl();
         String luaVer = config.getLuaVersion();
         File baseDir = LuaInMinecraftBukkit.instance().getDataFolder();
@@ -69,7 +105,14 @@ public class NativeLoader {
             currentVersion = new String(Files.readAllBytes(versionFile.toPath()));
         }
 
-        NativeLibraryConfig nativeConfig = getNativeConfig(baseUrl, nativeFolder);
+        NativeLibraryConfig nativeConfig = null;
+        try {
+            nativeConfig = getNativeConfig(baseUrl, nativeFolder);
+        } catch (Exception e) {
+            LuaInMinecraftBukkit.logger().warning("Failed to download natives.json, try again: " + e.getMessage());
+            baseUrl = FALLBACK_BASE_URL;
+            nativeConfig = getNativeConfig(baseUrl, nativeFolder);
+        }
         String[] files = nativeConfig.version(OS, ARCH, luaVer);
         if (files == null) {
             throw new RuntimeException("Sorry, this plugin is not supported on this platform");

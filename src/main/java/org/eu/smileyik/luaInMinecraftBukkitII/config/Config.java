@@ -2,6 +2,7 @@ package org.eu.smileyik.luaInMinecraftBukkitII.config;
 
 import lombok.Data;
 import lombok.ToString;
+import org.eu.smileyik.luaInMinecraftBukkitII.LuaInMinecraftBukkit;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,4 +21,11 @@ public class Config {
     private boolean checkUpdates = true;
     private LuaReflectionConfig luaReflection = new LuaReflectionConfig();
     private List<String> enableModules = new ArrayList<>();
+
+    public String getProjectUrl() {
+        if (projectUrl != null) {
+            return projectUrl.replace("${version}", LuaInMinecraftBukkit.instance().version());
+        }
+        return null;
+    }
 }

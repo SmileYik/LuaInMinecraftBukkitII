@@ -1,6 +1,7 @@
 {
-  // 项目资源地址, 用于下载预编译好的动态链接库
-  "projectUrl": "https://raw.githubusercontent.com/SmileYik/LuaInMinecraftBukkitII/refs/tags/resources-1.0.9",
+  // 项目资源地址, 用于下载预编译好的动态链接库.
+  // 自从 1.1.0 开始, 可以使用 ${version} 变量代表当前版本号. 如当前插件版本为 1.1.0, 则 ${version} 将会被替换成 1.1.0
+  "projectUrl": "https://raw.githubusercontent.com/SmileYik/LuaInMinecraftBukkitII/refs/tags/resources-${version}",
   // 选择插件使用的lua版本
   "luaVersion": "lua-5.4.8",
   // 总是检查依赖库Hash是否正确.

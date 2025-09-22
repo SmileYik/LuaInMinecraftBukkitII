@@ -211,4 +211,10 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
     public ClassLoader classLoader() {
         return getClassLoader();
     }
+
+    public String version() {
+        String version = getDescription().getVersion();
+        int i = version.indexOf('+');
+        return i == -1 ? version : version.substring(0, i);
+    }
 }
