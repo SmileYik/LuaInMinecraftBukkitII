@@ -18,8 +18,8 @@ public class BStatsMetrics {
 
     private static final DrilldownPie LUA_VERSION = new DrilldownPie("lua_version", () -> {
         Map<String, Map<String, Integer>> map = new HashMap<>();
-        String str = System.getProperty("os.name") + " " +
-                System.getProperty("os.version") + " " +
+        String str = System.getProperty("os.name") + "-" +
+                System.getProperty("os.version") + "-" +
                 System.getProperty("os.arch");
         Map<String, Integer> entry = new HashMap<>();
         entry.put(str, 1);
