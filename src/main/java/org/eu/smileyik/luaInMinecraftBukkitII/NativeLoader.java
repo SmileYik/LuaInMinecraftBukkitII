@@ -65,6 +65,10 @@ public class NativeLoader {
     private static void pluginVersionCheck() {
         LuaInMinecraftBukkit instance = LuaInMinecraftBukkit.instance();
         String version = instance.version();
+        // version show `master` means it's not a release version, just skip check.
+        if (version.startsWith("master")) {
+            return;
+        }
         File file = new File(instance.getDataFolder(), VERSION_FILE);
         boolean needUpdateNatives = true;
         try {
