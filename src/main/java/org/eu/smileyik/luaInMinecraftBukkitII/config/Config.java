@@ -23,9 +23,9 @@ public class Config {
     private List<String> enableModules = new ArrayList<>();
 
     public String getProjectUrl() {
-        if (projectUrl != null) {
+        if (projectUrl != null && projectUrl.contains("${version}")) {
             return projectUrl.replace("${version}", LuaInMinecraftBukkit.instance().version());
         }
-        return null;
+        return projectUrl;
     }
 }

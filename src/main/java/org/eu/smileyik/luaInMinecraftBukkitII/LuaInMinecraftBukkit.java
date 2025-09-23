@@ -122,7 +122,7 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
             if (LOADED_NATIVES.compareAndSet(false, true)) {
                 getLogger().info("Loading lua native libraries...");
                 try {
-                    NativeLoader.load(config);
+                    NativeLoader.load(this, config);
                 } catch (Exception e) {
                     getPluginLoader().disablePlugin(this);
                     throw new RuntimeException("Could not init lua state event: ", e);

@@ -1,6 +1,7 @@
 package org.eu.smileyik.luaInMinecraftBukkitII;
 
 import com.google.gson.Gson;
+import org.bukkit.plugin.Plugin;
 import org.eu.smileyik.luaInMinecraftBukkitII.config.Config;
 import org.eu.smileyik.luaInMinecraftBukkitII.config.NativeLibraryConfig;
 import org.eu.smileyik.luaInMinecraftBukkitII.module.NativeModule;
@@ -62,9 +63,11 @@ public class NativeLoader {
     /**
      * check plugin version. if version not match then will delete natives folder
      */
-    private static void pluginVersionCheck() {
-        LuaInMinecraftBukkit instance = LuaInMinecraftBukkit.instance();
-        String version = instance.version();
+    private static void pluginVersionCheck(Plugin instance) {
+        if (!(instance instanceof LuaInMinecraftBukkit)) {
+            return;
+        }
+        String version = ((LuaInMinecraftBukkit) instance).version();
         // version show `master` means it's not a release version, just skip check.
         if (version.startsWith("master")) {
             return;
@@ -90,18 +93,18 @@ public class NativeLoader {
                         StandardOpenOption.TRUNCATE_EXISTING,
                         StandardOpenOption.CREATE,
                         StandardOpenOption.WRITE);
-                LuaInMinecraftBukkit.logger().info("Native library version need updated, currently: " + version);
+                instance.getLogger().info("Native library version need updated, currently: " + version);
             }
         } catch (Exception e) {
-            LuaInMinecraftBukkit.logger().warning("Failed to check plugin native version: " + e);
+            instance.getLogger().warning("Failed to check plugin native version: " + e);
         }
     }
 
-    public static void load(Config config) throws IOException {
-        pluginVersionCheck();
+    public static void load(Plugin plugin, Config config) throws IOException {
+        pluginVersionCheck(plugin);
         String baseUrl = config.getProjectUrl();
         String luaVer = config.getLuaVersion();
-        File baseDir = LuaInMinecraftBukkit.instance().getDataFolder();
+        File baseDir = plugin.getDataFolder();
         File nativeFolder = new File(baseDir, LuaInMinecraftBukkit.NATIVES_FOLDER);
         File versionFile = new File(nativeFolder, VERSION_FILE);
         String currentVersion = null;
@@ -111,11 +114,11 @@ public class NativeLoader {
 
         NativeLibraryConfig nativeConfig = null;
         try {
-            nativeConfig = getNativeConfig(baseUrl, nativeFolder);
+            nativeConfig = getNativeConfig(plugin, baseUrl, nativeFolder);
         } catch (Exception e) {
-            LuaInMinecraftBukkit.logger().warning("Failed to download natives.json, try again: " + e.getMessage());
+            plugin.getLogger().warning("Failed to download natives.json, try again: " + e.getMessage());
             baseUrl = FALLBACK_BASE_URL;
-            nativeConfig = getNativeConfig(baseUrl, nativeFolder);
+            nativeConfig = getNativeConfig(plugin, baseUrl, nativeFolder);
         }
         String[] files = nativeConfig.version(OS, ARCH, luaVer);
         if (files == null) {
@@ -131,7 +134,7 @@ public class NativeLoader {
 
         for (String file : files) {
             File lib = new File(nativeFolder, file);
-            checkFile(lib, config, nativeConfig, config.getLuaVersion());
+            checkFile(plugin, lib, config, nativeConfig, config.getLuaVersion());
             System.load(lib.getAbsolutePath());
         }
 
@@ -140,7 +143,7 @@ public class NativeLoader {
         for (String module : config.getEnableModules()) {
             NativeModule nativeModule = NativeModule.MODULES.get(module);
             if (nativeModule == null) {
-                LuaInMinecraftBukkit.instance().getLogger().warning(String.format(
+                plugin.getLogger().warning(String.format(
                         "Skipping module '%s' because not found.", module));
                 continue;
             }
@@ -154,7 +157,7 @@ public class NativeLoader {
             } else if (availableModules.contains(module + "-" + config.getLuaVersion())) {
                 realModule = module + "-" + config.getLuaVersion();
             } else {
-                LuaInMinecraftBukkit.instance().getLogger().warning(String.format(
+                plugin.getLogger().warning(String.format(
                         "Skipping module '%s' because not available.", module));
                 continue;
             }
@@ -169,19 +172,19 @@ public class NativeLoader {
                         for (String file : moduleFiles) {
                             if (file != null) {
                                 File lib = new File(nativeBaseDir, file);
-                                checkFile(lib, config, nativeConfig, realModule);
+                                checkFile(plugin, lib, config, nativeConfig, realModule);
                                 paths.add(lib.getAbsolutePath());
                             }
                         }
                     }
                     nativeModule.initialize(paths);
                 } catch (Exception e) {
-                    LuaInMinecraftBukkit.instance().getLogger().warning(String.format(
+                    plugin.getLogger().warning(String.format(
                             "Load module '%s' failed: %s", module, e.getMessage()));
                     continue;
                 }
             }
-            LuaInMinecraftBukkit.instance().getLogger().warning(String.format(
+            plugin.getLogger().warning(String.format(
                     "Loaded module '%s'(%s) %s.",
                     module, realModule,
                     nativeModule.isInitialized() ? "successfully" : "failed"));
@@ -219,25 +222,31 @@ public class NativeLoader {
         }
     }
 
-    private static NativeLibraryConfig getNativeConfig(String baseUrl, File nativeFolder) throws IOException {
+    private static NativeLibraryConfig getNativeConfig(Plugin plugin,
+                                                       String baseUrl,
+                                                       File nativeFolder) throws IOException {
         File nativeConfigFile = new File(nativeFolder, "natives.json");
         if (!nativeConfigFile.exists()) {
-            downloadLibraryConfig(baseUrl, nativeConfigFile);
+            downloadLibraryConfig(plugin, baseUrl, nativeConfigFile);
         }
         return new Gson()
                 .fromJson(new FileReader(nativeConfigFile), NativeLibraryConfig.class);
     }
 
-    private static void downloadLibraryConfig(String baseUrl, File nativeConfigFile) {
+    private static void downloadLibraryConfig(Plugin plugin,
+                                              String baseUrl,
+                                              File nativeConfigFile) {
         baseUrl += "/natives/natives.json";
-        LuaInMinecraftBukkit.instance()
-                .getLogger()
+        plugin.getLogger()
                 .info(String.format(
                         "Not found natives.json, download from %s",
                         baseUrl
                 ));
         try {
             byte[] bytes = downloadFile(baseUrl);
+            if (nativeConfigFile.getParent() != null && !nativeConfigFile.getParentFile().exists()) {
+                nativeConfigFile.getParentFile().mkdirs();
+            }
             Files.write(nativeConfigFile.toPath(), bytes,
                     StandardOpenOption.TRUNCATE_EXISTING,
                     StandardOpenOption.CREATE,
@@ -266,7 +275,11 @@ public class NativeLoader {
         }
     }
 
-    private static void checkFile(File lib, Config config, NativeLibraryConfig libraryConfig, String module) {
+    private static void checkFile(Plugin plugin,
+                                  File lib,
+                                  Config config,
+                                  NativeLibraryConfig libraryConfig,
+                                  String module) {
         if (!lib.exists() || config.isAlwaysCheckHashes()) {
             List<String> urls = new ArrayList<>();
             urls.add(config.getProjectUrl() + "/natives");
@@ -279,8 +292,7 @@ public class NativeLoader {
                     int retry = 3;
                     while (retry > 0) {
                         if (!lib.exists()) {
-                            LuaInMinecraftBukkit.instance()
-                                    .getLogger()
+                            plugin.getLogger()
                                     .info(String.format(
                                             "Not found library: %s, downloading library from %s",
                                             lib.getName(), fileUrl
@@ -291,7 +303,7 @@ public class NativeLoader {
                                     StandardOpenOption.CREATE,
                                     StandardOpenOption.WRITE);
                         }
-                        LuaInMinecraftBukkit.instance()
+                        plugin
                                 .getLogger()
                                 .info("Downloading library hash file from " + hashUrl);
                         String targetHash = new String(downloadFile(hashUrl));
@@ -299,7 +311,7 @@ public class NativeLoader {
                         if (Objects.equals(downloadedHash, targetHash)) {
                             break;
                         }
-                        LuaInMinecraftBukkit.instance()
+                        plugin
                                 .getLogger()
                                 .info(String.format(
                                         "The file failed hash verification. " +
@@ -311,7 +323,7 @@ public class NativeLoader {
                         retry -= 1;
                     }
                     if (retry == 0) {
-                        LuaInMinecraftBukkit.instance().getLogger().warning(
+                        plugin.getLogger().warning(
                                 "The hash of library file is not correct: " + lib
                         );
                     } else {
