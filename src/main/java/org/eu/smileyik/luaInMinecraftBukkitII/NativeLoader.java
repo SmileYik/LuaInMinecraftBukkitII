@@ -11,11 +11,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
+
+import static org.eu.smileyik.luaInMinecraftBukkitII.util.HashUtil.sha256;
 
 public class NativeLoader {
     public static final String OS_LINUX = "linux";
@@ -336,52 +335,6 @@ public class NativeLoader {
         }
         if (!lib.exists()) {
             throw new RuntimeException("Couldn't find library file: " + lib);
-        }
-    }
-
-    public static String sha256(File file) throws NoSuchAlgorithmException, IOException {
-        byte[] bytes = Files.readAllBytes(file.toPath());
-        return sha256(bytes);
-    }
-
-    public static String sha256(byte[] bytes) throws NoSuchAlgorithmException {
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        digest.update(bytes, 0, bytes.length);
-        byte[] hashedBytes = digest.digest();
-        StringBuilder hexString = new StringBuilder();
-        for (byte b : hashedBytes) {
-            hexString.append(String.format("%02x", b));
-        }
-        return hexString.toString();
-    }
-
-    public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
-        if (args.length == 0) return;
-        File nativeFolder = new File(args[0]);
-        if (!nativeFolder.exists()) {
-            return;
-        }
-
-        LinkedList<File> files = new LinkedList<>();
-        files.add(nativeFolder);
-        while (!files.isEmpty()) {
-            nativeFolder = files.remove();
-            File[] subs = nativeFolder.listFiles();
-            if (subs != null) {
-                for (File sub : subs) {
-                    if (sub.isDirectory()) {
-                        files.add(sub);
-                    } else if (!sub.getName().endsWith(".hash")) {
-                        String path = sub.getAbsolutePath();
-                        String sha256Path = path + ".hash";
-                        String sha256 = sha256(sub);
-                        Files.write(Paths.get(sha256Path), sha256.getBytes(),
-                                StandardOpenOption.CREATE,
-                                StandardOpenOption.WRITE,
-                                StandardOpenOption.TRUNCATE_EXISTING);
-                    }
-                }
-            }
         }
     }
 }
