@@ -200,7 +200,7 @@ jobs:
           rm -rf output/windows/amd64/**/*.lib || echo "Failed remove *.lib"
           rm -rf output/windows/amd64/**/*.exp || echo "Failed remove *.exp"
           mv plugin/*-all.jar plugin/a.jar
-          java -cp plugin/a.jar org.eu.smileyik.luaInMinecraftBukkitII.NativeLoader ./output
+          java -cp plugin/a.jar org.eu.smileyik.luaInMinecraftBukkitII.runnable.LibraryHashes ./output
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4.6.2
         with:
