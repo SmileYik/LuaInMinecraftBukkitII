@@ -3,6 +3,8 @@ package org.eu.smileyik.luaInMinecraftBukkitII.luaState;
 import org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.ILuaStateEnv;
 import org.eu.smileyik.luajava.LuaStateFacade;
 
+import java.io.File;
+
 public interface ILuaStateEnvInner extends ILuaStateEnv, AutoCloseable {
     void createEnv();
 
@@ -26,4 +28,14 @@ public interface ILuaStateEnvInner extends ILuaStateEnv, AutoCloseable {
      * 软重载Lua环境.
      */
     void softReload();
+
+    default File getRootDir() {
+        return null;
+    }
+
+    default String getId() {
+        return null;
+    }
+
+    LuaStateFacade getLuaState();
 }

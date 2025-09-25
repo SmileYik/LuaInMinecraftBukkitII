@@ -31,12 +31,14 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
     public static final String NATIVES_FOLDER = "natives";
     public static final String LUA_STATE_FOLDER = "luaState";
     public static final String LUA_LIB_FOLDER = "luaLibrary";
+    public static final String LUA_PKG_FOLDER = "package";
 
     private static final int BSTATS_CODE = 26298;
     private static final String[] FOLDERS = new String[] {
             LUA_STATE_FOLDER,
             NATIVES_FOLDER,
             LUA_LIB_FOLDER,
+            LUA_PKG_FOLDER,
             "scripts"
     };
 
@@ -216,5 +218,13 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
         String version = getDescription().getVersion();
         int i = version.indexOf('+');
         return i == -1 ? version : version.substring(0, i);
+    }
+
+    public File getFolder(String folder) {
+        return new File(getDataFolder(), folder);
+    }
+
+    public File getFile(String folder, String ... paths) {
+        return new File(getFolder(folder), String.join(File.separator, paths));
     }
 }

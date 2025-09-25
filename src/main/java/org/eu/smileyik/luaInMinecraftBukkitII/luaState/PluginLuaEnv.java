@@ -85,6 +85,11 @@ public class PluginLuaEnv implements ILuaStateEnvInner, ILuaStateEnv, ILuaStateP
     }
 
     @Override
+    public LuaStateFacade getLuaState() {
+        return lua;
+    }
+
+    @Override
     public void checkScriptFilesUpdate() {
 
     }

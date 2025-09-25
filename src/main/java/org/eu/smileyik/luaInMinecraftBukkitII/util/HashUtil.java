@@ -16,10 +16,10 @@ public class HashUtil {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         digest.update(bytes, 0, bytes.length);
         byte[] hashedBytes = digest.digest();
-        StringBuilder hexString = new StringBuilder();
-        for (byte b : hashedBytes) {
-            hexString.append(String.format("%02x", b));
-        }
-        return hexString.toString();
+        return HexUtil.bytesToHex(hashedBytes);
+    }
+
+    public static boolean isEqualsHashString(String p, String q) {
+        return p != null && p.equalsIgnoreCase(q);
     }
 }

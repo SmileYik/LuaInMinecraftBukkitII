@@ -10,14 +10,9 @@ import lombok.ToString;
 public class LuacageLuaMeta extends LuacageCommonMeta {
 
     /**
-     * main lua file of
+     * main lua file of. if set null then means no main script files.
      */
     private String main;
-
-    /**
-     * depend lua packages
-     */
-    private String[] dependPackages;
 
     /**
      * depend bukkit plugin

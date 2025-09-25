@@ -27,4 +27,9 @@ public class LuacageJsonMeta extends LuacageCommonMeta {
      * created timestamp
      */
     private Long createdAt;
+
+    /**
+     * from which repo.
+     */
+    private String source;
 }

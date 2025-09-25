@@ -180,6 +180,11 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
         return lua;
     }
 
+    @Override
+    public LuaStateFacade getLuaState() {
+        return lua;
+    }
+
     public synchronized void initialization() {
         if (initialized) {
             return;

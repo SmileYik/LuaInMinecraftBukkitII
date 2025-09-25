@@ -2,22 +2,24 @@ package org.eu.smileyik.luaInMinecraftBukkitII.luaState.luacage;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class LuacageRepository implements ILuacageRepository {
-
     private final List<LuacageJsonMeta> list;
 
     public LuacageRepository(File file) throws FileNotFoundException {
         list = new Gson().fromJson(new FileReader(file), new TypeToken<List<LuacageJsonMeta>>() {}.getType());
+    }
+
+    public LuacageRepository(String repoName, File file) throws FileNotFoundException {
+        list = new Gson().fromJson(new FileReader(file), new TypeToken<List<LuacageJsonMeta>>() {}.getType());
+        list.parallelStream().forEach(l -> l.setSource(repoName));
     }
 
     @Override
@@ -26,10 +28,13 @@ public class LuacageRepository implements ILuacageRepository {
     }
 
     @Override
+    @NotNull
     public List<LuacageJsonMeta> findPackages(String packageName, String desc, short searchType) {
         return list.parallelStream()
                 .filter(it -> {
-                    if (searchType == SEARCH_TYPE_PKG_NAME_ONLY
+                    if (searchType == SEARCH_TYPE_PKG_NAME_EXACTLY && Objects.equals(packageName, it.getName())) {
+                        return true;
+                    } else if (searchType == SEARCH_TYPE_PKG_NAME_ONLY
                             && hasString(packageName)
                             && it.getName().toLowerCase(Locale.ENGLISH).contains(packageName.toLowerCase(Locale.ENGLISH))) {
                         return true;
@@ -45,16 +50,6 @@ public class LuacageRepository implements ILuacageRepository {
                     return false;
                 })
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<LuacageJsonMeta> findPackages(String keyword) {
-        return findPackages(keyword, keyword, SEARCH_TYPE_PKG_NAME_AND_DESC);
-    }
-
-    @Override
-    public List<LuacageJsonMeta> findPackagesByName(String packageName) {
-        return findPackages(packageName, null, SEARCH_TYPE_PKG_NAME_ONLY);
     }
 
     private boolean hasString(String text) {

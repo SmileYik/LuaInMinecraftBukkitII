@@ -32,4 +32,9 @@ public class LuacageCommonMeta {
      * runnable lua version
      */
     private String[] luaVersion;
+
+    /**
+     * depend lua packages
+     */
+    private String[] dependPackages;
 }
