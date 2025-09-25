@@ -37,4 +37,9 @@ public class LuacageCommonMeta {
      * depend lua packages
      */
     private String[] dependPackages;
+
+    /**
+     * depend bukkit plugin
+     */
+    private String[] dependPlugins;
 }

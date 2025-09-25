@@ -9,7 +9,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 public class LuacageJsonMeta extends LuacageCommonMeta {
     /**
-     * package file paths.
+     * package file paths. need starts with '/'.
      */
     private String[] files;
 

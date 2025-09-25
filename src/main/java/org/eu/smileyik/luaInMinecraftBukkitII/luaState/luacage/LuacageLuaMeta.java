@@ -15,11 +15,6 @@ public class LuacageLuaMeta extends LuacageCommonMeta {
     private String main;
 
     /**
-     * depend bukkit plugin
-     */
-    private String[] dependPlugins;
-
-    /**
      * is runnable.
      */
     private boolean runnable;
