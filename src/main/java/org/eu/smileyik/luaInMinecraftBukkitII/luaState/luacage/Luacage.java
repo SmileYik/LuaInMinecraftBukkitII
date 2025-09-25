@@ -28,7 +28,9 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class Luacage implements ILuacageRepository, ILuacage {
-    private static final String PACKAGE_DIR_NAME = "packages";
+    public static final String PACKAGE_META_NAME = "luacage.json";
+    public static final String PACKAGE_DIR_NAME = "packages";
+    public static final String PACKAGE_LUA_NAME = "package.lua";
 
     private static final ReentrantLock REPO_LOCK = new ReentrantLock();
     private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -71,8 +73,8 @@ public class Luacage implements ILuacageRepository, ILuacage {
                 file.delete();
             }
             if (!file.exists()) {
-                String url = baseUrl + "luacage.json";
-                String hashUrl = baseUrl + "luacage.json.hash";
+                String url = baseUrl + PACKAGE_META_NAME;
+                String hashUrl = baseUrl + PACKAGE_META_NAME + ".hash";
                 try (
                         FileOutputStream fos = new FileOutputStream(file);
                         BufferedOutputStream bos = new BufferedOutputStream(fos);
@@ -459,7 +461,7 @@ public class Luacage implements ILuacageRepository, ILuacage {
         }
 
         File installDir = getInstallDir(installedPackage);
-        File file = new File(installDir, "package.lua");
+        File file = new File(installDir, PACKAGE_LUA_NAME);
         Result<Integer, LuaException> metaResult = env.evalFile(file.getAbsolutePath());
         if (metaResult.isError()) {
             failed.add(installedPackage.getName());
