@@ -1,8 +1,8 @@
 {
     "urls": [
+        "https://raw.githubusercontent.com/SmileYik/LuaInMinecraftBukkitII/refs/heads/gh-page/natives",
         "https://luainminecraftbukkit.smileyik.eu.org/natives",
-        "https://smileyik.github.io/LuaInMinecraftBukkitII/natives",
-        "https://raw.githubusercontent.com/SmileYik/LuaInMinecraftBukkitII/refs/heads/gh-page/natives"
+        "https://smileyik.github.io/LuaInMinecraftBukkitII/natives"
     ],
     "files": {
         "windows": {
