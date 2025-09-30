@@ -29,6 +29,14 @@ public class LuacageCommand {
 
     @Command(
             value = "list",
+            description = "List packages"
+    )
+    public void listFirstPage(CommandSender sender, String[] args) {
+        list(sender, new String[] { "1" });
+    }
+
+    @Command(
+            value = "list",
             args = {"page"},
             description = "List packages"
     )
@@ -47,15 +55,38 @@ public class LuacageCommand {
             int pageCount = size / pageSize + (size % pageSize == 0 ? 0 : 1);
             if (page > pageCount) {
                 page = pageCount;
-            } else if (page < 1) {
+            }
+            if (page < 1) {
                 page = 1;
             }
+            int numLen = Integer.toString(pageCount).length();
             StringBuilder msg = new StringBuilder();
-            packages.subList((page - 1) * pageSize, page * pageSize).forEach(pkg -> {
+            int i = (page - 1) * pageSize + 1;
+            for (LuacageJsonMeta pkg : packages.subList((page - 1) * pageSize, Math.min(page * pageSize, size))) {
+                msg.append(String.format("%0" + numLen + "d: %s: %s\n", i++, pkg.getName(), pkg.getDescription()));
+            }
 
-            });
+            sender.sendMessage(String.format(
+                    "Page %0" + numLen + "d of %0" + numLen + "d:\n%s",
+                    page, pageCount, msg
+            ));
+        });
+    }
 
-            sender.sendMessage("Luacage updated");
+    @Command(
+            value = "search",
+            args = {"keyword"},
+            description = "Search package"
+    )
+    public void search(CommandSender sender, String[] args) {
+        getLuaState(sender, env -> {
+            int i = 1;
+
+            StringBuilder msg = new StringBuilder();
+            for (LuacageJsonMeta pkg : env.getLuacage().findPackages(args[0])) {
+                msg.append(String.format("%02d: %s: %s\n", i++, pkg.getName(), pkg.getDescription()));
+            }
+            sender.sendMessage("Search result:\n" + msg.toString());
         });
     }
 

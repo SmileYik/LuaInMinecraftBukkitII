@@ -17,11 +17,13 @@ public class LuacageRepository implements ILuacageRepository {
     private final List<LuacageJsonMeta> list;
 
     public LuacageRepository(File file) throws FileNotFoundException {
-        list = new Gson().fromJson(new FileReader(file), new TypeToken<List<LuacageJsonMeta>>() {}.getType());
+        List<LuacageJsonMeta> list = new Gson().fromJson(new FileReader(file), new TypeToken<List<LuacageJsonMeta>>() {}.getType());
+        if (list == null) list = Collections.emptyList();
+        this.list = list;
     }
 
     public LuacageRepository(String repoName, File file) throws FileNotFoundException {
-        list = new Gson().fromJson(new FileReader(file), new TypeToken<List<LuacageJsonMeta>>() {}.getType());
+        this(Objects.requireNonNull(file));
         list.parallelStream().forEach(l -> l.setSource(repoName));
     }
 

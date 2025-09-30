@@ -15,5 +15,7 @@ public interface ILuaStateEnv {
 
     Result<Object, Exception> callClosure(String globalClosureName, Object... params);
 
-    ILuacage getLuacage();
+    default ILuacage getLuacage() {
+        return null;
+    }
 }

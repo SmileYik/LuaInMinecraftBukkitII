@@ -6,6 +6,7 @@ import org.bstats.bukkit.Metrics;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.eu.smileyik.luaInMinecraftBukkitII.api.ILuaStateManager;
+import org.eu.smileyik.luaInMinecraftBukkitII.command.LuacageCommand;
 import org.eu.smileyik.luaInMinecraftBukkitII.command.RootCommand;
 import org.eu.smileyik.luaInMinecraftBukkitII.config.Config;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.command.LuaCommandRegister;
@@ -65,6 +66,11 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
                     LuaCommandRegister.DEFAULT_TRANSLATOR,
                     LuaCommandRegister.DEFAULT_FORMAT,
                     RootCommand.class
+            ).registerToBukkit(this);
+            CommandService.newInstance(
+                    LuaCommandRegister.DEFAULT_TRANSLATOR,
+                    LuaCommandRegister.DEFAULT_FORMAT,
+                    LuacageCommand.class
             ).registerToBukkit(this);
         } catch (Exception e) {
             getLogger().warning("Cannot register command!");
@@ -186,6 +192,7 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
         }
 
         luaStateManager = new LuaStateManager(config);
+        luaStateManager.preLoad();
     }
 
     /**

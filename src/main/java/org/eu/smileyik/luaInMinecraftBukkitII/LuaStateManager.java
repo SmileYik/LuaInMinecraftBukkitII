@@ -31,7 +31,6 @@ public class LuaStateManager implements ILuaStateManager, Listener {
 
     public LuaStateManager(Config config) {
         this.config = config;
-        preLoad();
     }
 
     @Override
