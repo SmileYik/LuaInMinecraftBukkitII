@@ -116,12 +116,6 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
 
         // load native library.
         getScheduler().runTaskAsynchronously(this, () -> {
-            CompletableFuture<Object> future = new CompletableFuture<>();
-            getScheduler().runTaskAsynchronously(this, () -> {
-                asyncInit(config);
-                future.complete(null);
-            });
-
             if (LOADED_NATIVES.compareAndSet(false, true)) {
                 getLogger().info("Loading lua native libraries...");
                 try {
@@ -133,6 +127,12 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
                 getLogger().info("Successfully loaded lua native libraries, lua version: " +
                         LuaState.LUA_VERSION);
             }
+
+            CompletableFuture<Object> future = new CompletableFuture<>();
+            getScheduler().runTaskAsynchronously(this, () -> {
+                asyncInit(config);
+                future.complete(null);
+            });
             // after loaded then init plugin.
             try {
                 future.get();
