@@ -10,6 +10,7 @@ import org.eu.smileyik.luaInMinecraftBukkitII.command.RootCommand;
 import org.eu.smileyik.luaInMinecraftBukkitII.config.Config;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.command.LuaCommandRegister;
 import org.eu.smileyik.luaInMinecraftBukkitII.scheduler.Scheduler;
+import org.eu.smileyik.luaInMinecraftBukkitII.tools.LuacageDatabaseGenerator;
 import org.eu.smileyik.luaInMinecraftBukkitII.util.BStatsMetrics;
 import org.eu.smileyik.luaInMinecraftBukkitII.util.ResourcesExtractor;
 import org.eu.smileyik.luajava.LuaJavaAPI;
@@ -148,7 +149,7 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
     /**
      * ahead of init().
      */
-    private void asyncInit(Config config) {
+    private synchronized void asyncInit(Config config) {
         // set reflection util for luajava
         if (config.getLuaReflection() != null) {
             ReflectUtil reflectUtil = config.getLuaReflection().toReflectUtil();
@@ -182,13 +183,16 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
         if (config.isCheckUpdates()) {
             getScheduler().runTaskAsynchronously(this, () -> new UpdateChecker().checkForUpdates(logger()));
         }
+
+        luaStateManager = new LuaStateManager(config);
     }
 
     /**
      * init will call after asyncInit method.
      */
-    private void init(Config config) {
-        luaStateManager = new LuaStateManager(config);
+    private synchronized void init(Config config) {
+        luaStateManager.initialization();
+        LuacageDatabaseGenerator.run();
     }
 
     public Config loadConfig() throws IOException {

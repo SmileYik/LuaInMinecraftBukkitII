@@ -70,4 +70,14 @@ public interface ILuaStateManager extends AutoCloseable {
      * @param config
      */
     void reload(Config config);
+
+    /**
+     * 预先加载需要的配置
+     */
+    void preLoad();
+
+    /**
+     * 环境初始化, 需要在 preLoad 之后进行运行.
+     */
+    void initialization();
 }

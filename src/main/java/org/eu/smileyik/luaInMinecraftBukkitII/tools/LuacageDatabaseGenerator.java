@@ -2,6 +2,7 @@ package org.eu.smileyik.luaInMinecraftBukkitII.tools;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import org.bukkit.Bukkit;
 import org.eu.smileyik.luaInMinecraftBukkitII.LuaInMinecraftBukkit;
 import org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.ILuaStateEnv;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.ILuaStateEnvInner;
@@ -22,12 +23,75 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.eu.smileyik.luaInMinecraftBukkitII.luaState.luacage.Luacage.*;
 
 public class LuacageDatabaseGenerator {
 
+    public static void run() {
+        String path = System.getenv("luainminecraftbukkit_luacage_build");
+        if (path == null) return;
+        try {
+            run(path, path + "/" + PACKAGE_META_NAME);
+        } catch (Exception ignore) {
 
+        } finally {
+            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "stop");
+        }
+    }
+
+
+    public static void run(String repoPath, String outPath) throws Exception {
+        try {
+            doRun(repoPath, outPath);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "stop");
+            throw e;
+        }
+    }
+
+    protected static void doRun(String repoPath, String outPath) throws Exception {
+        File repo = new File(repoPath);
+        File pkgDir = new File(repoPath, PACKAGE_DIR_NAME);
+        if (!pkgDir.exists()) {
+            pkgDir.mkdirs();
+        }
+        List<LuacageJsonMeta> database = getDatabase(repo);
+        File[] files = pkgDir.listFiles();
+        if (files == null) {
+            return;
+        }
+        Set<String> ids = new HashSet<>();
+        for (File file : files) {
+            if (file.isDirectory()) {
+                ids.add(file.getName());
+            }
+        }
+
+        List<String> remove = new ArrayList<>();
+        List<String> update = new ArrayList<>();
+        for (LuacageJsonMeta meta : database) {
+            if (!ids.remove(meta.getName())) {
+                remove.add(meta.getName());
+            } else {
+                LuacageLuaMeta luacageLuaMeta = loadLuaMeta(getLuaStateFacade(), new File(pkgDir, meta.getName() + "/" + PACKAGE_LUA_NAME));
+                if (!Objects.equals(luacageLuaMeta.getVersion(), meta.getVersion())) {
+                    update.add(meta.getName());
+                }
+            }
+        }
+        for (String id : update) {
+            updateMetaList(repoPath, new File(repo, PACKAGE_META_NAME).getAbsolutePath(), id);
+        }
+        for (String id : ids) {
+            updateMetaList(repoPath, new File(repo, PACKAGE_META_NAME).getAbsolutePath(), id);
+        }
+        database = getDatabase(repo);
+        database = database.parallelStream().filter(it -> !remove.contains(it.getName())).collect(Collectors.toList());;
+        writeJson(database, outPath);
+    }
 
     public static void generateMetaList(String repoPath, String outPath) {
         LuaInMinecraftBukkit instance = LuaInMinecraftBukkit.instance();
@@ -99,7 +163,7 @@ public class LuacageDatabaseGenerator {
         String[] fs = new String[files.size()];
         String[] hs = new String[hashes.size()];
         for (int i = 0; i < fs.length; i++) {
-            fs[i] = files.get(i);
+            fs[i] = files.get(i).replace("\\", "/");
             hs[i] = hashes.get(i);
         }
         jsonMeta.setFiles(fs);
@@ -124,7 +188,7 @@ public class LuacageDatabaseGenerator {
 
     private static List<LuacageJsonMeta> getDatabase(File repo) throws FileNotFoundException {
         File file = new File(repo, PACKAGE_META_NAME);
-        if (file.exists()) {
+        if (!file.exists()) {
             return new ArrayList<>();
         }
         List<LuacageJsonMeta> list = new Gson().fromJson(new FileReader(file), new TypeToken<List<LuacageJsonMeta>>() {}.getType());

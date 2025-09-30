@@ -23,11 +23,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class LuaStateManager implements ILuaStateManager, Listener {
+    private final Config config;
     private final Map<String, ILuaStateEnvInner> envs = new HashMap<>();
     private final Map<Plugin, ILuaStateEnvInner> pluginEnvs = new HashMap<>();
 
     public LuaStateManager(Config config) {
-        reload(config);
+        this.config = config;
+        preLoad();
     }
 
     @Override
@@ -92,7 +94,12 @@ public class LuaStateManager implements ILuaStateManager, Listener {
     @Override
     public void reload(Config config) {
         close();
+        preLoad();
+        initialization();
+    }
 
+    @Override
+    public void preLoad() {
         LuaInMinecraftBukkit.instance()
                 .getServer()
                 .getPluginManager()
@@ -107,8 +114,14 @@ public class LuaStateManager implements ILuaStateManager, Listener {
                 DebugLogger.debug(e);
                 return;
             }
-            env.initialization();
             envs.put(id, env);
+        });
+    }
+
+    @Override
+    public void initialization() {
+        config.getLuaState().forEach((id, conf) -> {
+            envs.get(id).initialization();
         });
     }
 
