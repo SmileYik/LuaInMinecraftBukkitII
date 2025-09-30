@@ -20,6 +20,7 @@ public class Config {
     private boolean bStats = true;
     private boolean checkUpdates = true;
     private LuaReflectionConfig luaReflection = new LuaReflectionConfig();
+    private LuacageConfig luacage = new LuacageConfig();
     private List<String> enableModules = new ArrayList<>();
 
     public String getProjectUrl() {

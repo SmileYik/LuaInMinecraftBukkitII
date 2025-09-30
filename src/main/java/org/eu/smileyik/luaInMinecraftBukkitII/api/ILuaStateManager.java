@@ -80,4 +80,10 @@ public interface ILuaStateManager extends AutoCloseable {
      * 环境初始化, 需要在 preLoad 之后进行运行.
      */
     void initialization();
+
+    /**
+     * 获取插件配置
+     * @return
+     */
+    Config getConfig();
 }

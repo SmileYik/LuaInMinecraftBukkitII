@@ -1,5 +1,6 @@
 package org.eu.smileyik.luaInMinecraftBukkitII;
 
+import lombok.Getter;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -23,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class LuaStateManager implements ILuaStateManager, Listener {
+    @Getter
     private final Config config;
     private final Map<String, ILuaStateEnvInner> envs = new HashMap<>();
     private final Map<Plugin, ILuaStateEnvInner> pluginEnvs = new HashMap<>();

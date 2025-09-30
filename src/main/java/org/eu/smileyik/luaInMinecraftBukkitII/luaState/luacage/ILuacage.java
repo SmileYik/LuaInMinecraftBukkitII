@@ -11,9 +11,11 @@ import java.util.function.Function;
  * luacage based on lua environment, every lua environment need a luacage instance.
  * And luacage should not break currently script loader. it should be an additional loader.
  */
-public interface ILuacage {
+public interface ILuacage extends ILuacageRepository {
 
     void cleanCache();
+
+    void update();
 
     void installPackage(@NotNull LuacageJsonMeta meta, boolean force);
 

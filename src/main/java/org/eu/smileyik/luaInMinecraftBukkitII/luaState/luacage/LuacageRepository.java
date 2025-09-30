@@ -7,7 +7,10 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class LuacageRepository implements ILuacageRepository {
@@ -23,7 +26,7 @@ public class LuacageRepository implements ILuacageRepository {
     }
 
     @Override
-    public Collection<LuacageJsonMeta> getPackages() {
+    public List<LuacageJsonMeta> getPackages() {
         return Collections.unmodifiableList(list);
     }
 

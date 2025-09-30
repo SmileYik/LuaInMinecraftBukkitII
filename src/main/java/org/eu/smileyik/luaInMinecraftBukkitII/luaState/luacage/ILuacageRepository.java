@@ -2,7 +2,6 @@ package org.eu.smileyik.luaInMinecraftBukkitII.luaState.luacage;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -14,7 +13,7 @@ public interface ILuacageRepository {
 
     public static final ILuacageRepository EMPTY = new ILuacageRepository() {
         @Override
-        public Collection<LuacageJsonMeta> getPackages() {
+        public List<LuacageJsonMeta> getPackages() {
             return Collections.emptyList();
         }
 
@@ -24,7 +23,7 @@ public interface ILuacageRepository {
         }
     };
 
-    Collection<LuacageJsonMeta> getPackages();
+    List<LuacageJsonMeta> getPackages();
 
     @NotNull
     List<LuacageJsonMeta> findPackages(String packageName, String desc, short searchType);

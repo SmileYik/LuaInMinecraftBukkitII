@@ -10,3 +10,4 @@ commands:
       - lua
       - limb
       - limb2
+  Luacage: {}

@@ -3,7 +3,6 @@ package org.eu.smileyik.luaInMinecraftBukkitII.luaState.luacage;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,7 +17,7 @@ public class LuacageRepositoryBundle extends ArrayList<ILuacageRepository> imple
     }
 
     @Override
-    public Collection<LuacageJsonMeta> getPackages() {
+    public List<LuacageJsonMeta> getPackages() {
         return parallelStream()
                 .flatMap(it -> it.getPackages().parallelStream())
                 .collect(Collectors.toList());

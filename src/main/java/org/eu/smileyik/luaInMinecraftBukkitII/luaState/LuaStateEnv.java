@@ -16,6 +16,8 @@ import org.eu.smileyik.luaInMinecraftBukkitII.config.LuaInitConfig;
 import org.eu.smileyik.luaInMinecraftBukkitII.config.LuaStateConfig;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.autoReload.AutoReloadManager;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.event.LuaEventListener;
+import org.eu.smileyik.luaInMinecraftBukkitII.luaState.luacage.ILuacage;
+import org.eu.smileyik.luaInMinecraftBukkitII.luaState.luacage.Luacage;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.pool.LuaPool;
 import org.eu.smileyik.luajava.LuaException;
 import org.eu.smileyik.luajava.LuaStateFacade;
@@ -59,6 +61,9 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
     private final List<ILuaCallable> softReloadCallables = new LinkedList<>();
 
     private LuaStateFacade lua;
+    @Getter
+    private ILuacage luacage;
+
     @Getter(AccessLevel.PUBLIC)
     private boolean initialized = false;
 
@@ -93,6 +98,13 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
         }
         this.lua = createLuaState();
         this.luaPool = createLuaPool();
+        LuaInMinecraftBukkit instance = LuaInMinecraftBukkit.instance();
+        this.luacage = new Luacage(
+                this,
+                instance.getLuaStateManager().getConfig().getLuacage(),
+                new File(instance.getDataFolder(), LuaInMinecraftBukkit.LUA_PKG_FOLDER),
+                instance.getLogger()
+        );
     }
 
     protected LuaPool createLuaPool() {

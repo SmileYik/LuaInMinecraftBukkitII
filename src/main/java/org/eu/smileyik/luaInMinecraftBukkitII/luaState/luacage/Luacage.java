@@ -45,6 +45,13 @@ public class Luacage implements ILuacageRepository, ILuacage {
 
     private final Function<List<LuacageJsonMeta>, LuacageJsonMeta> DEFAULT_ON_CONFLICT;
 
+    /**
+     *
+     * @param env     lua 环境
+     * @param config  配置
+     * @param baseDir 仓库数据存储位置
+     * @param logger  日志
+     */
     public Luacage(ILuaStateEnvInner env, LuacageConfig config, File baseDir, Logger logger) {
         this.env = env;
         this.config = config;
@@ -233,7 +240,7 @@ public class Luacage implements ILuacageRepository, ILuacage {
     }
 
     @Override
-    public Collection<LuacageJsonMeta> getPackages() {
+    public List<LuacageJsonMeta> getPackages() {
         return getRepository().getPackages();
     }
 
@@ -244,6 +251,11 @@ public class Luacage implements ILuacageRepository, ILuacage {
 
     @Override
     public void cleanCache() {
+        getRepository(true);
+    }
+
+    @Override
+    public void update() {
         getRepository(true);
     }
 
