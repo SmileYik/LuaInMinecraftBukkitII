@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.bukkit.Bukkit;
 import org.eu.smileyik.luaInMinecraftBukkitII.LuaInMinecraftBukkit;
+import org.eu.smileyik.luaInMinecraftBukkitII.api.ILuaStateManager;
 import org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.ILuaStateEnv;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.ILuaStateEnvInner;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.luacage.LuacageCommonMeta;
@@ -23,21 +24,41 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.eu.smileyik.luaInMinecraftBukkitII.luaState.luacage.Luacage.*;
 
 public class LuacageDatabaseGenerator {
 
-    public static void run() {
-        String path = System.getenv("luainminecraftbukkit_luacage_build");
-        if (path == null) return;
-        try {
-            run(path, path + "/" + PACKAGE_META_NAME);
-        } catch (Exception ignore) {
+    public static final String BUILD_PATH = System.getenv("luainminecraftbukkit_luacage_build");
 
+    public static void run() {
+        if (BUILD_PATH == null) return;
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        Future<Object> stop = executorService.submit(() -> {
+            while (getLuaStateFacade() == null) {
+                Thread.sleep(1000);
+            }
+            try {
+                LuacageDatabaseGenerator.run(BUILD_PATH, BUILD_PATH + "/" + PACKAGE_META_NAME);
+            } catch (Exception ignore) {
+
+            }
+            return null;
+        });
+        try {
+            stop.get(60, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         } finally {
-            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "stop");
+            executorService.shutdown();
+            LuaInMinecraftBukkit.instance().getScheduler().runTask(LuaInMinecraftBukkit.instance(), () -> {
+                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "stop");
+            });
         }
     }
 
@@ -178,7 +199,9 @@ public class LuacageDatabaseGenerator {
     }
 
     private static LuaStateFacade getLuaStateFacade() {
-        Collection<ILuaStateEnv> scriptEnvs = LuaInMinecraftBukkit.instance().getLuaStateManager().getScriptEnvs();
+        ILuaStateManager luaStateManager = LuaInMinecraftBukkit.instance().getLuaStateManager();
+        if (luaStateManager == null) return null;
+        Collection<ILuaStateEnv> scriptEnvs = luaStateManager.getScriptEnvs();
         ILuaStateEnvInner env = (ILuaStateEnvInner) scriptEnvs.stream().findFirst().orElse(null);
         if (env == null) {
             throw new IllegalStateException("LuaInMinecraftBukkit has no lua env");

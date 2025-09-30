@@ -59,6 +59,7 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
     @Override
     public void onEnable() {
         // Plugin startup logic
+        getScheduler().runTaskAsynchronously(this, LuacageDatabaseGenerator::run);
         try {
             CommandService.newInstance(
                     LuaCommandRegister.DEFAULT_TRANSLATOR,
@@ -192,7 +193,6 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
      */
     private synchronized void init(Config config) {
         luaStateManager.initialization();
-        LuacageDatabaseGenerator.run();
     }
 
     public Config loadConfig() throws IOException {
