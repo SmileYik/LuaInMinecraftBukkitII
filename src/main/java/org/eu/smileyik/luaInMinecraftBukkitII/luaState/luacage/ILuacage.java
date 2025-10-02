@@ -13,8 +13,14 @@ import java.util.function.Function;
  */
 public interface ILuacage extends ILuacageRepository {
 
+    /**
+     * clean index cache and update index.
+     */
     void cleanCache();
 
+    /**
+     * clean index cache and update index.
+     */
     void update();
 
     void installPackage(@NotNull LuacageJsonMeta meta, boolean force);
@@ -25,19 +31,46 @@ public interface ILuacage extends ILuacageRepository {
             @NotNull Function<List<LuacageJsonMeta>, LuacageJsonMeta> onConflict
     );
 
+    /**
+     * find packages the target package depends.
+     * @param meta the package
+     * @return return the dependent list. this list just include dependents.
+     */
     List<LuacageJsonMeta> findDepends(@NotNull LuacageJsonMeta meta);
 
+    /**
+     * find packages the target package depends.
+     * @param meta the package
+     * @param onConflict on conflict
+     * @return return the dependent list. this list just include dependents.
+     */
     List<LuacageJsonMeta> findDepends(
             @NotNull LuacageJsonMeta meta,
             @NotNull Function<List<LuacageJsonMeta>, LuacageJsonMeta> onConflict
     );
 
+    /**
+     * get the installed package list
+     * @return list of installed packages.
+     */
     List<LuacageJsonMeta> installedPackages();
 
+    /**
+     * uninstall package
+     * @param meta package information
+     */
     void uninstallPackage(@NotNull LuacageJsonMeta meta);
 
+    /**
+     * get package install dir.
+     * @param meta package information
+     * @return the package installed dir
+     */
     File getInstallDir(@NotNull LuacageCommonMeta meta);
 
+    /**
+     * load packages to lua env
+     */
     void loadPackages();
 
     boolean loadPackage(LuacageJsonMeta pkg);
