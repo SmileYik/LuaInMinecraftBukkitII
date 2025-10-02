@@ -9,6 +9,7 @@ import org.eu.smileyik.luaInMinecraftBukkitII.luaState.luacage.LuacageJsonMeta;
 import org.eu.smileyik.simplecommand.annotation.Command;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -89,10 +90,11 @@ public class LuacageCommand {
 
     @Command(
             value = "installed",
+            args = "lua-env",
             description = "List installed packages"
     )
     public void installed(CommandSender sender, String[] args) {
-        getLuaState(sender, env -> {
+        getLuaState(args[0], sender, env -> {
             List<LuacageJsonMeta> installed = env.getLuacage().installedPackages();
             if (installed.isEmpty()) {
                 sender.sendMessage("No installed packages.");
@@ -105,27 +107,90 @@ public class LuacageCommand {
 
     @Command(
             value = "install",
-            args = "package-name",
+            args = {"lua-env", "package-name"},
             description = "Install package"
     )
     public void install(CommandSender sender, String[] args) {
-        getLuaState(sender, env -> {
-            String packageName = args[0];
+        getLuaState(args[0], sender, env -> {
+            String source = null;
+            String packageFullName = args[1];
+            String packageName = packageFullName;
+            if (packageName.contains("/")) {
+                int idx  = packageName.indexOf("/");
+                source = packageName.substring(0, idx);
+                packageName = packageName.substring(idx + 1);
+            }
+
+            String fSource = source;
+            String fPackageName = packageName;
             sender.sendMessage("Installing " + packageName + "... It will take a while...");
             LuaInMinecraftBukkit.instance().getScheduler().runTaskAsynchronously(LuaInMinecraftBukkit.instance(), () -> {
-                List<LuacageJsonMeta> results = env.getLuacage().findPackages(packageName, null, ILuacageRepository.SEARCH_TYPE_PKG_NAME_EXACTLY);
+                List<LuacageJsonMeta> results = env.getLuacage().findPackages(fPackageName, null, ILuacageRepository.SEARCH_TYPE_PKG_NAME_EXACTLY);
+                LuacageJsonMeta target;
                 if (results.isEmpty()) {
-                    sender.sendMessage("No packages named " + packageName);
+                    sender.sendMessage("No packages named " + fPackageName);
                     return;
                 } else if (results.size() > 1) {
-                    String msg = generatePackageInformation(1, results);
-                    sender.sendMessage("Multiple packages named " + packageName + ":\n" + msg);
-                    return;
+                    if (fSource == null) {
+                        String msg = generatePackageInformation(1, results);
+                        sender.sendMessage("Multiple packages named " + fPackageName + ":\n" + msg);
+                        return;
+                    }
+                    target = results.stream()
+                            .filter(it -> Objects.equals(it.getSource(), fSource))
+                            .findFirst()
+                            .orElse(null);
+                    if (target == null) {
+                        String msg = generatePackageInformation(1, results);
+                        sender.sendMessage("No packages named " + packageFullName + ":\n" + msg);
+                        return;
+                    }
+                } else {
+                    target = results.get(0);
                 }
-                LuacageJsonMeta pkg = results.get(0);
-                env.getLuacage().installPackage(pkg, true);
-                sender.sendMessage("Finished installing " + packageName + ".");
+                env.getLuacage().installPackage(target, true);
+                sender.sendMessage("Finished installing " + packageFullName + ".");
             });
+        });
+    }
+
+    @Command(
+            value = "uninstall",
+            args = {"lua-env", "package-name"},
+            description = "Uninstall package"
+    )
+    public void uninstall(CommandSender sender, String[] args) {
+        getLuaState(args[0], sender, env -> {
+            String packageFullName = args[1];
+            String packageName = packageFullName.contains("/") ? packageFullName.substring(0, packageFullName.indexOf("/")) : packageFullName;
+            env.getLuacage()
+                    .installedPackages()
+                    .stream()
+                    .filter(it -> Objects.equals(it.getName(), packageName))
+                    .findAny()
+                    .ifPresent(it -> {
+                        env.getLuacage().uninstallPackage(it);
+                    });
+            sender.sendMessage("Uninstalled " + packageFullName + ".");
+        });
+    }
+
+    @Command(
+            value = "autoRemove",
+            args = "lua-env",
+            description = "Auto remove useless packages"
+    )
+    public void autoRemove(CommandSender sender, String[] args) {
+        getLuaState(args[0], sender, env -> {
+            List<LuacageJsonMeta> removed = env.getLuacage().removeUselessPackages();
+            if (removed.isEmpty()) {
+                sender.sendMessage("No useless packages found.");
+            } else {
+                String msg = generatePackageInformation(1, removed);
+                sender.sendMessage(String.format(
+                        "Removed %s packages:\n%s",  removed.size(), msg
+                ));
+            }
         });
     }
 
@@ -155,6 +220,22 @@ public class LuacageCommand {
             return false;
         }
         consumer.accept(result.get());
+        return true;
+    }
+
+    protected boolean getLuaState(String envId, CommandSender sender, Consumer<ILuaStateEnv> consumer) {
+        LuaInMinecraftBukkit plugin = LuaInMinecraftBukkit.instance();
+        ILuaStateManager manager = plugin.getLuaStateManager();
+        if (manager == null) {
+            sender.sendMessage("No Lua state manager available");
+            return false;
+        }
+        ILuaStateEnv env = manager.getEnv(envId);
+        if (env == null) {
+            sender.sendMessage("No Lua state environment available: " + envId);
+            return false;
+        }
+        consumer.accept(env);
         return true;
     }
 }
