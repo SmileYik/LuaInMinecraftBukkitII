@@ -61,7 +61,7 @@ public class StaticResourceDownloader {
                 BufferedOutputStream bos = new BufferedOutputStream(baos);
         ) {
             download(url, bufferSize, timeout, (bytes, len) -> {
-                bos.write(len);
+                bos.write(bytes, 0, len);
             });
             bos.flush();
             return baos.toByteArray();
