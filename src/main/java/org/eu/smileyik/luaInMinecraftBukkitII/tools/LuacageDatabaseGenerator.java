@@ -218,13 +218,20 @@ public class LuacageDatabaseGenerator {
         return new ArrayList<>(list);
     }
 
-    private static void writeJson(List<LuacageJsonMeta> list, String outPath) throws IOException {
+    private static void writeJson(List<LuacageJsonMeta> list, String outPath) throws IOException, NoSuchAlgorithmException {
         list.sort(Comparator.comparing(LuacageCommonMeta::getName));
         String json = new Gson().toJson(list);
         Files.write(Paths.get(outPath), json.getBytes(StandardCharsets.UTF_8),
                 StandardOpenOption.WRITE,
                 StandardOpenOption.TRUNCATE_EXISTING,
-                StandardOpenOption.CREATE);
+                StandardOpenOption.CREATE
+        );
+        String hash = HashUtil.sha256(Paths.get(outPath).toFile());
+        Files.write(Paths.get(outPath + ".hash"), hash.getBytes(StandardCharsets.UTF_8),
+                StandardOpenOption.WRITE,
+                StandardOpenOption.TRUNCATE_EXISTING,
+                StandardOpenOption.CREATE
+        );
     }
 
     private static LuacageLuaMeta loadLuaMeta(LuaStateFacade lua, File luaFile) throws Exception {
