@@ -147,8 +147,9 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
                             .mapResultValue(it -> {
                                 return table.get("path")
                                         .mapValue(path -> (path) +
-                                                ";" + rootDir.getAbsolutePath() + "/?.lua"+
-                                                ";" + luaLibrary + "/?.lua"
+                                                ";" + rootDir.getAbsolutePath() + "/?.lua" +
+                                                ";" + luaLibrary + "/?.lua" +
+                                                ";?.lua"
                                         )
                                         .mapResultValue(path -> table.put("path", path));
                             });
@@ -160,7 +161,7 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
                 });
         lua.getGlobal("require", ILuaCallable.class)
                 .mapResultValue(callable ->
-                        lua.setGlobal("require", new WrapperedRequireFunction(lua,  callable, rootDir)))
+                        lua.setGlobal("require", new WrapperedRequireFunction(lua,  callable, rootDir, this)))
                 .ifFailureThen(it -> {
                     DebugLogger.debug(DebugLogger.WARN,
                             "Error initializing lua package path: %s", it.getMessage());
@@ -233,6 +234,7 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
         }
         this.initialized = initialized;
         if (initialized) {
+            luacage.loadPackages();
             DebugLogger.debug("[Lua env %s] lua file all initialized", id);
         }
     }

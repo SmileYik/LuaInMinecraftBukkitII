@@ -4,6 +4,7 @@ import org.bukkit.command.CommandSender;
 import org.eu.smileyik.luaInMinecraftBukkitII.LuaInMinecraftBukkit;
 import org.eu.smileyik.luaInMinecraftBukkitII.api.ILuaStateManager;
 import org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.ILuaStateEnv;
+import org.eu.smileyik.luaInMinecraftBukkitII.luaState.luacage.ILuacageRepository;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.luacage.LuacageJsonMeta;
 import org.eu.smileyik.simplecommand.annotation.Command;
 
@@ -22,8 +23,11 @@ public class LuacageCommand {
     )
     public void update(CommandSender sender, String[] args) {
         getLuaState(sender, env -> {
-            env.getLuacage().update();
-            sender.sendMessage("Luacage updated");
+            sender.sendMessage("Updating Luacage index... It will take a while...");
+            LuaInMinecraftBukkit.instance().getScheduler().runTaskAsynchronously(LuaInMinecraftBukkit.instance(), () -> {
+                env.getLuacage().update();
+                sender.sendMessage("Luacage updated");
+            });
         });
     }
 
@@ -60,14 +64,12 @@ public class LuacageCommand {
                 page = 1;
             }
             int numLen = Integer.toString(pageCount).length();
-            StringBuilder msg = new StringBuilder();
             int i = (page - 1) * pageSize + 1;
-            for (LuacageJsonMeta pkg : packages.subList((page - 1) * pageSize, Math.min(page * pageSize, size))) {
-                msg.append(String.format("%0" + numLen + "d: %s: %s\n", i++, pkg.getName(), pkg.getDescription()));
-            }
+            List<LuacageJsonMeta> result = packages.subList((page - 1) * pageSize, Math.min(page * pageSize, size));
+            String msg = generatePackageInformation(i, result);
 
-            sender.sendMessage(String.format(
-                    "Page %0" + numLen + "d of %0" + numLen + "d:\n%s",
+            sender.sendMessage(String.format("\n" +
+                    "Page %" + numLen + "d of %" + numLen + "d:\n%s",
                     page, pageCount, msg
             ));
         });
@@ -80,14 +82,64 @@ public class LuacageCommand {
     )
     public void search(CommandSender sender, String[] args) {
         getLuaState(sender, env -> {
-            int i = 1;
-
-            StringBuilder msg = new StringBuilder();
-            for (LuacageJsonMeta pkg : env.getLuacage().findPackages(args[0])) {
-                msg.append(String.format("%02d: %s: %s\n", i++, pkg.getName(), pkg.getDescription()));
-            }
-            sender.sendMessage("Search result:\n" + msg.toString());
+            String msg = generatePackageInformation(1, env.getLuacage().findPackages(args[0]));
+            sender.sendMessage("Search result:\n" + msg);
         });
+    }
+
+    @Command(
+            value = "installed",
+            description = "List installed packages"
+    )
+    public void installed(CommandSender sender, String[] args) {
+        getLuaState(sender, env -> {
+            List<LuacageJsonMeta> installed = env.getLuacage().installedPackages();
+            if (installed.isEmpty()) {
+                sender.sendMessage("No installed packages.");
+            } else {
+                sender.sendMessage("Installed " + installed.size() + " packages:\n" +
+                        generatePackageInformation(1, installed));
+            }
+        });
+    }
+
+    @Command(
+            value = "install",
+            args = "package-name",
+            description = "Install package"
+    )
+    public void install(CommandSender sender, String[] args) {
+        getLuaState(sender, env -> {
+            String packageName = args[0];
+            sender.sendMessage("Installing " + packageName + "... It will take a while...");
+            LuaInMinecraftBukkit.instance().getScheduler().runTaskAsynchronously(LuaInMinecraftBukkit.instance(), () -> {
+                List<LuacageJsonMeta> results = env.getLuacage().findPackages(packageName, null, ILuacageRepository.SEARCH_TYPE_PKG_NAME_EXACTLY);
+                if (results.isEmpty()) {
+                    sender.sendMessage("No packages named " + packageName);
+                    return;
+                } else if (results.size() > 1) {
+                    String msg = generatePackageInformation(1, results);
+                    sender.sendMessage("Multiple packages named " + packageName + ":\n" + msg);
+                    return;
+                }
+                LuacageJsonMeta pkg = results.get(0);
+                env.getLuacage().installPackage(pkg, true);
+                sender.sendMessage("Finished installing " + packageName + ".");
+            });
+        });
+    }
+
+    protected String generatePackageInformation(int startIdx, List<LuacageJsonMeta> packages) {
+        int len = String.valueOf(startIdx + packages.size()).length();
+        StringBuilder msg = new StringBuilder();
+        for (LuacageJsonMeta pkg : packages) {
+            msg.append(String.format("\n" +
+                    "%" + len + "d. %s/%s %s:\n" +
+                    "  %s",
+                    startIdx++, pkg.getSource(), pkg.getName(), pkg.getVersion(),
+                    pkg.getDescription()));
+        }
+        return msg.length() == 0 ? "" : msg.substring(1);
     }
 
     protected boolean getLuaState(CommandSender sender, Consumer<ILuaStateEnv> consumer) {

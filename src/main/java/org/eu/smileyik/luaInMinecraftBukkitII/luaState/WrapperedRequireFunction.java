@@ -1,6 +1,9 @@
 package org.eu.smileyik.luaInMinecraftBukkitII.luaState;
 
 import org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState.LuaIOHelper;
+import org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.ILuaStateEnv;
+import org.eu.smileyik.luaInMinecraftBukkitII.luaState.luacage.ILuacage;
+import org.eu.smileyik.luaInMinecraftBukkitII.luaState.luacage.LuacageJsonMeta;
 import org.eu.smileyik.luajava.JavaFunction;
 import org.eu.smileyik.luajava.LuaException;
 import org.eu.smileyik.luajava.LuaState;
@@ -22,17 +25,19 @@ public class WrapperedRequireFunction extends JavaFunction {
     private static final char[] CHARS = "abcdefghijklmnopqrstuvwxyz".toCharArray();
     private final ILuaCallable originRequire;
     private final File tempDir, rootDir;
+    private final ILuaStateEnv env;
 
     /**
      * Constructor that receives a LuaState.
      *
      * @param L LuaState object associated with this JavaFunction object
      */
-    public WrapperedRequireFunction(LuaStateFacade L, ILuaCallable originRequire, File rootDir) {
+    public WrapperedRequireFunction(LuaStateFacade L, ILuaCallable originRequire, File rootDir, ILuaStateEnv env) {
         super(L);
         this.originRequire = originRequire;
         this.rootDir = rootDir;
         this.tempDir = new File(rootDir, "temp");
+        this.env = env;
         if (!this.tempDir.exists()) {
             this.tempDir.mkdirs();
         }
@@ -49,6 +54,7 @@ public class WrapperedRequireFunction extends JavaFunction {
             throw new LuaException("Attempted to call require() on an invalid state, the first param type should be a string");
         }
         String module = l.toString(-1);
+        // require network
         if (module.startsWith("http")) {
             DebugLogger.debug("Requesting module: " + module);
             File downloaded = null;
@@ -71,6 +77,21 @@ public class WrapperedRequireFunction extends JavaFunction {
                 DebugLogger.debug("Finished requesting module: " + module);
             }
         } else {
+            // require package
+            if (module.startsWith("@")) {
+                final String finalModule = module.substring(1);
+                ILuacage luacage = env.getLuacage();
+                LuacageJsonMeta pkg = luacage.installedPackages()
+                        .parallelStream()
+                        .filter(it -> finalModule.startsWith(it.getName() + ".") || finalModule.startsWith(it.getName() + "/"))
+                        .findAny()
+                        .orElse(null);
+                if (pkg != null) {
+                    File parentFile = luacage.getInstallDir(pkg).getParentFile();
+                    module = parentFile.getAbsolutePath() + "/" + module.substring(1);
+                    module = module.substring(new File(".").getAbsolutePath().length() - 1);
+                }
+            }
             originRequire.call(module)
                     .mapResultValue(L::rawPushObjectValue)
                     .justThrow(LuaException.class);

@@ -101,7 +101,8 @@ public class Luacage implements ILuacageRepository, ILuacage {
                     }
                 } catch (NoSuchAlgorithmException | IOException | ExecutionException | InterruptedException |
                          TimeoutException e) {
-                    logger.warning("Luacage index failed download for repository " + name + ": " + baseUrl + ": " + e.getMessage());
+                    logger.warning("Luacage index failed download for repository " + name + ": " + baseUrl + ": " + e);
+                    if (file.exists()) file.delete();
                     DebugLogger.debug(e);
                 }
             }
@@ -152,6 +153,15 @@ public class Luacage implements ILuacageRepository, ILuacage {
         return String.format("%s-luacages.json", name);
     }
 
+    protected String getBaseUrl(@NotNull LuacageJsonMeta meta) {
+        for (LuacageConfig.Source source : config.getSources()) {
+            if (source.getName().equals(meta.getSource())) {
+                return source.getUrl();
+            }
+        }
+        return null;
+    }
+
     protected boolean doInstallPackage(@NotNull LuacageJsonMeta meta, boolean force) {
         File installDir = getInstallDir(meta);
         REPO_LOCK.lock();
@@ -163,13 +173,15 @@ public class Luacage implements ILuacageRepository, ILuacage {
             }
             String[] files = meta.getFiles();
             String[] hashes = meta.getHashes();
+            String baseUrl = getBaseUrl(meta);
             for (int i = 0; i < files.length; i++) {
                 String path = files[i];
                 String hash = hashes[i];
-                String url = baseDir + PACKAGE_DIR_NAME + path;
+                String url = baseUrl + PACKAGE_DIR_NAME + "/" + meta.getName() + path;
                 File file = new File(installDir, path);
                 File parent = file.getParentFile();
                 if (parent != null && !parent.exists()) parent.mkdirs();
+                logger.info("Downloading package file '" + path + "' from " + url);
                 String downloadHash = StaticResourceDownloader.download(url, 8192, 60, file);
                 if (!HashUtil.isEqualsHashString(hash, downloadHash)) {
                     deleteFolder(installDir);
@@ -309,7 +321,7 @@ public class Luacage implements ILuacageRepository, ILuacage {
 //            for (LuacageJsonMeta pkgMeta : installed) {
 //                deleteFolder(getInstallDir(pkgMeta));
 //            }
-            throw new RuntimeException(String.format("Package '%s' include circular dependency: %s", meta.getName(), sortResult.getValue()));
+            throw new RuntimeException(String.format("Package '%s' install failure.", meta.getName()));
         }
     }
 
@@ -448,7 +460,10 @@ public class Luacage implements ILuacageRepository, ILuacage {
             if (main.startsWith("/")) {
                 main = main.substring(1);
             }
-            return lua.evalString(String.format("require(@%s/%s)", pkg.getName(), main))
+            if (main.toLowerCase(Locale.ENGLISH).endsWith(".lua")) {
+                main = main.substring(0, main.length() - 4);
+            }
+            return lua.evalString(String.format("require('@%s/%s')", pkg.getName(), main))
                     .ifFailureThen(err -> {
                         logger.warning(String.format("Failed load main file of package '%s': %s", pkg.getName(), err.getMessage()));
                         DebugLogger.debug(err);
