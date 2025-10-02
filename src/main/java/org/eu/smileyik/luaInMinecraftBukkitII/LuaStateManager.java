@@ -34,6 +34,11 @@ public class LuaStateManager implements ILuaStateManager, Listener {
     }
 
     @Override
+    public Collection<String> getScriptEnvIds() {
+        return envs.keySet();
+    }
+
+    @Override
     public Collection<ILuaStateEnv> getScriptEnvs() {
         return Collections.unmodifiableCollection(envs.values());
     }

@@ -49,6 +49,8 @@ public interface ILuaStateManager extends AutoCloseable {
     @Nullable
     ILuaStateEnv getEnv(String id);
 
+    Collection<String> getScriptEnvIds();
+
     /**
      * 获取仅允许脚本的 Lua 环境.
      */

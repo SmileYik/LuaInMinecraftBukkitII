@@ -67,11 +67,7 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
                     LuaCommandRegister.DEFAULT_FORMAT,
                     RootCommand.class
             ).registerToBukkit(this);
-            CommandService.newInstance(
-                    LuaCommandRegister.DEFAULT_TRANSLATOR,
-                    LuaCommandRegister.DEFAULT_FORMAT,
-                    LuacageCommand.class
-            ).registerToBukkit(this);
+            LuacageCommand.register(this);
         } catch (Exception e) {
             getLogger().warning("Cannot register command!");
             DebugLogger.debug(e);

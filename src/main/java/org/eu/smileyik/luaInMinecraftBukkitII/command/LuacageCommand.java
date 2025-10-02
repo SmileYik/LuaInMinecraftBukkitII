@@ -4,14 +4,19 @@ import org.bukkit.command.CommandSender;
 import org.eu.smileyik.luaInMinecraftBukkitII.LuaInMinecraftBukkit;
 import org.eu.smileyik.luaInMinecraftBukkitII.api.ILuaStateManager;
 import org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.ILuaStateEnv;
+import org.eu.smileyik.luaInMinecraftBukkitII.luaState.command.LuaCommandRegister;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.luacage.ILuacageRepository;
+import org.eu.smileyik.luaInMinecraftBukkitII.luaState.luacage.LuacageCommonMeta;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.luacage.LuacageJsonMeta;
+import org.eu.smileyik.simplecommand.CommandService;
+import org.eu.smileyik.simplecommand.TabSuggest;
 import org.eu.smileyik.simplecommand.annotation.Command;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.io.InvalidClassException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @Command(
         value = "Luacage",
@@ -148,8 +153,12 @@ public class LuacageCommand {
                 } else {
                     target = results.get(0);
                 }
-                env.getLuacage().installPackage(target, true);
-                sender.sendMessage("Finished installing " + packageFullName + ".");
+                try {
+                    env.getLuacage().installPackage(target, true);
+                    sender.sendMessage("Finished installing " + packageFullName + ".");
+                } catch (Exception e) {
+                    sender.sendMessage("Failed to install package `" + fPackageName + "`: " + e);
+                }
             });
         });
     }
@@ -237,5 +246,55 @@ public class LuacageCommand {
         }
         consumer.accept(env);
         return true;
+    }
+
+    public static void register(LuaInMinecraftBukkit plugin) throws InvalidClassException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        CommandService commandService = CommandService.newInstance(
+                LuaCommandRegister.DEFAULT_TRANSLATOR,
+                LuaCommandRegister.DEFAULT_FORMAT,
+                LuacageCommand.class
+        );
+        commandService.registerTabSuggest(new TabSuggest() {
+            @Override
+            public String getKeyword() {
+                return "lua-env";
+            }
+
+            @Override
+            public List<String> suggest() {
+                return new ArrayList<>(plugin.getLuaStateManager().getScriptEnvIds());
+            }
+        });
+        commandService.registerTabSuggest(new TabSuggest() {
+            @Override
+            public String getKeyword() {
+                return "package-name";
+            }
+
+            @Override
+            public List<String> suggest(String[] args, int commandIdx) {
+                String envId = args[1];
+                ILuaStateEnv env = plugin.getLuaStateManager().getEnv(envId);
+                List<String> suggestions = Collections.emptyList();
+                if (env != null) {
+                    String command = args[0];
+                    if ("install".equalsIgnoreCase(command)) {
+                        suggestions = env.getLuacage()
+                                .getPackages()
+                                .stream()
+                                .map(it -> it.getSource() + "/" + it.getName())
+                                .collect(Collectors.toList());
+                    } else if ("uninstall".equalsIgnoreCase(command)) {
+                        suggestions = env.getLuacage()
+                                .installedPackages()
+                                .stream()
+                                .map(LuacageCommonMeta::getName)
+                                .collect(Collectors.toList());
+                    }
+                }
+                return suggestions;
+            }
+        });
+        commandService.registerToBukkit(plugin);
     }
 }
