@@ -11,6 +11,7 @@ import org.eu.smileyik.luaInMinecraftBukkitII.luaState.luacage.LuacageJsonMeta;
 import org.eu.smileyik.simplecommand.CommandService;
 import org.eu.smileyik.simplecommand.TabSuggest;
 import org.eu.smileyik.simplecommand.annotation.Command;
+import org.eu.smileyik.simpledebug.DebugLogger;
 
 import java.io.InvalidClassException;
 import java.lang.reflect.InvocationTargetException;
@@ -158,6 +159,7 @@ public class LuacageCommand {
                     sender.sendMessage("Finished installing " + packageFullName + ".");
                 } catch (Exception e) {
                     sender.sendMessage("Failed to install package `" + fPackageName + "`: " + e);
+                    DebugLogger.debug(e);
                 }
             });
         });

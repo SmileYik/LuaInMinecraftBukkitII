@@ -168,7 +168,7 @@ public class Luacage implements ILuacageRepository, ILuacage {
         try {
             if (force) {
                 deleteFolder(installDir);
-            } else if (installDir.exists()) {
+            } else if (installDir.exists() && new File(installDir, PACKAGE_LUA_NAME).exists()) {
                 return true;
             }
             String[] files = meta.getFiles();
@@ -181,7 +181,7 @@ public class Luacage implements ILuacageRepository, ILuacage {
                 File file = new File(installDir, path);
                 File parent = file.getParentFile();
                 if (parent != null && !parent.exists()) parent.mkdirs();
-                logger.info("Downloading package file '" + path + "' from " + url);
+                logger.info("Downloading package '" + meta.getName() + "' file '" + path + "' from " + url);
                 String downloadHash = StaticResourceDownloader.download(url, 8192, 60, file);
                 if (!HashUtil.isEqualsHashString(hash, downloadHash)) {
                     deleteFolder(installDir);
@@ -192,7 +192,7 @@ public class Luacage implements ILuacageRepository, ILuacage {
             }
         } catch (Exception e) {
             deleteFolder(installDir);
-            logger.warning("Luacage install failed, attempt to update the database source index: " + e.getMessage());
+            logger.warning("Luacage install failed, attempt to update the database source index: " + e);
             DebugLogger.debug(e);
             return false;
         } finally {
@@ -232,7 +232,6 @@ public class Luacage implements ILuacageRepository, ILuacage {
             sorted.forEach(circle::remove);
             return Result.failure(circle);
         }
-
         return Result.success(sorted);
     }
 
@@ -308,7 +307,7 @@ public class Luacage implements ILuacageRepository, ILuacage {
 
         // update json
         if (!failed) {
-            installed.addAll(pkgs);
+            installed.addAll(installedPackages);
             try {
                 Result<Void, Collection<LuacageJsonMeta>> updateResult = updateInstalledPackagesJson(installed);
                 if (updateResult.isError()) {
@@ -469,14 +468,14 @@ public class Luacage implements ILuacageRepository, ILuacage {
     public void loadPackages() {
         loadedPackages.clear();
         List<LuacageJsonMeta> installedPackages = installedPackages();
-        List<LuacageLuaMeta> packages = new ArrayList<>(installedPackages.size());
+        LinkedList<LuacageLuaMeta> packages = new LinkedList<>();
         Set<String> failed = new HashSet<>();
         LuaStateFacade lua = env.getLuaState();
         lua.lock(l -> {
             for (LuacageJsonMeta installedPackage : installedPackages) {
                 LuacageLuaMeta meta = loadPackageLua(lua, installedPackage, failed);
                 if (meta != null) {
-                    packages.add(meta);
+                    packages.addFirst(meta);
                 }
             }
 
