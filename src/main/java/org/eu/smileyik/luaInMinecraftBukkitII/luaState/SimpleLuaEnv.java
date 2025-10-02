@@ -18,6 +18,7 @@ import org.eu.smileyik.simplecommand.CommandService;
 import org.eu.smileyik.simpledebug.DebugLogger;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 
 public class SimpleLuaEnv implements ILuaEnv {
     private final LuaStateEnv env;
@@ -62,6 +63,11 @@ public class SimpleLuaEnv implements ILuaEnv {
     @Override
     public Result<Boolean, Exception> registerCommand(String rootCommand, Class<?>... classes) {
         return registerCommand(rootCommand, null, classes);
+    }
+
+    @Override
+    public void registerRawCommand(String command, ILuaCallable callable) throws InvocationTargetException, IllegalAccessException, InstantiationException {
+        LuaCommandRegister.register(command, callable);
     }
 
     @Override
@@ -126,7 +132,7 @@ public class SimpleLuaEnv implements ILuaEnv {
 
     @Override
     public File file(String... paths) {
-        return new File(env.getRootDir(), String.join(File.pathSeparator, paths));
+        return new File(env.getRootDir(), String.join(File.separator, paths));
     }
 
     @Override

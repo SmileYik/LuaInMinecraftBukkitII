@@ -8,6 +8,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.plugin.Plugin;
 import org.eu.smileyik.luaInMinecraftBukkitII.LuaInMinecraftBukkit;
 import org.eu.smileyik.luaInMinecraftBukkitII.reflect.ReflectUtil;
+import org.eu.smileyik.luajava.type.ILuaCallable;
 import org.eu.smileyik.simplecommand.CommandMessageFormat;
 import org.eu.smileyik.simplecommand.CommandService;
 import org.eu.smileyik.simplecommand.CommandTranslator;
@@ -112,5 +113,29 @@ public class LuaCommandRegister {
             });
         }
         return commandService;
+    }
+
+    public static void register(String rootCommand, ILuaCallable callable) throws InvocationTargetException, IllegalAccessException, InstantiationException {
+        register(rootCommand, null, callable);
+    }
+
+    public static void register(String rootCommand, String[] aliases, ILuaCallable callable) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+        LuaInMinecraftBukkit plugin = LuaInMinecraftBukkit.instance();
+        PluginCommand pluginCommand = plugin.getCommand(rootCommand);
+        CommandMap commandMap = (CommandMap) COMMAND_MAP_FIELD.get(plugin.getServer());
+        if (pluginCommand == null) {
+            pluginCommand = PLUGIN_COMMAND_CONSTRUCTOR.newInstance(rootCommand, plugin);
+        }
+        if (aliases != null) {
+            pluginCommand.setAliases(Arrays.asList(aliases));
+        }
+        commandMap.register(rootCommand, rootCommand, pluginCommand);
+        pluginCommand.setExecutor((sender, command, label, args) -> {
+            try {
+                return (boolean) callable.call(new Object[]{sender, command, label, args}).getOrThrow();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 }

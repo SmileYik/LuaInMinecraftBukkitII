@@ -8,6 +8,7 @@ import org.eu.smileyik.luajava.exception.Result;
 import org.eu.smileyik.luajava.type.ILuaCallable;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 
 public interface ILuaEnv {
     /**
@@ -75,6 +76,16 @@ public interface ILuaEnv {
      * @return 注册结果.
      */
     Result<Boolean, Exception> registerCommand(String rootCommand, Class<?>... classes);
+
+    /**
+     * 注册一个原始指令, 该指令与 Bukkit 原始指令一致.
+     * @param command 指令名称
+     * @param callable 回调闭包, 指令触发时, 将会传输给闭包形参顺序乳如下: sender, command, label, args, 并且该闭包需要返回 true/false
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     */
+    void registerRawCommand(String command, ILuaCallable callable) throws InvocationTargetException, IllegalAccessException, InstantiationException;
 
     /**
      * 注册指令
