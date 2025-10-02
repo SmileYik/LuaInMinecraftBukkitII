@@ -35,6 +35,7 @@ import static org.eu.smileyik.luaInMinecraftBukkitII.luaState.luacage.Luacage.*;
 public class LuacageDatabaseGenerator {
 
     public static final String BUILD_PATH = System.getenv("luainminecraftbukkit_luacage_build");
+    private static final String NAME_PATTERN = "[a-zA-Z][a-zA-Z0-9_-]+";
 
     public static void run() {
         if (BUILD_PATH == null) return;
@@ -127,6 +128,9 @@ public class LuacageDatabaseGenerator {
     }
 
     public static void updateMetaList(String repoPath, String outPath, String name) throws Exception {
+        if (!name.matches(NAME_PATTERN)) {
+            throw new Exception("Invalid name " + name + ", name not matches pattern " + NAME_PATTERN);
+        }
         File repo = new File(repoPath);
         File pkgDir = new File(repoPath, PACKAGE_DIR_NAME);
         List<LuacageJsonMeta> database = getDatabase(repo);
@@ -221,12 +225,13 @@ public class LuacageDatabaseGenerator {
     private static void writeJson(List<LuacageJsonMeta> list, String outPath) throws IOException, NoSuchAlgorithmException {
         list.sort(Comparator.comparing(LuacageCommonMeta::getName));
         String json = new Gson().toJson(list);
-        Files.write(Paths.get(outPath), json.getBytes(StandardCharsets.UTF_8),
+        Path path = Paths.get(outPath);
+        Files.write(path, json.getBytes(StandardCharsets.UTF_8),
                 StandardOpenOption.WRITE,
                 StandardOpenOption.TRUNCATE_EXISTING,
                 StandardOpenOption.CREATE
         );
-        String hash = HashUtil.sha256(Paths.get(outPath).toFile());
+        String hash = HashUtil.sha256(path.toFile());
         Files.write(Paths.get(outPath + ".hash"), hash.getBytes(StandardCharsets.UTF_8),
                 StandardOpenOption.WRITE,
                 StandardOpenOption.TRUNCATE_EXISTING,
