@@ -36,6 +36,8 @@ public class SimpleLuaPool implements LuaPool, AutoCloseable {
     private final Lock poolLock = new ReentrantLock();
     private final Condition freeCondition = poolLock.newCondition();
 
+    private volatile boolean closed = false;
+
     public SimpleLuaPool(ILuaStateEnvInner env, LuaPoolConfig config) {
         this.env = env;
         this.config = config;
@@ -149,12 +151,15 @@ public class SimpleLuaPool implements LuaPool, AutoCloseable {
     }
 
     protected Result<Object[], LuaException> doSubmit(ILuaCallable luaCallable, int _nres, Object... params) {
+        if (closed) return Result.failure(new  LuaException("Pool is closed"));
+        else if (params == null) {
+            params = new Object[0];
+        }
         LuaPoolEntity poolEntity = getLuaState();
         LuaStateFacade srcF = luaCallable.getLuaState();
         LuaStateFacade destF = poolEntity.getLuaStateFacade();
         LuaState srcL = srcF.getLuaState();
         LuaState destL = destF.getLuaState();
-
 
         // call closure
         destF.lock();
@@ -257,6 +262,7 @@ public class SimpleLuaPool implements LuaPool, AutoCloseable {
     public void close() {
         scheduled.shutdown();
         poolLock.lock();
+        closed = true;
         try {
             running.forEach(it -> {
                 try {
