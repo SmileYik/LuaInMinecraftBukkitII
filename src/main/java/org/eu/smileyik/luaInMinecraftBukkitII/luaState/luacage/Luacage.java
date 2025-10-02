@@ -288,6 +288,7 @@ public class Luacage implements ILuacageRepository, ILuacage {
                 .collect(Collectors.toSet());
         List<LuacageJsonMeta> waitInstallPackages = findDepends(meta, onConflict);
         waitInstallPackages.add(meta);
+        meta.setManual(true);
         Result<List<LuacageJsonMeta>, Collection<LuacageJsonMeta>> sortResult = sort(waitInstallPackages);
         if (sortResult.isError()) {
             throw new RuntimeException(String.format("Package '%s' include circular dependency: %s", meta.getName(), sortResult.getValue()));
@@ -298,7 +299,8 @@ public class Luacage implements ILuacageRepository, ILuacage {
         for (LuacageJsonMeta pkgMeta : pkgs) {
             if (installedNames.contains(pkgMeta.getName())) continue;
             installed.add(pkgMeta);
-            if (!doInstallPackage(pkgMeta, force)) {
+            // just force install the package we pointed.
+            if (!doInstallPackage(pkgMeta, force && pkgMeta.getName().equals(meta.getName()))) {
                 failed = true;
                 break;
             }
@@ -397,6 +399,61 @@ public class Luacage implements ILuacageRepository, ILuacage {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public synchronized List<LuacageJsonMeta> removeUselessPackages() {
+        List<LuacageJsonMeta> installedPackages = installedPackages();
+        Map<String, LuacageJsonMeta> map = new HashMap<>();
+        Set<String> deleted = new HashSet<>();
+
+        // init installed packages information
+        for (LuacageJsonMeta installedPackage : installedPackages) {
+            map.put(installedPackage.getName(), installedPackage);
+            if (!installedPackage.isManual()) {
+                deleted.add(installedPackage.getName());
+            }
+        }
+
+        // find need packages
+        for (LuacageJsonMeta installedPackage : installedPackages) {
+            if (!installedPackage.isManual()) continue;
+            Set<String> checked = new HashSet<>();
+            Queue<LuacageJsonMeta> queue = new LinkedList<>();
+            queue.add(installedPackage);
+            checked.add(installedPackage.getName());
+            while (!queue.isEmpty()) {
+                LuacageJsonMeta dependency = queue.poll();
+                if (checked.add(dependency.getName())) {
+                    deleted.remove(dependency.getName());
+                }
+                String[] dependPackages = dependency.getDependPackages();
+                for (String dependPackage : dependPackages) {
+                    LuacageJsonMeta meta = map.get(dependPackage);
+                    if (meta != null) queue.add(meta);
+                }
+            }
+        }
+
+        // remove
+        List<LuacageJsonMeta> removed = installedPackages.parallelStream()
+                .filter(it -> deleted.contains(it.getName()))
+                .collect(Collectors.toList());
+        installedPackages = installedPackages.parallelStream()
+                .filter(it -> !deleted.contains(it.getName()))
+                .collect(Collectors.toList());
+        sort(installedPackages)
+                .ifSuccessThen(newList -> {
+                    try {
+                        updateInstalledPackagesJson(newList);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .ifFailureThen(circularDependencies -> {
+                    logger.severe("[LuaEnv " + env.getId() + "] Circular dependencies found: " + circularDependencies);
+                });
+        return removed;
     }
 
     @Override

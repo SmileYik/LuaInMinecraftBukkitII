@@ -23,8 +23,19 @@ public interface ILuacage extends ILuacageRepository {
      */
     void update();
 
+    /**
+     * install package
+     * @param meta  the package
+     * @param force is re-download from repository.
+     */
     void installPackage(@NotNull LuacageJsonMeta meta, boolean force);
 
+    /**
+     * install package
+     * @param meta  the package
+     * @param force is re-download from repository.
+     * @param onConflict on conflict
+     */
     void installPackage(
             @NotNull LuacageJsonMeta meta,
             boolean force,
@@ -60,6 +71,11 @@ public interface ILuacage extends ILuacageRepository {
      * @param meta package information
      */
     void uninstallPackage(@NotNull LuacageJsonMeta meta);
+
+    /**
+     * remove the packages not installed by manual and it is not needed by other packages
+     */
+    List<LuacageJsonMeta> removeUselessPackages();
 
     /**
      * get package install dir.

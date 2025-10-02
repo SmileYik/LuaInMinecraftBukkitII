@@ -32,4 +32,9 @@ public class LuacageJsonMeta extends LuacageCommonMeta {
      * from which repo.
      */
     private String source;
+
+    /**
+     * is it install by manually.
+     */
+    private boolean manual;
 }
