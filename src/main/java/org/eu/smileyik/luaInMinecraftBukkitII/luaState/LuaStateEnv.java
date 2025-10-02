@@ -266,9 +266,12 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
 
     @Override
     public Result<Integer, LuaException> evalFile(String file) {
-        File scripFile = new File(rootDir, file);
-        String absolutePath = scripFile.toString();
-        if (scripFile.exists()) {
+        File scriptFile = new File(file);
+        if (!scriptFile.exists()) {
+            scriptFile = new File(rootDir, file);
+        }
+        String absolutePath = scriptFile.toString();
+        if (scriptFile.exists()) {
             return lua.evalFile(absolutePath)
                     .ifFailureThen(err -> {
                         log.warning(String.format(
