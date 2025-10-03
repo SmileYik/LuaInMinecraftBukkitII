@@ -5,6 +5,7 @@ import org.eu.smileyik.luaInMinecraftBukkitII.LuaInMinecraftBukkit;
 import org.eu.smileyik.luaInMinecraftBukkitII.api.ILuaStateManager;
 import org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.ILuaStateEnv;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.command.LuaCommandRegister;
+import org.eu.smileyik.luaInMinecraftBukkitII.luaState.luacage.ILuacage;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.luacage.ILuacageRepository;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.luacage.LuacageCommonMeta;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.luacage.LuacageJsonMeta;
@@ -73,7 +74,7 @@ public class LuacageCommand {
             int numLen = Integer.toString(pageCount).length();
             int i = (page - 1) * pageSize + 1;
             List<LuacageJsonMeta> result = packages.subList((page - 1) * pageSize, Math.min(page * pageSize, size));
-            String msg = generatePackageInformation(i, result);
+            String msg = generatePackageInformation(env.getLuacage(), i, result);
 
             sender.sendMessage(String.format("\n" +
                     "Page %" + numLen + "d of %" + numLen + "d:\n%s",
@@ -89,7 +90,7 @@ public class LuacageCommand {
     )
     public void search(CommandSender sender, String[] args) {
         getLuaState(sender, env -> {
-            String msg = generatePackageInformation(1, env.getLuacage().findPackages(args[0]));
+            String msg = generatePackageInformation(env.getLuacage(), 1, env.getLuacage().findPackages(args[0]));
             sender.sendMessage("Search result:\n" + msg);
         });
     }
@@ -106,7 +107,7 @@ public class LuacageCommand {
                 sender.sendMessage("No installed packages.");
             } else {
                 sender.sendMessage("Installed " + installed.size() + " packages:\n" +
-                        generatePackageInformation(1, installed));
+                        generatePackageInformation(env.getLuacage(), 1, installed));
             }
         });
     }
@@ -138,7 +139,7 @@ public class LuacageCommand {
                     return;
                 } else if (results.size() > 1) {
                     if (fSource == null) {
-                        String msg = generatePackageInformation(1, results);
+                        String msg = generatePackageInformation(env.getLuacage(), 1, results);
                         sender.sendMessage("Multiple packages named " + fPackageName + ":\n" + msg);
                         return;
                     }
@@ -147,7 +148,7 @@ public class LuacageCommand {
                             .findFirst()
                             .orElse(null);
                     if (target == null) {
-                        String msg = generatePackageInformation(1, results);
+                        String msg = generatePackageInformation(env.getLuacage(), 1, results);
                         sender.sendMessage("No packages named " + packageFullName + ":\n" + msg);
                         return;
                     }
@@ -197,7 +198,7 @@ public class LuacageCommand {
             if (removed.isEmpty()) {
                 sender.sendMessage("No useless packages found.");
             } else {
-                String msg = generatePackageInformation(1, removed);
+                String msg = generatePackageInformation(env.getLuacage(), 1, removed);
                 sender.sendMessage(String.format(
                         "Removed %s packages:\n%s",  removed.size(), msg
                 ));
@@ -205,14 +206,16 @@ public class LuacageCommand {
         });
     }
 
-    protected String generatePackageInformation(int startIdx, List<LuacageJsonMeta> packages) {
+    protected String generatePackageInformation(ILuacage luacage, int startIdx, List<LuacageJsonMeta> packages) {
         int len = String.valueOf(startIdx + packages.size()).length();
         StringBuilder msg = new StringBuilder();
         for (LuacageJsonMeta pkg : packages) {
+            boolean installed = luacage.installedPackages().parallelStream().anyMatch(it -> Objects.equals(it.getName(), pkg.getName()));
             msg.append(String.format("\n" +
-                    "%" + len + "d. %s/%s %s:\n" +
+                    "%" + len + "d. %s/%s %s %s:\n" +
                     "  %s",
                     startIdx++, pkg.getSource(), pkg.getName(), pkg.getVersion(),
+                    installed ? "§2[§nInstalled]§r" : "",
                     pkg.getDescription()));
         }
         return msg.length() == 0 ? "" : msg.substring(1);
