@@ -13,6 +13,18 @@
   "bStats": true,
   // 是否启用更新检测, 更新检测最多持续60秒, 并且全程在异步线程中执行.
   "checkUpdates": true,
+  // luacage 包管理器设置
+  "luacage": {
+    // luacage 源仓库配置
+    "sources": [
+      {
+        // 源仓库名
+        "name": "default",
+        // 源仓库地址
+        "url": "https://raw.githubusercontent.com/SmileYik/luacage-demo/refs/heads/master/repo/"
+      }
+    ]
+  },
   // lua 反射设置
   "luaReflection": {
     // lua 所使用的反射类型, 目前可用反射类型如下:
