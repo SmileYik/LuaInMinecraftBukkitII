@@ -198,7 +198,9 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
         return lua;
     }
 
+    @Override
     public synchronized void initialization() {
+        luacage.loadPackages();
         if (initialized) {
             return;
         }
@@ -232,9 +234,9 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
                 initialized = false;
             }
         }
+
         this.initialized = initialized;
         if (initialized) {
-            luacage.loadPackages();
             DebugLogger.debug("[Lua env %s] lua file all initialized", id);
         }
     }

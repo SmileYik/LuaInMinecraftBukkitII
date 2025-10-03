@@ -1,6 +1,8 @@
 package org.eu.smileyik.luaInMinecraftBukkitII.luaState.luacage;
 
 import com.google.gson.Gson;
+import org.bukkit.plugin.PluginManager;
+import org.eu.smileyik.luaInMinecraftBukkitII.LuaInMinecraftBukkit;
 import org.eu.smileyik.luaInMinecraftBukkitII.config.LuacageConfig;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.ILuaStateEnvInner;
 import org.eu.smileyik.luaInMinecraftBukkitII.reflect.LuaTable2Object;
@@ -26,6 +28,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Luacage implements ILuacageRepository, ILuacage {
     public static final String PACKAGE_META_NAME = "luacage.json";
@@ -44,6 +47,8 @@ public class Luacage implements ILuacageRepository, ILuacage {
     private final Map<String, LuacageLuaMeta> loadedPackages = new HashMap<>();
 
     private final Function<List<LuacageJsonMeta>, LuacageJsonMeta> DEFAULT_ON_CONFLICT;
+
+    private boolean loaded = false;
 
     /**
      *
@@ -465,24 +470,42 @@ public class Luacage implements ILuacageRepository, ILuacage {
     }
 
     @Override
-    public void loadPackages() {
-        loadedPackages.clear();
-        List<LuacageJsonMeta> installedPackages = installedPackages();
-        LinkedList<LuacageLuaMeta> packages = new LinkedList<>();
-        Set<String> failed = new HashSet<>();
-        LuaStateFacade lua = env.getLuaState();
-        lua.lock(l -> {
-            for (LuacageJsonMeta installedPackage : installedPackages) {
-                LuacageLuaMeta meta = loadPackageLua(lua, installedPackage, failed);
-                if (meta != null) {
-                    packages.addFirst(meta);
+    public synchronized void loadPackages() {
+        if (loaded) return;
+        loaded = true;
+        ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
+        service.scheduleAtFixedRate(new Runnable() {
+            private int count = 60;
+            @Override
+            public synchronized void run() {
+                DebugLogger.debug("Luacage load packages: (%02d/60)", 60 - count);
+                if (count-- <= 0) {
+                    try {
+                        doLoadPackages();
+                    } finally {
+                        service.shutdown();
+                    }
+                    return;
                 }
-            }
 
-            for (LuacageLuaMeta meta : packages) {
-                loadPackage(lua, meta);
+                List<LuacageJsonMeta> installedPackages = installedPackages();
+                Set<String> depends = installedPackages.parallelStream()
+                        .flatMap(it -> Stream.of(it.getDependPlugins()))
+                        .collect(Collectors.toSet());
+                PluginManager pluginManager = LuaInMinecraftBukkit.instance().getServer().getPluginManager();
+                for (String p : depends) {
+                    if (!pluginManager.isPluginEnabled(p)) {
+                        if (count % 10 == 0) {
+                            logger.warning(String.format("Still waiting plugin: %s", p));
+                        }
+                        return;
+                    }
+                }
+
+                doLoadPackages();
+                service.shutdown();
             }
-        });
+        }, 1, 1, TimeUnit.SECONDS);
     }
 
     @Override
@@ -510,7 +533,51 @@ public class Luacage implements ILuacageRepository, ILuacage {
                 .isSuccess();
     }
 
+    protected synchronized void doLoadPackages() {
+        loadedPackages.clear();
+        List<LuacageJsonMeta> installedPackages = installedPackages();
+        LinkedList<LuacageLuaMeta> packages = new LinkedList<>();
+        Set<String> failed = new HashSet<>();
+        LuaStateFacade lua = env.getLuaState();
+        lua.lock(l -> {
+            for (LuacageJsonMeta installedPackage : installedPackages) {
+                LuacageLuaMeta meta = loadPackageLua(lua, installedPackage, failed);
+                if (meta != null) {
+                    packages.addFirst(meta);
+                }
+            }
+
+            for (LuacageLuaMeta meta : packages) {
+                // check depends
+                boolean next = false;
+                for (String depends : meta.getDependPackages()) {
+                    if (failed.contains(depends)) {
+                        failed.add(meta.getName());
+                        next = true;
+                        logger.warning(String.format(
+                                "Package '%s' load failed because failed load depend package '%s'",
+                                meta.getName(), depends));
+                        break;
+                    }
+                }
+                if (next) continue;
+                if (!loadPackage(lua, meta)) {
+                    failed.add(meta.getName());
+                    logger.warning(String.format(
+                            "Package '%s' load failed because not found dependence plugins: %s",
+                            meta.getName(), Arrays.toString(meta.getDependPlugins())));
+                }
+            }
+        });
+    }
+
     protected boolean loadPackage(LuaStateFacade lua, LuacageLuaMeta pkg) {
+        // check plugin first
+        PluginManager pluginManager = LuaInMinecraftBukkit.instance().getServer().getPluginManager();
+        for (String id : pkg.getDependPlugins()) {
+            if (!pluginManager.isPluginEnabled(id)) return false;
+        }
+
         String main = pkg.getMain();
         if (main != null) {
             if (main.startsWith("/")) {
