@@ -2,9 +2,9 @@
 [LatestVersion]: https://github.com/SmileYik/LuaInMinecraftBukkitII/tree/tags/1.0.9
 [ResourceRepo]: https://github.com/SmileYik/LuaInMinecraftBukkitII/tree/gh-page
 
-> 最后更新于2025年09月18日 | [历史记录][History]
+> 最后更新于2025年10月03日 | [历史记录][History]
 
-> 此页面内容对应于 LuaInMinecraftBukkit II 插件的 [**1.0.9**][LatestVersion] 版本, 历史文档可以插件此页面的历史记录
+> 此页面内容对应于 LuaInMinecraftBukkit II 插件的 [**1.1.0**][LatestVersion] 版本, 历史文档可以插件此页面的历史记录
 
 这个文档将给出默认的插件配置设定及其说明.
 
@@ -15,15 +15,43 @@
 
 | 配置名 | 类型 | 说明 |
 | :-: | :-: | :-: |
-| projectUrl        | 链接文本 | [项目资源地址][ResourceRepo], 可以去仓库中寻找. 自 **1.0.8** 版本以后, 项目资源分支都会将与插件版本相匹配的资源标记tag, tag命名格式为 `resources-[插件版本]`, 例如插件版本为 1.0.8, 则会有资源分支 `resources-1.0.8`, 此时, 链接 `https://raw.githubusercontent.com/SmileYik/LuaInMinecraftBukkitII/refs/tags/resources-1.0.8` 即可填入配置中.
+| projectUrl        | 链接文本 | [项目资源地址][ResourceRepo], 可以去仓库中寻找. 自 **1.0.8** 版本以后, 项目资源分支都会将与插件版本相匹配的资源标记tag, tag命名格式为 `resources-[插件版本]`, 例如插件版本为 1.0.8, 则会有资源分支 `resources-1.0.8`, 此时, 链接 `https://raw.githubusercontent.com/SmileYik/LuaInMinecraftBukkitII/refs/tags/resources-1.0.8` 即可填入配置中. 从版本 **1.1.0** 开始可以使用 `${version}` 变量自动输入当前版本号, 如 `https://raw.githubusercontent.com/SmileYik/LuaInMinecraftBukkitII/refs/tags/resources-${version}`|
 | luaVersion         | `luajit` / `lua-5.2.4` / `lua-5.3.6` / `lua-5.4.8` | 设置插件所使用的 lua 版本. |
 | alwaysCheckHashes  | `true` / `false` | 是否总是从资源仓库中获取最新依赖 |
 | justUseFirstMethod | `true` / `false` | 是否在 lua 检测到多个可选方法时, 总是选择第一个候选项而不是抛出异常 |
 | debug              | `true` / `false` | 是否启用 Debug 日志 |
 | bStats             | `true` / `false` | 是否启用 bStats 统计信息 |
+| luacage            | Lua 包管理器配置  | 配置 Luacage 包管理器 |
 | luaReflection      | Lua 反射配置      | 配置 Lua 使用的反射类型 |
 | luaState           | Lua 环境配置      | 配置 Lua 环境. |
 | enableModules      | 文本列表          | 启用模组, 现可用模组有 `cffi` |
+
+#### Luacage - Lua 包管理器配置
+
+Lua 包管理器主题配置片段如下:
+
+```json
+  "luacage": {
+    // luacage 源仓库配置
+    "sources": [
+      {
+        // 源仓库名
+        "name": "default",
+        // 源仓库地址
+        "url": "https://raw.githubusercontent.com/SmileYik/luacage-demo/refs/heads/master/repo/"
+      }
+    ]
+  },
+```
+
+目前可以配置 `sources` 字段, 即包的来源. 而 `sources` 字段接受一个对象数组, 其对象实体配置项如下:
+
+```json
+{
+  "name": "source name",
+  "url": "source url"
+}
+```
 
 #### Lua Reflection - Lua 反射配置
 

@@ -2,9 +2,9 @@
 [LatestVersion]: https://github.com/SmileYik/LuaInMinecraftBukkitII/tree/tags/1.0.9
 [ResourceRepo]: https://github.com/SmileYik/LuaInMinecraftBukkitII/tree/gh-page
 
-> Last updated on September 18, 2025 | [History][History]
+> Last updated on October 03, 2025 | [History][History]
 
-> This page corresponds to version [**1.0.9**][LatestVersion] of the LuaInMinecraftBukkit II plugin. Historical documentation can be found in the history of this page.
+> This page corresponds to version [**1.1.0**][LatestVersion] of the LuaInMinecraftBukkit II plugin. Historical documentation can be found in the history of this page.
 
 This document provides the default plugin configuration settings and their descriptions.
 
@@ -17,15 +17,43 @@ At the same time, this configuration file is not a standard `json` type file; it
 
 | Configuration Name | Type | Description |
 | :-: | :-: | :-: |
-| projectUrl | Link Text | [Project Resource Address][ResourceRepo], which can be found in the repository. Since version **1.0.8**, project resource branches will have tags that match the plugin version. The tag naming format is `resources-[plugin version]`. For example, if the plugin version is 1.0.8, there will be a resource branch `resources-1.0.8`. In this case, the link `https://raw.githubusercontent.com/SmileYik/LuaInMinecraftBukkitII/refs/tags/resources-1.0.8` can be filled in the configuration.
-| luaVersion | `luajit` / `lua-5.2.4` / `lua-5.3.6` / `lua-5.4.8` | Sets the Lua version used by the plugin.
-| alwaysCheckHashes  | `true` / `false` | Always fetch the latest dependencies from the resource repository.
+| projectUrl | Link Text | [Project Resource Address][ResourceRepo], which can be found in the repository. Since version **1.0.8**, project resource branches will have tags that match the plugin version. The tag naming format is `resources-[plugin version]`. For example, if the plugin version is 1.0.8, there will be a resource branch `resources-1.0.8`. In this case, the link `https://raw.githubusercontent.com/SmileYik/LuaInMinecraftBukkitII/refs/tags/resources-1.0.8` can be filled in the configuration. Starting from version 1.1.0, the variable ${version} can be used to automatically input the current version number, e.g., https://raw.githubusercontent.com/SmileYik/LuaInMinecraftBukkitII/refs/tags/resources-${version} |
+| luaVersion | `luajit` / `lua-5.2.4` / `lua-5.3.6` / `lua-5.4.8` | Sets the Lua version used by the plugin. |
+| alwaysCheckHashes  | `true` / `false` | Always fetch the latest dependencies from the resource repository. |
 | justUseFirstMethod | `true` / `false` | When multiple optional methods are detected in Lua, does it always select the first candidate instead of throwing an exception |
-| debug | `true` / `false` | Enable Debug logs.
-| bStats | `true` / `false` | Enable bStats statistics.
-| luaReflection | Lua Reflection Configuration | Configures the reflection for Lua.
-| luaState | Lua Environment Configuration | Configures the Lua environment.
-| enableModules | List of Texts | Enable modules. Currently available modules include `cffi`.
+| debug | `true` / `false` | Enable Debug logs. |
+| bStats | `true` / `false` | Enable bStats statistics. |
+| luacage | Lua Package Manager Configuration | Configures the Luacage package manager. |
+| luaReflection | Lua Reflection Configuration | Configures the reflection for Lua. |
+| luaState | Lua Environment Configuration | Configures the Lua environment. |
+| enableModules | List of Texts | Enable modules. Currently available modules include `cffi`. |
+
+#### Luacage - Lua Package Manager Configuration
+
+The configuration snippet for the Lua package manager theme is as follows:
+
+```json
+  "luacage": {
+    // luacage source repository configuration
+    "sources": [
+      {
+        // Source repository name
+        "name": "default",
+        // Source repository URL
+        "url": "https://raw.githubusercontent.com/SmileYik/luacage-demo/refs/heads/master/repo/"
+      }
+    ]
+  },
+```
+
+Currently, the **`sources`** field can be configured, which specifies the source of the packages. The **`sources`** field accepts an array of objects, and the configuration items for its object entities are as follows:
+
+```json
+{
+  "name": "source name",
+  "url": "source url"
+}
+```
 
 #### Lua Reflection - Lua Reflection Configuration
 
