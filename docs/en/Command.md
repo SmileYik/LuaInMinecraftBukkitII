@@ -1,6 +1,6 @@
-> Last updated on July 03, 2025 | [History](https://github.com/SmileYik/LuaInMinecraftBukkitII/commits/gh-page/docs/en/Command.md)
+> Last updated on October 03, 2025 | [History](https://github.com/SmileYik/LuaInMinecraftBukkitII/commits/gh-page/docs/en/Command.md)
 
-> This page corresponds to the latest version of the LuaInMinecraftBukkit II plugin. For historical documentation, you can find the history of this page.
+> This page corresponds to version **1.1.0** of the LuaInMinecraftBukkit II plugin. For historical documentation, you can find the history of this page.
 
 > **!! The content of this file has machine translation !!** | [Origin](../Command.md)
 
@@ -33,7 +33,25 @@ public boolean onCommand(CommandSender sender,
 }
 ```
 
-To avoid such a long series of if statements, Lua made some changes in the command registration process.
+Now, similar command registration methods can also be used in Lua.
+
+### Registering Raw Bukkit Commands in Lua
+
+Since version **1.1.0**, you can use the `luaBukkit.env:registerRawCommand` method to register a raw Bukkit command.
+This method accepts two arguments: the first is the command name, and the second is the command handler (a Lua closure).
+
+For example, to register a `/home` command, we can register it like this:
+
+```lua
+luaBukkit.env:registerRawCommand("command", function (sender, command, label, args)
+    -- handle your command
+    return true
+end)
+```
+
+The command handler, when the command is triggered, will receive four arguments: `CommandSender sender`, `Command command`, `String label`, and `String[] args`. Additionally, the command handler must have a return value of type `bool`. As you can see, the signature of this command handler is the same as the `onCommand` command signature in **Bukkit** mentioned above.
+
+Directly using `luaBukkit.env:registerRawCommand` to register a command is a very simple method, but what if our command has a large number of subcommands? How can we avoid a massive number of subcommand checks in that case? At this point, you can use the plugin's built-in **`SimpleCommand`** library to simplify the command checking process.
 
 ## Simple Command
 

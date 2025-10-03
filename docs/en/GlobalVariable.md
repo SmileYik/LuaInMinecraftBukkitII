@@ -17,9 +17,9 @@
 [Command Section]: ./../Command.md
 [EventListener Section]: ./../EventListener.md
 
-> Last updated on August 31, 2025 | [History][History]
+> Last updated on October 03, 2025 | [History][History]
 
-> The content of this page corresponds to the latest version of the LuaInMinecraftBukkit II plugin, **1.0.9**. For historical documentation, please check the historical records of this page.
+> The content of this page corresponds to the latest version of the LuaInMinecraftBukkit II plugin, **1.1.0**. For historical documentation, please check the historical records of this page.
 
 > **!! The content of this file has machine translation !!** | [Origin](./../GlobalVariable.md)
 
@@ -189,6 +189,19 @@ Usage: `luaBukkit.env:methodName`
 -- Unregister the listener named "GreetingEvent"
 luaBukkit.env:unregisterEventListener("GreetingEvent")
 ```
+
+#### registerRawCommand - Register Raw Bukkit Command
+
+**Method Description**: Constructs a raw Bukkit command. See the [Command Section] for details.  
+**Return Type**: None  
+**Parameter List**:  
+
+| Parameter | Parameter Type | Description |
+| :-: | :-: | :-: |
+| `command` | String Type | The command name |
+| `handler` | `LuaFunction` | The command handler. This handler accepts four parameters: `sender`, `command`, `label`, `args`, corresponding to the `Sender`, `Command`, `Command Label`, and `Command Arguments`. The command handler should return a value of type `bool`, i.e., `true/false`, to indicate whether the command executed successfully. |
+
+**Example**: Please see the [Command Section]
 
 #### commandClassBuilder - Command class builder
 

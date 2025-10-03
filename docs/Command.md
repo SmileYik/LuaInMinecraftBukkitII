@@ -1,6 +1,6 @@
-> 最后更新于2025年07月01日 | [历史记录](https://github.com/SmileYik/LuaInMinecraftBukkitII/commits/gh-page/docs/Command.md)
+tt> 最后更新于2025年10月03日 | [历史记录](https://github.com/SmileYik/LuaInMinecraftBukkitII/commits/gh-page/docs/Command.md)
 
-> 此页面内容对应于 LuaInMinecraftBukkit II 插件的最新版本, 历史文档可以插件此页面的历史记录
+> 此页面内容对应于 LuaInMinecraftBukkit II 插件的**1.1.0**版本, 历史文档可以插件此页面的历史记录
 
 在这个文档中, 将介绍怎么在 Lua 中注册 Bukkit 指令.
 
@@ -8,7 +8,7 @@
 
 一般来讲, 在 Java 中处理 Bukkit 指令, 需要先去 `plugin.yml` 中注册一个指令, 然后在插件中实现 `onCommand` 方法, 去判断 `label` 以及 `args`, 最后根据判断情况去选择执行哪个指令方法.
 
-具体情况类似于: 
+具体情况类似于:
 
 ```java
 private static final String COMMAND_LABEL = "MyCommand";
@@ -31,11 +31,29 @@ public boolean onCommand(CommandSender sender,
 }
 ```
 
-为了避免这么一大串的判断, Lua 在注册指令过程中做了一些改变.
+现在在 Lua 中也可以使用类似的指令注册方法.
+
+### 在 Lua 中注册原始的 Bukkit 指令
+
+自 **1.1.0** 版本开始, 可以使用 `luaBukkit.env:registerRawCommand` 方法去注册一个原始的 Bukkit 指令.
+这个方法接受2个形参, 第一个形参为指令名, 第二个形参为指令处理器(Lua闭包).
+
+例如我们要注册一个 `/home` 指令, 我们可以这样注册:
+
+```lua
+luaBukkit.env:registerRawCommand("command", function (sender, command, label, args)
+    -- handle your command
+    return true
+end)
+```
+
+对于指令处理器, 在指令触发时, 会传入4个参数, 分别为 `CommandSender sender`, `Command command`, `String label` 和 `String[] args`, 并且指令处理器需要拥有一个 `bool` 类型的返回值.可以看见这个指令控制器和上述 `Bukkit` 的 `onCommand` 指令签名相同.
+
+直接使用 `luaBukkit.env:registerRawCommand` 注册指令是一个非常简单的方法, 但是如果我们的指令存在一大堆子指令, 这时候该如何避免一大堆子指令判断呢? 这时候可以使用插件内建的 `SimpleCommand` 库去简化指令判断流程.
 
 ## 简单的指令
 
-LuaInMinecraftBukkit II 中使用了 `SimpleCommand` 来简化指令判断流程. 
+LuaInMinecraftBukkit II 中使用了 `SimpleCommand` 来简化指令判断流程.
 
 `SimpleCommand` 整体使用反射设计, 每一个指令都对应着一个实际的方法. 它将 `plugin.yml` 中注册的指令称为 **根指令**, 还将每一个指令都视为 **指令名+指令参数** 的形式, 此时在 Bukkit 调用 `/根指令 指令名 指令参数` 时它就会根据输入的指令名去寻找其对应的方法, 然后将执行指令的人还有指令参数作为参数传递给指令方法去执行. 简单的来说, `SimpleCommand` 简化了寻找指令这一流程, 使得指令编写者将注意力集中在指令实际内容上.
 
