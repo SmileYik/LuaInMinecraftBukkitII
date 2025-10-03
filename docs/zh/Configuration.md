@@ -1,4 +1,4 @@
-[History]: https://github.com/SmileYik/LuaInMinecraftBukkitII/commits/gh-page/docs/Configuration.md
+[History]: https://github.com/SmileYik/LuaInMinecraftBukkitII/commits/gh-page/docs/zh/Configuration.md
 [LatestVersion]: https://github.com/SmileYik/LuaInMinecraftBukkitII/tree/tags/1.0.9
 [ResourceRepo]: https://github.com/SmileYik/LuaInMinecraftBukkitII/tree/gh-page
 

@@ -1,4 +1,4 @@
-> 最后更新于2025年10月03日 | [历史记录](https://github.com/SmileYik/LuaInMinecraftBukkitII/commits/gh-page/docs/Command.md)
+> 最后更新于2025年10月03日 | [历史记录](https://github.com/SmileYik/LuaInMinecraftBukkitII/commits/gh-page/docs/zh/Command.md)
 
 > 此页面内容对应于 LuaInMinecraftBukkit II 插件的**1.1.0**版本, 历史文档可以插件此页面的历史记录
 

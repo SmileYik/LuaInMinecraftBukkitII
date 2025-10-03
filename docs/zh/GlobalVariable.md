@@ -1,4 +1,4 @@
-[历史记录]: https://github.com/SmileYik/LuaInMinecraftBukkitII/commits/gh-page/docs/GlobalVariable.md
+[历史记录]: https://github.com/SmileYik/LuaInMinecraftBukkitII/commits/gh-page/docs/zh/GlobalVariable.md
 [LuaJava]: https://github.com/SmileYik/luajava
 [LuaInMinecraftBukkit II]: https://github.com/SmileYik/LuaInMinecraftBukkitII
 

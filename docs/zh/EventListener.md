@@ -1,4 +1,4 @@
-> 最后更新于2025年06月30日 | [历史记录](https://github.com/SmileYik/LuaInMinecraftBukkitII/commits/gh-page/docs/EventListener.md)
+> 最后更新于2025年06月30日 | [历史记录](https://github.com/SmileYik/LuaInMinecraftBukkitII/commits/gh-page/docs/zh/EventListener.md)
 
 > 此页面内容对应于 LuaInMinecraftBukkit II 插件的最新版本, 历史文档可以插件此页面的历史记录
 
