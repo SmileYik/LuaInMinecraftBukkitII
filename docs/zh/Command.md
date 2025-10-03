@@ -1,4 +1,4 @@
-tt> 最后更新于2025年10月03日 | [历史记录](https://github.com/SmileYik/LuaInMinecraftBukkitII/commits/gh-page/docs/Command.md)
+> 最后更新于2025年10月03日 | [历史记录](https://github.com/SmileYik/LuaInMinecraftBukkitII/commits/gh-page/docs/Command.md)
 
 > 此页面内容对应于 LuaInMinecraftBukkit II 插件的**1.1.0**版本, 历史文档可以插件此页面的历史记录
 
@@ -59,11 +59,11 @@ LuaInMinecraftBukkit II 中使用了 `SimpleCommand` 来简化指令判断流程
 
 当然, 指令不可能恰好每个都符合 `/根指令 指令名 指令参数` 形式, 它必定是 `/根指令 指令名1 指令名2 指令名n 指令参数` 的形式, 就像下面图一样.
 
-![指令树](./images/SimpleCommand.CommandTree.png)
+![指令树](./../images/SimpleCommand.CommandTree.png)
 
 为了解决这个问题, `SimpleCommand` 将每一个指令都打包成一个集合, 并为其命名, 使得这一个集合中所有指令都是以 `/集合名 指令名 指令参数` 形式响应的. 然后为集合构建一个从属关系, 然后在寻找指令时, 先寻找指令是属于哪个集合的, 然后再去集合中寻找具体是哪个指令. 这样, 指令就变成了 `/集合名1 集合名2 集合名n 指令名 指令参数`. 此时, 只要确保集合**仅有一个根节点集合**, 并且这个**根节点集合的名字为根指令名字**, 就可以实现上述 `/根指令 指令名1 指令名2 指令名n 指令参数` 的指令形式
 
-![指令集合树](./images/SimpleCommand.CommandTree.2.png)
+![指令集合树](./../images/SimpleCommand.CommandTree.2.png)
 
 ## 在 Lua 中注册指令
 

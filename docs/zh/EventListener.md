@@ -23,7 +23,7 @@
 
 例如 [BlockBreakEvent](https://hub.spigotmc.org/javadocs/spigot/org/bukkit/event/block/BlockBreakEvent.html)(方块破坏事件), 全类名可以在它的Javadoc中的标题下找到:
 
-![org.bukkit.event.block.BlockBreakEvent](./images/EventListener.1.png)
+![org.bukkit.event.block.BlockBreakEvent](../images/EventListener.1.png)
 
 如上图紫色标记的文本就是 `BlockBreakEvent` 事件的全类名: `org.bukkit.event.block.BlockBreakEvent`
 
@@ -130,7 +130,7 @@ luaBukkit.env:listenerBuilder()
 
 好了, 现在就可以保存文件, 然后重载 lua 环境就能在游戏中看见效果了.
 
-![NoBreak](./images/EventListener.NoBreakListener.png)
+![NoBreak](../images/EventListener.NoBreakListener.png)
 
 ## 面向 Lua 的 API
 

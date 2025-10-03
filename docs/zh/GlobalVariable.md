@@ -14,8 +14,8 @@
 [Logger]: https://docs.oracle.com/en/java/javase/17/docs/api/java.logging/java/util/logging/Logger.html
 [PrintStream]: https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/PrintStream.html
 
-[Command 章节]: ./../Command.md
-[EventListener 章节]: ./../EventListener.md
+[Command 章节]: ./Command.md
+[EventListener 章节]: ./EventListener.md
 
 > 最后更新于2025年10月03日 | [历史记录]
 
