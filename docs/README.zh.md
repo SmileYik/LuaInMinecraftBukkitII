@@ -11,14 +11,14 @@
     <img src="https://img.shields.io/github/check-runs/SmileYik/LuaInMinecraftBukkitII/master?style=flat-square" alt="GitHub branch check runs"/>
     <img src="https://img.shields.io/github/actions/workflow/status/SmileYik/LuaInMinecraftBukkitII/gradle.yml?style=flat-square" alt="GitHub Actions Workflow Status"/>
     <img src="https://img.shields.io/github/license/SmileYik/LuaInMinecraftBukkitII?style=flat-square" alt="GitHub License"/>
-    <a href="https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/gh-page/docs/QuickStart.md">
+    <a href="https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/gh-page/docs/zh/QuickStart.md">
         <img src="https://img.shields.io/badge/DOCS-QuickStart-blue?style=flat-square" alt="Docs-QuickStart"/>
     </a>
 </p>
 
 [luajava-jasonsantos]: https://github.com/jasonsantos/luajava
 [luajava-smileyik]: https://github.com/SmileYik/luajava
-[lua-pool-example]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/gh-page/docs/en/GlobalVariable.md#pooledcallable---transform-a-lua-closure-into-a-closure-that-can-be-run-in-the-lua-pool
+[lua-pool-example]: https://github.com/SmileYik/LuaInMinecraftBukkitII/blob/gh-page/docs/zh/GlobalVariable.md#pooledcallable---transform-a-lua-closure-into-a-closure-that-can-be-run-in-the-lua-pool
 [jni-bridge]: ../modules/jni-bridge
 
 ## 简介
@@ -132,5 +132,5 @@ stop
 
 下图是一个简单的玩家加入服务器事件, 不过事件处理逻辑由 Cpp 端处理.
 
-![ffi-plugin](../ffi-plugin.png)
+![ffi-plugin](./ffi-plugin.png)
 
