@@ -70,7 +70,7 @@ public interface ILuacage extends ILuacageRepository {
      * uninstall package
      * @param meta package information
      */
-    void uninstallPackage(@NotNull LuacageJsonMeta meta);
+    boolean uninstallPackage(@NotNull LuacageJsonMeta meta);
 
     /**
      * remove the packages not installed by manual and it is not needed by other packages

@@ -390,19 +390,32 @@ public class Luacage implements ILuacageRepository, ILuacage {
     }
 
     @Override
-    public synchronized void uninstallPackage(@NotNull LuacageJsonMeta meta) {
+    public synchronized boolean uninstallPackage(@NotNull LuacageJsonMeta meta) {
         List<LuacageJsonMeta> installedPackages = installedPackages();
+
         for (LuacageJsonMeta installedPackage : installedPackages) {
             if (installedPackage.getName().equals(meta.getName())) {
-                installedPackages.remove(installedPackage);
-                break;
+                meta = installedPackage;
+            } else {
+                for (String depend : installedPackage.getDependPackages()) {
+                    if (Objects.equals(depend, meta.getName())) {
+                        logger.warning(String.format(
+                                "Cannot remove package '%s' because it is be depends by package named '%s'",
+                                depend, installedPackage.getName()
+                        ));
+                        return false;
+                    }
+                }
             }
         }
+        installedPackages.remove(meta);
+
         try {
             updateInstalledPackagesJson(installedPackages);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        return true;
     }
 
     @Override

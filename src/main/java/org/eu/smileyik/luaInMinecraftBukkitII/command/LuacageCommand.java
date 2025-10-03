@@ -181,9 +181,12 @@ public class LuacageCommand {
                     .filter(it -> Objects.equals(it.getName(), packageName))
                     .findAny()
                     .ifPresent(it -> {
-                        env.getLuacage().uninstallPackage(it);
+                        if (env.getLuacage().uninstallPackage(it)) {
+                            sender.sendMessage("Uninstalled " + packageFullName + ".");
+                        } else {
+                            sender.sendMessage("Failed uninstalled " + packageFullName + ". You can see details in you console.");
+                        }
                     });
-            sender.sendMessage("Uninstalled " + packageFullName + ".");
         });
     }
 
