@@ -49,12 +49,21 @@ public class BStatsMetrics {
         return String.valueOf(count);
     });
 
+    private static final SimplePie LUA_PACKAGE_COUNT = new SimplePie("lua_package_count", () -> {
+        int count = 0;
+        for (ILuaStateEnv env : LuaInMinecraftBukkit.instance().getLuaStateManager().getScriptEnvs()) {
+            count += env.getLuacage().installedPackages().size();
+        }
+        return String.valueOf(count);
+    });
+
     public static Metrics newInstance(int serviceId) {
         Metrics metrics = new Metrics(LuaInMinecraftBukkit.instance(), serviceId);
         metrics.addCustomChart(LUA_VERSION);
         metrics.addCustomChart(LUA_REFLECTION_TYPE);
         metrics.addCustomChart(LUA_ENV_COUNT);
         metrics.addCustomChart(LUA_SCRIPT_COUNT);
+        metrics.addCustomChart(LUA_PACKAGE_COUNT);
         return metrics;
     }
 }
