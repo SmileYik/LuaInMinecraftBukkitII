@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import lombok.Getter;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.event.HandlerList;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.eu.smileyik.luaInMinecraftBukkitII.api.ILuaStateManager;
 import org.eu.smileyik.luaInMinecraftBukkitII.command.LuacageCommand;
@@ -88,6 +89,7 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
             luaStateManager.close();
             luaStateManager = null;
         }
+        getServer().getServicesManager().unregisterAll(this);
         try {
             DebugLogger.closeLogger();
         } catch (IOException e) {
@@ -195,6 +197,12 @@ public final class LuaInMinecraftBukkit extends JavaPlugin {
      * init will call after asyncInit method.
      */
     private synchronized void init(Config config) {
+        getServer().getServicesManager().register(
+                ILuaStateManager.class,
+                luaStateManager,
+                this,
+                ServicePriority.Normal
+        );
         luaStateManager.initialization();
     }
 
