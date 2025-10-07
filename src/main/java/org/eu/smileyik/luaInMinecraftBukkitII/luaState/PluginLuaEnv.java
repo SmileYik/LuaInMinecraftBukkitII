@@ -42,6 +42,13 @@ public class PluginLuaEnv implements ILuaStateEnvInner, ILuaStateEnv, ILuaStateP
                 LuaInMinecraftBukkit.instance().getLuaStateFolder(), LuaInMinecraftBukkit.LUA_LIB_FOLDER)
                 .getAbsolutePath();
         lua.openLibs();
+        lua.setThrowableHook(exp -> {
+            DebugLogger.debug(exp);
+            while (exp.getCause() != null) {
+                exp = exp.getCause();
+            }
+            return exp;
+        });
         lua.getGlobal("package", LuaTable.class)
                 .mapResultValue(table -> {
                     return table.get("path")
