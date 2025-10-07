@@ -132,71 +132,74 @@ public class LuaStateEnv implements AutoCloseable, ILuaStateEnv, ILuaStateEnvInn
         String luaLibrary = new File(
                 LuaInMinecraftBukkit.instance().getDataFolder(), LuaInMinecraftBukkit.LUA_LIB_FOLDER)
                 .getAbsolutePath();
-        lua.openLibs();
-        lua.setThrowableHook(exp -> {
-            DebugLogger.debug(exp);
-            while (exp.getCause() != null) {
-                exp = exp.getCause();
-            }
-            return exp;
-        });
-        lua.getGlobal("package", LuaTable.class)
-                .mapResultValue(table -> {
-                    return table.get("cpath")
-                            .mapValue(path -> {
-                                for (String fileType : NativeLoader.getDynamicFileType()) {
-                                    path += ";" + rootDir.getAbsolutePath() + "/?" + fileType;
-                                    path += ";" + luaLibrary + "/?" +  fileType;
-                                }
-                                return path;
-                            })
-                            .mapResultValue(cpath -> table.put("cpath", cpath))
-                            .mapResultValue(it -> {
-                                return table.get("path")
-                                        .mapValue(path -> (path) +
-                                                ";" + rootDir.getAbsolutePath() + "/?.lua" +
-                                                ";" + luaLibrary + "/?.lua" +
-                                                ";?.lua"
-                                        )
-                                        .mapResultValue(path -> table.put("path", path));
-                            });
-                })
-                .ifFailureThen(it -> {
-                    DebugLogger.debug(DebugLogger.WARN,
-                            "Error initializing lua package path: %s", it.getMessage());
-                    DebugLogger.debug(DebugLogger.ERROR, it);
-                });
-        lua.getGlobal("require", ILuaCallable.class)
-                .mapResultValue(callable ->
-                        lua.setGlobal("require", new WrapperedRequireFunction(lua,  callable, rootDir, this)))
-                .ifFailureThen(it -> {
-                    DebugLogger.debug(DebugLogger.WARN,
-                            "Error initializing lua package path: %s", it.getMessage());
-                    DebugLogger.debug(DebugLogger.ERROR, it);
-                });
+        lua.lock(l -> {
+            lua.openLibs();
+            lua.setThrowableHook(exp -> {
+                DebugLogger.debug(exp);
+                while (exp.getCause() != null) {
+                    exp = exp.getCause();
+                }
+                return exp;
+            });
+            lua.getGlobal("package", LuaTable.class)
+                    .mapResultValue(table -> {
+                        return table.get("cpath")
+                                .mapValue(path -> {
+                                    for (String fileType : NativeLoader.getDynamicFileType()) {
+                                        path += ";" + rootDir.getAbsolutePath() + "/?" + fileType;
+                                        path += ";" + luaLibrary + "/?" +  fileType;
+                                    }
+                                    return path;
+                                })
+                                .mapResultValue(cpath -> table.put("cpath", cpath))
+                                .mapResultValue(it -> {
+                                    return table.get("path")
+                                            .mapValue(path -> (path) +
+                                                    ";" + rootDir.getAbsolutePath() + "/?.lua" +
+                                                    ";" + luaLibrary + "/?.lua" +
+                                                    ";?.lua"
+                                            )
+                                            .mapResultValue(path -> table.put("path", path));
+                                });
+                    })
+                    .ifFailureThen(it -> {
+                        DebugLogger.debug(DebugLogger.WARN,
+                                "Error initializing lua package path: %s", it.getMessage());
+                        DebugLogger.debug(DebugLogger.ERROR, it);
+                    });
+            lua.getGlobal("require", ILuaCallable.class)
+                    .mapResultValue(callable ->
+                            lua.setGlobal("require", new WrapperedRequireFunction(lua,  callable, rootDir, this)))
+                    .ifFailureThen(it -> {
+                        DebugLogger.debug(DebugLogger.WARN,
+                                "Error initializing lua package path: %s", it.getMessage());
+                        DebugLogger.debug(DebugLogger.ERROR, it);
+                    });
 
-        LuaInMinecraftBukkit plugin = LuaInMinecraftBukkit.instance();
-        lua.newTable();
-        lua.toJavaObject(-1)
-                .mapResultValue(obj -> {
-                    LuaTable table = ((LuaTable) obj).asTable();
-                    return table.put("env", luaEnv)
-                            .mapResultValue(it -> table.put("helper", LuaHelper.class))
-                            .mapResultValue(it -> table.put("io",     LuaIOHelper.class))
-                            .mapResultValue(it -> table.put("bukkit", Bukkit.class))
-                            .mapResultValue(it -> table.put("plugin", plugin))
-                            .mapResultValue(it -> table.put("server", plugin.getServer()))
-                            .mapResultValue(it -> table.put("log",    plugin.getLogger()))
-                            .mapResultValue(it -> table.put("out",    System.out))
-                            .mapResultValue(it -> Result.success(table));
-                })
-                .mapResultValue(table -> lua.setGlobal("luaBukkit", table))
-                .ifFailureThen(err -> {
-                    DebugLogger.debug(DebugLogger.WARN,
-                            "Error initializing global variable 'luaBukkit': %s", err.getMessage());
-                    DebugLogger.debug(DebugLogger.ERROR, err);
-                });
-        lua.setJustUseFirstMethod(config.isJustUseFirstMethod());
+            LuaInMinecraftBukkit plugin = LuaInMinecraftBukkit.instance();
+            lua.newTable();
+            lua.toJavaObject(-1)
+                    .mapResultValue(obj -> {
+                        LuaTable table = ((LuaTable) obj).asTable();
+                        return table.put("env", luaEnv)
+                                .mapResultValue(it -> table.put("helper", LuaHelper.class))
+                                .mapResultValue(it -> table.put("io",     LuaIOHelper.class))
+                                .mapResultValue(it -> table.put("bukkit", Bukkit.class))
+                                .mapResultValue(it -> table.put("plugin", plugin))
+                                .mapResultValue(it -> table.put("server", plugin.getServer()))
+                                .mapResultValue(it -> table.put("log",    plugin.getLogger()))
+                                .mapResultValue(it -> table.put("out",    System.out))
+                                .mapResultValue(it -> Result.success(table));
+                    })
+                    .mapResultValue(table -> lua.setGlobal("luaBukkit", table))
+                    .ifFailureThen(err -> {
+                        DebugLogger.debug(DebugLogger.WARN,
+                                "Error initializing global variable 'luaBukkit': %s", err.getMessage());
+                        DebugLogger.debug(DebugLogger.ERROR, err);
+                    });
+            lua.setJustUseFirstMethod(config.isJustUseFirstMethod());
+            lua.setTop(0);
+        });
         return lua;
     }
 
