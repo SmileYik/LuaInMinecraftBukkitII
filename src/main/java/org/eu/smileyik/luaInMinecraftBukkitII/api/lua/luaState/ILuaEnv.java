@@ -6,6 +6,7 @@ import org.eu.smileyik.luaInMinecraftBukkitII.api.lua.luaState.event.ILuaEventLi
 import org.eu.smileyik.luajava.LuaException;
 import org.eu.smileyik.luajava.exception.Result;
 import org.eu.smileyik.luajava.type.ILuaCallable;
+import org.eu.smileyik.luajava.type.LuaArray;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -62,6 +63,45 @@ public interface ILuaEnv {
      * @return 事件监听构造器.
      */
     ILuaEventListenerBuilder listenerBuilder();
+
+    /**
+     * 一个简易的语法糖用于快速监听事件
+     * @param id 事件ID
+     * @param event 要监听的事件全类名
+     * @param luaCallable 事件处理器
+     */
+    default void onEvent(String id, String event, ILuaCallable luaCallable) throws Exception {
+        listenerBuilder()
+                .subscribe(event, luaCallable)
+                .build()
+                .register(id);
+    }
+
+    /**
+     * 一个简易的语法糖用于快速监听事件, 传入LuaTable类型, 并且必须包含<code>event</code>和<code>handler</code>字段.
+     * <code>event</code>字段为文本类型, 是要订阅的事件的全类名.
+     * <code>handler</code>字段为Lua闭包, 并且包含一个形参.
+     * @param id 事件ID, 可以后续用来注销事件
+     * @param event 事件实体
+     */
+    default void onEvent(String id, LuaArray event) throws Exception {
+        listenerBuilder()
+                .subscribe(event)
+                .build()
+                .register(id);
+    }
+
+    /**
+     * 一个简易的语法糖用于快速监听事件, 与 onEvent 类似, 不过接收的是数组.
+     * @param id 事件ID, 可以后续用来注销事件
+     * @param events 事件实体数组.
+     */
+    default void onEvents(String id, LuaArray ... events) throws Exception {
+        listenerBuilder()
+                .subscribes(events)
+                .build()
+                .register(id);
+    }
 
     /**
      * 获取指令类构造器.
