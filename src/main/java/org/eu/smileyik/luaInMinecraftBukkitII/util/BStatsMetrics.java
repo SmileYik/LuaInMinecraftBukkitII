@@ -18,8 +18,8 @@ public class BStatsMetrics {
 
     private static final DrilldownPie LUA_VERSION = new DrilldownPie("lua_version", () -> {
         Map<String, Map<String, Integer>> map = new HashMap<>();
-        String str = System.getProperty("os.name") + "-" +
-                System.getProperty("os.version") + "-" +
+        String str = System.getProperty("os.name") + "@" +
+                System.getProperty("os.version") + "@" +
                 System.getProperty("os.arch");
         Map<String, Integer> entry = new HashMap<>();
         entry.put(str, 1);
@@ -57,6 +57,17 @@ public class BStatsMetrics {
         return String.valueOf(count);
     });
 
+    private static final DrilldownPie LUA_PACKAGE = new DrilldownPie("lua_package", () -> {
+        Map<String, Map<String, Integer>> map = new HashMap<>();
+        for (ILuaStateEnv env : LuaInMinecraftBukkit.instance().getLuaStateManager().getScriptEnvs()) {
+            env.getLuacage().installedPackages().forEach(it -> {
+                Map<String, Integer> entry = map.computeIfAbsent(it.getName(), key -> new HashMap<>());
+                entry.put(it.getVersion(), entry.getOrDefault(it.getVersion(), 0) + 1);
+            });
+        }
+        return map;
+    });
+
     public static Metrics newInstance(int serviceId) {
         Metrics metrics = new Metrics(LuaInMinecraftBukkit.instance(), serviceId);
         metrics.addCustomChart(LUA_VERSION);
@@ -64,6 +75,7 @@ public class BStatsMetrics {
         metrics.addCustomChart(LUA_ENV_COUNT);
         metrics.addCustomChart(LUA_SCRIPT_COUNT);
         metrics.addCustomChart(LUA_PACKAGE_COUNT);
+        metrics.addCustomChart(LUA_PACKAGE);
         return metrics;
     }
 }
