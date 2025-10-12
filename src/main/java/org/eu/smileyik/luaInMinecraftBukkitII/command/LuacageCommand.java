@@ -4,16 +4,15 @@ import org.bukkit.command.CommandSender;
 import org.eu.smileyik.luaInMinecraftBukkitII.LuaInMinecraftBukkit;
 import org.eu.smileyik.luaInMinecraftBukkitII.api.ILuaStateManager;
 import org.eu.smileyik.luaInMinecraftBukkitII.api.luaState.ILuaStateEnv;
+import org.eu.smileyik.luaInMinecraftBukkitII.luaState.ILuaStateEnvInner;
 import org.eu.smileyik.luaInMinecraftBukkitII.luaState.command.LuaCommandRegister;
-import org.eu.smileyik.luaInMinecraftBukkitII.luaState.luacage.ILuacage;
-import org.eu.smileyik.luaInMinecraftBukkitII.luaState.luacage.ILuacageRepository;
-import org.eu.smileyik.luaInMinecraftBukkitII.luaState.luacage.LuacageCommonMeta;
-import org.eu.smileyik.luaInMinecraftBukkitII.luaState.luacage.LuacageJsonMeta;
+import org.eu.smileyik.luaInMinecraftBukkitII.luaState.luacage.*;
 import org.eu.smileyik.simplecommand.CommandService;
 import org.eu.smileyik.simplecommand.TabSuggest;
 import org.eu.smileyik.simplecommand.annotation.Command;
 import org.eu.smileyik.simpledebug.DebugLogger;
 
+import java.io.File;
 import java.io.InvalidClassException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -118,7 +117,9 @@ public class LuacageCommand {
             description = "Install package"
     )
     public void install(CommandSender sender, String[] args) {
-        getLuaState(args[0], sender, env -> {
+        update(sender, args);
+        getLuaState(args[0], sender, ienv -> {
+            ILuaStateEnvInner env = (ILuaStateEnvInner) ienv;
             String source = null;
             String packageFullName = args[1];
             String packageName = packageFullName;
@@ -134,6 +135,29 @@ public class LuacageCommand {
             LuaInMinecraftBukkit.instance().getScheduler().runTaskAsynchronously(LuaInMinecraftBukkit.instance(), () -> {
                 List<LuacageJsonMeta> results = env.getLuacage().findPackages(fPackageName, null, ILuacageRepository.SEARCH_TYPE_PKG_NAME_EXACTLY);
                 LuacageJsonMeta target;
+                // if result is empty then try to find local package.
+                if ((fSource == null || Objects.equals("local", fSource)) && results.isEmpty()) {
+                    File dir = LuaInMinecraftBukkit.instance().getFile(LuaInMinecraftBukkit.LUA_PKG_FOLDER, Luacage.PACKAGE_DIR_NAME);
+                    File packageDir = null;
+                    if (dir.exists()) {
+                        File[] files = dir.listFiles();
+                        if (files != null) {
+                            for (File file : files) {
+                                if (file.isDirectory() && file.getName().equalsIgnoreCase(fPackageName)) {
+                                    packageDir = file;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (packageDir != null) {
+                        env.getLuacage().installPackage(packageDir);
+                        sender.sendMessage("Finished installing " + packageFullName + ".");
+                        return;
+                    }
+                }
+
+                // handle remote package
                 if (results.isEmpty()) {
                     sender.sendMessage("No packages named " + fPackageName);
                     return;
@@ -287,11 +311,26 @@ public class LuacageCommand {
                 if (env != null) {
                     String command = args[0];
                     if ("install".equalsIgnoreCase(command)) {
+                        Set<String> checked = new HashSet<>();
                         suggestions = env.getLuacage()
                                 .getPackages()
                                 .stream()
-                                .map(it -> it.getSource() + "/" + it.getName())
+                                .map(it -> {
+                                    checked.add(it.getName());
+                                    return it.getSource() + "/" + it.getName();
+                                })
                                 .collect(Collectors.toList());
+                        File dir = LuaInMinecraftBukkit.instance().getFile(LuaInMinecraftBukkit.LUA_PKG_FOLDER, Luacage.PACKAGE_DIR_NAME);
+                        if (dir.exists()) {
+                            String[] list = dir.list();
+                            if (list != null) {
+                                for (String s : list) {
+                                    if (checked.add(s)) {
+                                        suggestions.add("local/" + s);
+                                    }
+                                }
+                            }
+                        }
                     } else if ("uninstall".equalsIgnoreCase(command)) {
                         suggestions = env.getLuacage()
                                 .installedPackages()

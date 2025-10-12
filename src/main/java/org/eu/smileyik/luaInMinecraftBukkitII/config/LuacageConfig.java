@@ -3,6 +3,8 @@ package org.eu.smileyik.luaInMinecraftBukkitII.config;
 import lombok.Data;
 import lombok.ToString;
 
+import java.util.*;
+
 @Data
 @ToString
 public class LuacageConfig {
@@ -21,12 +23,24 @@ public class LuacageConfig {
             sources = new Source[]{DEFAULT_SOURCE};
             return sources;
         }
+        Set<String> checked = new HashSet<>();
+        List<Source> list = new ArrayList<>();
         for (Source source : sources) {
-            if (source != null && source.url != null && !source.url.endsWith("/")) {
-                source.url += "/";
+            if (source == null || source.name == null || source.url == null || Objects.equals("local", source.name)) {
+                continue;
+            }
+            if (checked.add(source.name)) {
+                String url = source.url;
+                if (!url.endsWith("/")) {
+                    source.url += "/";
+                }
+                list.add(source);
             }
         }
-        return sources;
+        if (!checked.contains("default")) {
+            list.add(DEFAULT_SOURCE);
+        }
+        return list.toArray(new Source[0]);
     }
 
     @Data

@@ -276,6 +276,30 @@ public class Luacage implements ILuacageRepository, ILuacage {
     }
 
     @Override
+    public synchronized void installPackage(@NotNull File installDir) {
+        LuacageLuaMeta meta = loadPackageMeta(env.getLuaState(), installDir, installDir.getName());
+        if (meta == null) return;
+        List<LuacageJsonMeta> depends = findDepends(meta);
+        List<LuacageJsonMeta> installedPackages = installedPackages();
+        Set<String> installedNames = installedPackages.parallelStream().map(LuacageJsonMeta::getName).collect(Collectors.toSet());
+        depends = depends.parallelStream().filter(it -> !installedNames.contains(it.getName())).collect(Collectors.toList());
+
+        for (LuacageJsonMeta m : depends) {
+            installPackage(m, false, false, DEFAULT_ON_CONFLICT);
+        }
+        installedPackages = installedPackages();
+        LuacageJsonMeta jsonMeta = meta.toJsonMeta();
+        jsonMeta.setManual(true);
+        jsonMeta.setSource("local");
+        installedPackages.add(jsonMeta);
+        try {
+            updateInstalledPackagesJson(installedPackages);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public synchronized void installPackage(@NotNull LuacageJsonMeta meta, boolean force) {
         installPackage(meta, force, DEFAULT_ON_CONFLICT);
     }
@@ -286,13 +310,21 @@ public class Luacage implements ILuacageRepository, ILuacage {
             boolean force,
             @NotNull Function<List<LuacageJsonMeta>, LuacageJsonMeta> onConflict
     ) {
+        installPackage(meta, force, true, onConflict);
+    }
+
+    protected synchronized void installPackage(
+            @NotNull LuacageJsonMeta meta,
+            boolean force, boolean manual,
+            @NotNull Function<List<LuacageJsonMeta>, LuacageJsonMeta> onConflict
+    ) {
         List<LuacageJsonMeta> installedPackages = installedPackages();
         Set<String> installedNames = installedPackages.parallelStream()
                 .map(LuacageJsonMeta::getName)
                 .collect(Collectors.toSet());
         List<LuacageJsonMeta> waitInstallPackages = findDepends(meta, onConflict);
         waitInstallPackages.add(meta);
-        meta.setManual(true);
+        meta.setManual(manual);
         Result<List<LuacageJsonMeta>, Collection<LuacageJsonMeta>> sortResult = sort(waitInstallPackages);
         if (sortResult.isError()) {
             throw new RuntimeException(String.format("Package '%s' include circular dependency: %s", meta.getName(), sortResult.getValue()));
@@ -324,30 +356,27 @@ public class Luacage implements ILuacageRepository, ILuacage {
         }
 
         if (failed) {
-//            for (LuacageJsonMeta pkgMeta : installed) {
-//                deleteFolder(getInstallDir(pkgMeta));
-//            }
             throw new RuntimeException(String.format("Package '%s' install failure.", meta.getName()));
         }
     }
 
     @Override
-    public List<LuacageJsonMeta> findDepends(@NotNull LuacageJsonMeta meta) {
+    public List<LuacageJsonMeta> findDepends(@NotNull LuacageCommonMeta meta) {
         return findDepends(meta, DEFAULT_ON_CONFLICT);
     }
 
     @Override
     public List<LuacageJsonMeta> findDepends(
-            @NotNull LuacageJsonMeta meta,
+            @NotNull LuacageCommonMeta meta,
             @NotNull Function<List<LuacageJsonMeta>, LuacageJsonMeta> onConflict
     ) {
         List<LuacageJsonMeta> depends = new ArrayList<>();
         List<String> notfound = new ArrayList<>();
 
-        Queue<LuacageJsonMeta> queue = new LinkedList<>();
+        Queue<LuacageCommonMeta> queue = new LinkedList<>();
         queue.add(meta);
         while (!queue.isEmpty()) {
-            LuacageJsonMeta dependency = queue.poll();
+            LuacageCommonMeta dependency = queue.poll();
             String[] dependPackages = dependency.getDependPackages();
             ILuacageRepository repo = getRepository();
             if (dependPackages != null) {
@@ -609,6 +638,32 @@ public class Luacage implements ILuacageRepository, ILuacage {
         return true;
     }
 
+    public LuacageLuaMeta loadPackageMeta(LuaStateFacade lua, File installDir, String name) {
+        File file = new File(installDir, PACKAGE_LUA_NAME);
+        Result<Integer, LuaException> metaResult = env.evalFile(file.getAbsolutePath());
+        if (metaResult.isError()) {
+            LuaException error = metaResult.getError();
+            logger.warning(String.format("Failed load 'package.lua' file of package '%s': %s", name, error.getMessage()));
+            DebugLogger.debug(error);
+            return null;
+        }
+        Result<LuacageLuaMeta, Exception> covertResult = lua.toJavaObject(-1)
+                .mapResultValue(obj -> {
+                    if (obj instanceof LuaTable) {
+                        return LuaTable2Object.covert((LuaTable) obj, LuacageLuaMeta.class);
+                    }
+                    return null;
+                });
+        if (covertResult.isError() || covertResult.isSuccess() && covertResult.getValue() == null) {
+            Exception error = covertResult.getError();
+            logger.warning(String.format("Failed load 'package.lua' file of package '%s': %s", name, error.getMessage()));
+            DebugLogger.debug(error);
+
+            return null;
+        }
+        return covertResult.getValue();
+    }
+
     protected LuacageLuaMeta loadPackageLua(LuaStateFacade lua, LuacageJsonMeta installedPackage, Set<String> failed) {
         if (installedPackage.getDependPackages() != null) {
             boolean skip = false;
@@ -624,32 +679,11 @@ public class Luacage implements ILuacageRepository, ILuacage {
         }
 
         File installDir = getInstallDir(installedPackage);
-        File file = new File(installDir, PACKAGE_LUA_NAME);
-        Result<Integer, LuaException> metaResult = env.evalFile(file.getAbsolutePath());
-        if (metaResult.isError()) {
+        LuacageLuaMeta meta = loadPackageMeta(lua, installDir, installedPackage.getName());
+        if (meta == null) {
             failed.add(installedPackage.getName());
-            LuaException error = metaResult.getError();
-            logger.warning(String.format("Failed load 'package.lua' file of package '%s': %s", installedPackage.getName(), error.getMessage()));
-            DebugLogger.debug(error);
             return null;
-        }
-        Result<LuacageLuaMeta, Exception> covertResult = lua.toJavaObject(-1)
-                .mapResultValue(obj -> {
-                    if (obj instanceof LuaTable) {
-                        return LuaTable2Object.covert((LuaTable) obj, LuacageLuaMeta.class);
-                    }
-                    return null;
-                });
-        if (covertResult.isError() || covertResult.isSuccess() && covertResult.getValue() == null) {
-            failed.add(installedPackage.getName());
-            Exception error = covertResult.getError();
-            logger.warning(String.format("Failed load 'package.lua' file of package '%s': %s", installedPackage.getName(), error.getMessage()));
-            DebugLogger.debug(error);
-
-            return null;
-        }
-        LuacageLuaMeta meta = covertResult.getValue();
-        if (meta.isRunnable()) {
+        } else if (meta.isRunnable()) {
             return meta;
         } else {
             failed.add(installedPackage.getName());

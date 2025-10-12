@@ -24,6 +24,12 @@ public interface ILuacage extends ILuacageRepository {
     void update();
 
     /**
+     * install local package.
+     * @param installDir
+     */
+    void installPackage(@NotNull File installDir);
+
+    /**
      * install package
      * @param meta  the package
      * @param force is re-download from repository.
@@ -47,7 +53,7 @@ public interface ILuacage extends ILuacageRepository {
      * @param meta the package
      * @return return the dependent list. this list just include dependents.
      */
-    List<LuacageJsonMeta> findDepends(@NotNull LuacageJsonMeta meta);
+    List<LuacageJsonMeta> findDepends(@NotNull LuacageCommonMeta meta);
 
     /**
      * find packages the target package depends.
@@ -56,7 +62,7 @@ public interface ILuacage extends ILuacageRepository {
      * @return return the dependent list. this list just include dependents.
      */
     List<LuacageJsonMeta> findDepends(
-            @NotNull LuacageJsonMeta meta,
+            @NotNull LuacageCommonMeta meta,
             @NotNull Function<List<LuacageJsonMeta>, LuacageJsonMeta> onConflict
     );
 

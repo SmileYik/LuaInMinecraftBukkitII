@@ -23,4 +23,19 @@ public class LuacageLuaMeta extends LuacageCommonMeta {
      * the reason if not runnable.
      */
     private String reason;
+
+    /**
+     * to json meta
+     */
+    public LuacageJsonMeta toJsonMeta() {
+        LuacageJsonMeta meta = new LuacageJsonMeta();
+        meta.setName(getName());
+        meta.setDescription(getDescription());
+        meta.setAuthors(getAuthors());
+        meta.setVersion(getVersion());
+        meta.setLuaVersion(getLuaVersion());
+        meta.setDependPackages(getDependPackages());
+        meta.setDependPlugins(getDependPlugins());
+        return meta;
+    }
 }
