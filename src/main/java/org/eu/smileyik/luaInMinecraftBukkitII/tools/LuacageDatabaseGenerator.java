@@ -70,7 +70,6 @@ public class LuacageDatabaseGenerator {
         }
     }
 
-
     public static void run(String repoPath, String outPath) throws Exception {
         try {
             doRun(repoPath, outPath);
@@ -122,18 +121,6 @@ public class LuacageDatabaseGenerator {
         writeJson(database, outPath);
     }
 
-    public static void generateMetaList(String repoPath, String outPath) {
-        LuaInMinecraftBukkit instance = LuaInMinecraftBukkit.instance();
-        if (instance == null) {
-            throw new IllegalStateException("LuaInMinecraftBukkit instance is null");
-        }
-
-        File repo = new File(repoPath, PACKAGE_DIR_NAME);
-        for (File pkgDir : Objects.requireNonNull(repo.listFiles())) {
-            File packageFile = new File(pkgDir, PACKAGE_LUA_NAME);
-        }
-    }
-
     public static void updateMetaList(String repoPath, String outPath, String name) throws Exception {
         if (!name.matches(NAME_PATTERN)) {
             throw new Exception("Invalid name " + name + ", name not matches pattern " + NAME_PATTERN);
@@ -173,21 +160,35 @@ public class LuacageDatabaseGenerator {
 
         List<String> files = new ArrayList<>();
         List<String> hashes = new ArrayList<>();
-
         Files.walkFileTree(packageDir.toPath(), new SimpleFileVisitor<Path>() {
             @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                String fileName = dir.getFileName().toString();
+                if (fileName.startsWith(".")) {
+                    return FileVisitResult.SKIP_SUBTREE;
+                }
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                if (!attrs.isRegularFile()) {
+                    return FileVisitResult.CONTINUE;
+                }
                 String p = file.toFile().getAbsolutePath();
                 int i = p.indexOf(name);
                 if (i != -1) {
-                    files.add(p.substring(i + name.length()));
+                    String filePath = p.substring(i + name.length()).replace("\\", "/");
+                    if (filePath.startsWith("/.git")) return FileVisitResult.CONTINUE;
+                    files.add(filePath);
+                    try {
+                        String hash = HashUtil.sha256(file.toFile());
+                        hashes.add(hash);
+                    } catch (NoSuchAlgorithmException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
-                try {
-                    String hash = HashUtil.sha256(file.toFile());
-                    hashes.add(hash);
-                } catch (NoSuchAlgorithmException e) {
-                    throw new RuntimeException(e);
-                }
+
                 return FileVisitResult.CONTINUE;
             }
         });
