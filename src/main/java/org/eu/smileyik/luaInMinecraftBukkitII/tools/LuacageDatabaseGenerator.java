@@ -41,7 +41,14 @@ public class LuacageDatabaseGenerator {
         if (BUILD_PATH == null) return;
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         Future<Object> stop = executorService.submit(() -> {
-            while (getLuaStateFacade() == null) {
+            while (true) {
+                LuaStateFacade facade = null;
+                try {
+                    facade = getLuaStateFacade();
+                } catch (Exception ignore) {
+
+                }
+                if (facade != null) break;
                 Thread.sleep(1000);
             }
             try {
