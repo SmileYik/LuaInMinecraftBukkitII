@@ -21,7 +21,7 @@
         // 源仓库名
         "name": "default",
         // 源仓库地址
-        "url": "https://raw.githubusercontent.com/SmileYik/luacage-demo/refs/heads/master/repo/"
+        "url": "https://raw.githubusercontent.com/SmileYik/LuaInMinecraftBukkitII-Luacage/refs/heads/repo/"
       }
     ]
   },

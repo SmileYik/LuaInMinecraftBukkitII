@@ -12,7 +12,7 @@ public class LuacageConfig {
 
     static {
         DEFAULT_SOURCE.name = "default";
-        DEFAULT_SOURCE.url = "https://raw.githubusercontent.com/SmileYik/luacage-demo/refs/heads/master/repo/";
+        DEFAULT_SOURCE.url = "https://raw.githubusercontent.com/SmileYik/LuaInMinecraftBukkitII-Luacage/refs/heads/repo/";
     }
 
     private boolean enable = true;
