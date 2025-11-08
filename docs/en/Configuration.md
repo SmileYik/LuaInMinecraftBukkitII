@@ -6,6 +6,8 @@
 
 > This page corresponds to version [**1.1.0**][LatestVersion] of the LuaInMinecraftBukkit II plugin. Historical documentation can be found in the history of this page.
 
+> **!! The content of this file has machine translation !!** | [Origin](./../zh/Configuration.md)
+
 This document provides the default plugin configuration settings and their descriptions.
 
 -----

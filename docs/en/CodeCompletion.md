@@ -2,7 +2,7 @@
 
 > The content on this page corresponds to version [**1.1.0**][LatestVersion] of the LuaInMinecraftBukkit II plugin. Historical documentation can be found in the history of this page.
 
-> **!! The content of this file has machine translation !!** | [Origin](../zh/CodeCompletion.md)
+> **!! The content of this file has machine translation !!** | [Origin](./../zh/CodeCompletion.md)
 
 This chapter will discuss how to achieve Lua script syntax completion, including but not limited to syntax completion for the **LuaInMinecraftBukkit II API**, **Bukkit API**, **Java Standard API**, and **Kyori Adventure API**.
 

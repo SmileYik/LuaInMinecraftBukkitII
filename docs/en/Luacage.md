@@ -2,7 +2,7 @@
 
 > The content on this page corresponds to version [**1.1.0**][LatestVersion] of the LuaInMinecraftBukkit II plugin. Historical documentation can be found in the history of this page.
 
-> **!! The content of this file has machine translation !!** | [Origin](../zh/Luacage.md)
+> **!! The content of this file has machine translation !!** | [Origin](./../zh/Luacage.md)
 
 Luacage is a package manager implementation in the **LuaInMinecraftBukkit II** plugin, which can easily install Lua software packages in Minecraft Bukkit-like servers, and automatically handle dependency installation and removal.
 

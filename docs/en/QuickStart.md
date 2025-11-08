@@ -2,7 +2,7 @@
 
 > This page corresponds to the latest version of the LuaInMinecraftBukkit II plugin. For historical documentation, you can find the history of this page.
 
-> **!! The content of this file has machine translation !!** | [Origin](./../QuickStart.md)
+> **!! The content of this file has machine translation !!** | [Origin](./../zh/QuickStart.md)
 
 In this document, I will teach you how to quickly use this plugin to create a Lua interpreter in the game, so that players in the game can execute commands, enter the Lua interpreter console, and execute Lua scripts through the chat box.
 

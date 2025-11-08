@@ -2,7 +2,7 @@
 
 > This page corresponds to version **1.1.0** of the LuaInMinecraftBukkit II plugin. For historical documentation, you can find the history of this page.
 
-> **!! The content of this file has machine translation !!** | [Origin](../Command.md)
+> **!! The content of this file has machine translation !!** | [Origin](./../zh/Command.md)
 
 ## Bukkit Command
 

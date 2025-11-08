@@ -21,7 +21,7 @@
 
 > The content of this page corresponds to the latest version of the LuaInMinecraftBukkit II plugin, **1.1.0**. For historical documentation, please check the historical records of this page.
 
-> **!! The content of this file has machine translation !!** | [Origin](./../GlobalVariable.md)
+> **!! The content of this file has machine translation !!** | [Origin](./../zh/GlobalVariable.md)
 
 There are some global variables in the Lua section to make it easier for you to interact between Lua and the Bukkit server.
 

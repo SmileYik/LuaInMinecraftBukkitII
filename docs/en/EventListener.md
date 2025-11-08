@@ -2,7 +2,7 @@
 
 > This page corresponds to the latest version of the LuaInMinecraftBukkit II plugin. For historical documentation, you can find the history of this page.
 
-> **!! The content of this file has machine translation !!** | [Origin](./../EventListener.md)
+> **!! The content of this file has machine translation !!** | [Origin](./../zh/EventListener.md)
 
 In this document, I will tell you how to subscribe Bukkit events in Lua.
 
