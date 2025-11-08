@@ -179,7 +179,8 @@ public class LuacageDatabaseGenerator {
                 int i = p.indexOf(name);
                 if (i != -1) {
                     String filePath = p.substring(i + name.length()).replace("\\", "/");
-                    if (filePath.startsWith("/.git")) return FileVisitResult.CONTINUE;
+                    if (Files.isHidden(file)) return FileVisitResult.CONTINUE;
+                    else if (filePath.startsWith("/.git")) return FileVisitResult.CONTINUE;
                     files.add(filePath);
                     try {
                         String hash = HashUtil.sha256(file.toFile());
